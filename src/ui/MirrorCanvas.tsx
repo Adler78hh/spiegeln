@@ -12,6 +12,7 @@ import {
   type FigureState,
   type HandleId,
   type MirrorState,
+  type Scene,
   type Vec2,
 } from '../geometry';
 import { isTap, movedDistance, type PointerSample } from '../input/tap';
@@ -24,10 +25,7 @@ const LINE_TOUCH_TOLERANCE = 24;
 /** Rand um die Arbeitsfläche, damit die Anfasspunkte ganz sichtbar sind. */
 const PAD = 30;
 
-export interface Scene {
-  mirror: MirrorState;
-  figure: FigureState;
-}
+export type { Scene };
 
 export interface MirrorCanvasProps {
   image: CanvasImageSource | null;

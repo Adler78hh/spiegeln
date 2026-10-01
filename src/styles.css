@@ -1,10 +1,17 @@
 :root {
   --bg: #f6f1e7;
   --panel: #ffffff;
+  --paper: #fffdf8;
   --ink: #4a3b2f;
+  --ink-soft: #8a7a6a;
   --accent: #3a8f85;
   --accent-soft: #d6ece8;
   --border: #e3d8c6;
+  --fits: #4f9d69;
+  --fits-soft: #dff0e4;
+  --impossible: #d9822b;
+  --impossible-soft: #fbe8d4;
+  --star: #f2b632;
   --touch: 64px;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--ink);
@@ -37,12 +44,22 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+img {
+  -webkit-user-drag: none;
+}
+
+/* ---------- Grundlayout: Arbeitsfläche + Seitenleiste ---------- */
+
 .screen {
   height: 100%;
   display: flex;
   flex-direction: row;
   gap: 12px;
-  padding: 12px;
   padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
     max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
@@ -71,9 +88,9 @@ button {
 .side {
   flex: 0 0 auto;
   width: clamp(96px, 22vw, 260px);
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   gap: 12px;
   background: var(--panel);
   border-radius: 20px;
@@ -81,10 +98,22 @@ button {
   box-shadow: 0 2px 8px rgba(74, 59, 47, 0.08);
 }
 
+.side-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.side-top .tools {
+  margin-left: auto;
+}
+
 .motif-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
   gap: 10px;
+  flex: 1;
+  align-content: start;
 }
 
 .motif-btn {
@@ -93,7 +122,7 @@ button {
   padding: 6px;
   border-radius: 16px;
   border: 3px solid var(--border);
-  background: #fffdf8;
+  background: var(--paper);
 }
 
 .motif-btn img {
@@ -118,9 +147,10 @@ button {
 .tool-btn {
   width: var(--touch);
   height: var(--touch);
+  flex: 0 0 auto;
   border-radius: 18px;
   border: 3px solid var(--border);
-  background: #fffdf8;
+  background: var(--paper);
   display: grid;
   place-items: center;
 }
@@ -131,7 +161,292 @@ button {
   color: #fff;
 }
 
-/* Hochformat: Arbeitsfläche oben, Bedienleiste unten */
+/* ---------- Startbildschirm ---------- */
+
+.home {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 4vw, 48px);
+  padding: 24px;
+  flex-wrap: wrap;
+}
+
+.home-tile {
+  width: clamp(200px, 32vw, 320px);
+  aspect-ratio: 1;
+  border-radius: 32px;
+  border: 4px solid var(--border);
+  background: var(--panel);
+  box-shadow: 0 4px 14px rgba(74, 59, 47, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--accent);
+}
+
+.home-tile span {
+  color: var(--ink);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.home-tile:active {
+  transform: scale(0.98);
+}
+
+/* ---------- Liste der Herausforderungen ---------- */
+
+.list-screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 16px;
+  overflow-y: auto;
+}
+
+.list-top {
+  display: flex;
+}
+
+.challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.challenge-tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 24px;
+  border: 4px solid var(--border);
+  background: var(--panel);
+  padding: 18px 18px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.challenge-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.progress {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--accent-soft);
+  overflow: hidden;
+}
+
+.progress-bar {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 5px;
+}
+
+.tile-star {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--star);
+}
+
+.loading {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 5px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Herausforderung spielen ---------- */
+
+.challenge-side {
+  width: clamp(280px, 34vw, 420px);
+  overflow-y: auto;
+}
+
+.done-star {
+  color: var(--star);
+  display: grid;
+  place-items: center;
+}
+
+.target-big {
+  flex: 1 1 0;
+  min-height: 120px;
+  display: flex;
+  justify-content: center;
+}
+
+.target-big img {
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  display: block;
+  border-radius: 16px;
+  border: 4px solid var(--accent);
+  background: var(--paper);
+}
+
+.target-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.unsolvable-hint {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 6px;
+  border-radius: 999px;
+  background: var(--impossible-soft);
+  color: var(--impossible);
+  font-weight: 700;
+}
+
+.hint-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--impossible);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+
+.hint-count {
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.hint-text {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.target-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.target-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border-radius: 12px;
+  border: 3px solid var(--border);
+  background: var(--paper);
+  overflow: visible;
+}
+
+.target-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 9px;
+  display: block;
+  pointer-events: none;
+}
+
+.target-thumb.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  transform: scale(1.04);
+}
+
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  border: 2px solid var(--panel);
+}
+
+.badge.fits {
+  background: var(--fits);
+}
+
+.badge.impossible {
+  background: var(--impossible);
+}
+
+.decide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.decide-btn {
+  min-height: 72px;
+  border-radius: 18px;
+  border: 3px solid currentColor;
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.decide-btn.fits {
+  color: var(--fits);
+}
+
+.decide-btn.impossible {
+  color: var(--impossible);
+}
+
+.decide-btn.fits.chosen {
+  background: var(--fits-soft);
+}
+
+.decide-btn.impossible.chosen {
+  background: var(--impossible-soft);
+}
+
+.decide-btn:active {
+  transform: scale(0.97);
+}
+
+/* ---------- Hochformat: Arbeitsfläche oben, Leiste unten ---------- */
+
 @media (orientation: portrait) {
   .screen {
     flex-direction: column;
@@ -141,6 +456,9 @@ button {
     flex-direction: row;
     align-items: center;
   }
+  .side-top {
+    flex-direction: column;
+  }
   .motif-list {
     display: flex;
     overflow-x: auto;
@@ -148,5 +466,34 @@ button {
   .motif-btn {
     width: 80px;
     flex: 0 0 auto;
+  }
+
+  .challenge-side {
+    width: auto;
+    max-height: 46%;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+    grid-template-rows: auto auto 1fr;
+    align-items: start;
+  }
+  .challenge-side .side-top {
+    grid-column: 1 / -1;
+    flex-direction: row;
+  }
+  .challenge-side .target-big {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    height: 100%;
+  }
+  .challenge-side .target-area {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .challenge-side .decide {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .target-grid {
+    grid-template-columns: repeat(6, 1fr);
   }
 }

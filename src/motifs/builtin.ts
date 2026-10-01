@@ -6,6 +6,11 @@ export interface BuiltinMotif {
   id: string;
   name: string;
   svg: string;
+  /**
+   * Fehlervarianten für unlösbare Zielfiguren: jeweils Textersetzungen im
+   * SVG (andere Farbe oder fehlendes Detail).
+   */
+  errorVariants: Array<Array<[from: string, to: string]>>;
 }
 
 const svg = (body: string) =>
@@ -28,6 +33,7 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <line x1="123" y1="112" x2="123" y2="142"/>
         <line x1="106" y1="127" x2="140" y2="127"/>
       </g>`),
+    errorVariants: [[['fill="#e0675f"', 'fill="#8cc68a"']], [['fill="#7fa6d6"', 'fill="#ffd166"']]],
   },
   {
     id: 'fisch',
@@ -43,6 +49,7 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <circle cx="60" cy="92" r="3" fill="${INK}" stroke="none"/>
         <path d="M40,108 Q46,113 52,110" fill="none"/>
       </g>`),
+    errorVariants: [[['fill="#f59a4a"', 'fill="#7fa6d6"']], [['fill="#ffc46b"', 'fill="#f3a6c8"']]],
   },
   {
     id: 'formen',
@@ -53,6 +60,7 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <polygon points="108,128 108,58 168,128" fill="#8cc68a"/>
         <circle cx="72" cy="154" r="20" fill="#ffd166"/>
       </g>`),
+    errorVariants: [[['fill="#6fa8dc"', 'fill="#e0675f"']], [['fill="#8cc68a"', 'fill="#ffd166"']]],
   },
 ];
 
@@ -63,4 +71,13 @@ export function svgToImage(svgText: string): Promise<HTMLImageElement> {
   const img = new Image();
   img.src = svgDataUrl(svgText);
   return img.decode().then(() => img);
+}
+
+/** Wendet eine Fehlervariante (Textersetzungen) auf ein SVG an. */
+export function applyVariant(svgText: string, replacements: Array<[string, string]>): string {
+  return replacements.reduce((s, [from, to]) => s.split(from).join(to), svgText);
+}
+
+export function findBuiltinMotif(id: string): BuiltinMotif | undefined {
+  return BUILTIN_MOTIFS.find((m) => m.id === id);
 }

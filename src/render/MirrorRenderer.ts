@@ -10,7 +10,6 @@ import {
   clipLineToRect,
   figureTransform,
   ghostOpacity,
-  halves,
   lineOf,
   mirrorTransform,
   UNIT_RECT,
@@ -19,9 +18,10 @@ import {
   type MirrorState,
   type Vec2,
 } from '../geometry';
+import { AREA_COLOR, createFigureBuffer, drawComposite, pathPolygon, sampleFigure } from './composite';
 
 export const COLORS = {
-  area: '#fffdf8',
+  area: AREA_COLOR,
   areaBorder: '#d9cdb8',
   line: '#e0322b',
   lineActive: '#b81d17',
@@ -49,14 +49,6 @@ export interface Layout {
   area: number;
 }
 
-/**
- * Anteil der Arbeitsfläche, den die Figur einnimmt (Durchmesser des
- * Umkreises). Kleiner als die Fläche, damit Platz für das Spiegelbild bleibt.
- */
-export const FIGURE_DIAMETER = 0.6;
-
-/** Auflösung der Stichproben-Maske für den sichtbaren Anteil der Figur. */
-const MASK_SIZE = 48;
 /** Maximale Deckkraft des blassen Umrisses. */
 const GHOST_ALPHA = 0.6;
 
@@ -102,31 +94,21 @@ export class MirrorRenderer {
     return { x: (xCss - pad) / area, y: (yCss - pad) / area };
   }
 
-  /** Rendert die ungedrehte, mittige Figur in einen Zwischenspeicher (nur bei Änderung). */
+  /** Legt die ungedrehte, mittige Figur in einen Zwischenspeicher (nur bei Änderung). */
   private ensureFigure(): void {
     const px = Math.max(1, Math.round(this.layout.area * this.dpr));
     const key = `${px}|${this.imageVersion}`;
     if (key === this.figureKey) return;
     this.figureKey = key;
-    const c = this.figure;
-    if (c.width !== px) {
-      c.width = px;
-      c.height = px;
+    if (!this.image) {
+      this.figure.width = px;
+      this.figure.height = px;
+      this.samples = [];
+      return;
     }
-    const g = c.getContext('2d')!;
-    g.setTransform(1, 0, 0, 1, 0, 0);
-    g.clearRect(0, 0, px, px);
-    if (!this.image) return;
-    // Figur passt in einen Kreis, damit sie bei jeder Drehung ganz sichtbar bleibt.
-    const diag = FIGURE_DIAMETER * px;
-    const k = diag / Math.hypot(this.imageAspect, 1);
-    const w = k * this.imageAspect;
-    const h = k;
-    g.translate(px / 2, px / 2);
-    g.imageSmoothingQuality = 'high';
-    g.drawImage(this.image, -w / 2, -h / 2, w, h);
+    createFigureBuffer(this.image, this.imageAspect, px, this.figure);
     this.buildOutline(px);
-    this.buildSamples(w / px, h / px);
+    this.samples = sampleFigure(this.figure, this.imageAspect);
   }
 
   /** Außenkontur der Figur als schmaler Ring (einmal pro Bild/Größe). */
@@ -148,31 +130,6 @@ export class MirrorRenderer {
     g.globalCompositeOperation = 'source-over';
   }
 
-  /** Stichproben der deckenden Pixel; ohne Pixelzugriff: Rechteck der Figur. */
-  private buildSamples(wRel: number, hRel: number): void {
-    const n = MASK_SIZE;
-    const samples: Vec2[] = [];
-    try {
-      const m = document.createElement('canvas');
-      m.width = n;
-      m.height = n;
-      const g = m.getContext('2d', { willReadFrequently: true })!;
-      g.drawImage(this.figure, 0, 0, n, n);
-      const data = g.getImageData(0, 0, n, n).data;
-      for (let i = 0; i < n * n; i++) {
-        if (data[i * 4 + 3] > 64) samples.push({ x: ((i % n) + 0.5) / n, y: (Math.floor(i / n) + 0.5) / n });
-      }
-    } catch {
-      // Canvas nicht lesbar: Bildrechteck als Näherung.
-      for (let i = 0; i < n * n; i++) {
-        const x = ((i % n) + 0.5) / n;
-        const y = (Math.floor(i / n) + 0.5) / n;
-        if (Math.abs(x - 0.5) <= wRel / 2 && Math.abs(y - 0.5) <= hRel / 2) samples.push({ x, y });
-      }
-    }
-    this.samples = samples;
-  }
-
   draw(input: RenderInput): void {
     const { ctx } = this;
     const { pad, area } = this.layout;
@@ -190,24 +147,7 @@ export class MirrorRenderer {
     ctx.fillStyle = COLORS.area;
     ctx.fillRect(0, 0, 1, 1);
 
-    const { original, mirror } = halves(input.mirror, UNIT_RECT);
-
-    // Originalseite
-    ctx.save();
-    pathPolygon(ctx, original);
-    ctx.clip();
-    ctx.transform(...place);
-    ctx.drawImage(this.figure, 0, 0, 1, 1);
-    ctx.restore();
-
-    // Spiegelseite
-    ctx.save();
-    pathPolygon(ctx, mirror);
-    ctx.clip();
-    ctx.transform(...mirrorTransform(input.mirror));
-    ctx.transform(...place);
-    ctx.drawImage(this.figure, 0, 0, 1, 1);
-    ctx.restore();
+    const { mirror } = drawComposite(ctx, input, this.figure, this.figure, mirrorTransform(input.mirror));
 
     // Blasser Umriss des verdeckten Teils, nur wenn die Figur sonst fast ganz verschwände.
     const ghost = input.showOutline
@@ -301,10 +241,4 @@ export class MirrorRenderer {
     }
     ctx.restore();
   }
-}
-
-function pathPolygon(ctx: CanvasRenderingContext2D, poly: Vec2[]): void {
-  ctx.beginPath();
-  poly.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
-  ctx.closePath();
 }

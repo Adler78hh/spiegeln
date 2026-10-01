@@ -1,77 +1,59 @@
 import { useEffect, useState } from 'react';
-import { createMirror, INITIAL_FIGURE, UNIT_RECT } from './geometry';
-import { BUILTIN_MOTIFS, svgDataUrl, svgToImage } from './motifs/builtin';
-import { MirrorCanvas, type Scene } from './ui/MirrorCanvas';
-import { OutlineIcon, ResetIcon, SnapIcon } from './ui/icons';
+import { loadBuiltinChallenges } from './challenges/builtin';
+import type { Answer, Challenge, ChallengeAnswers } from './challenges/types';
+import { ChallengeList } from './ui/ChallengeList';
+import { ChallengePlay } from './ui/ChallengePlay';
+import { FreeMirror } from './ui/FreeMirror';
+import { Home } from './ui/Home';
+import type { ToolPrefs } from './ui/MirrorTools';
 
-const IMAGE_SIZE = { width: 1, height: 1 };
-const initialScene = (): Scene => ({ mirror: createMirror(UNIT_RECT), figure: INITIAL_FIGURE });
+type ScreenState = { name: 'home' } | { name: 'free' } | { name: 'challenges' } | { name: 'challenge'; id: string };
 
 export default function App() {
-  const [motifId, setMotifId] = useState(BUILTIN_MOTIFS[0].id);
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const [scene, setScene] = useState<Scene>(initialScene);
-  const [snap, setSnap] = useState(false);
-  const [showOutline, setShowOutline] = useState(false);
+  const [screen, setScreen] = useState<ScreenState>({ name: 'home' });
+  const [prefs, setPrefs] = useState<ToolPrefs>({ snap: false, showOutline: false });
+  const [challenges, setChallenges] = useState<Challenge[] | null>(null);
+  // Antworten pro Herausforderung (wird mit den Profilen dauerhaft gespeichert).
+  const [answers, setAnswers] = useState<Record<string, ChallengeAnswers>>({});
 
   useEffect(() => {
-    let alive = true;
-    const motif = BUILTIN_MOTIFS.find((m) => m.id === motifId)!;
-    svgToImage(motif.svg).then((img) => alive && setImage(img));
-    return () => {
-      alive = false;
-    };
-  }, [motifId]);
+    loadBuiltinChallenges().then((c) => {
+      setChallenges(c);
+      if (import.meta.env.DEV) (window as unknown as { __challenges: Challenge[] }).__challenges = c;
+    }, (e) => console.error(e));
+  }, []);
 
-  return (
-    <div className="screen">
-      <main className="work">
-        <MirrorCanvas
-          image={image}
-          imageSize={IMAGE_SIZE}
-          scene={scene}
-          onSceneChange={setScene}
-          snap={snap}
-          showOutline={showOutline}
+  const saveAnswer = (challengeId: string, targetId: string, answer: Answer) =>
+    setAnswers((all) => ({ ...all, [challengeId]: { ...all[challengeId], [targetId]: answer } }));
+
+  switch (screen.name) {
+    case 'home':
+      return <Home onFree={() => setScreen({ name: 'free' })} onChallenges={() => setScreen({ name: 'challenges' })} />;
+    case 'free':
+      return <FreeMirror prefs={prefs} onPrefsChange={setPrefs} onBack={() => setScreen({ name: 'home' })} />;
+    case 'challenges':
+      return (
+        <ChallengeList
+          challenges={challenges}
+          answers={answers}
+          onOpen={(id) => setScreen({ name: 'challenge', id })}
+          onBack={() => setScreen({ name: 'home' })}
         />
-      </main>
-      <aside className="side">
-        <div className="motif-list" role="radiogroup" aria-label="Bild wählen">
-          {BUILTIN_MOTIFS.map((m) => (
-            <button
-              key={m.id}
-              role="radio"
-              aria-checked={m.id === motifId}
-              aria-label={m.name}
-              className={`motif-btn ${m.id === motifId ? 'selected' : ''}`}
-              onClick={() => setMotifId(m.id)}
-            >
-              <img src={svgDataUrl(m.svg)} alt="" />
-            </button>
-          ))}
-        </div>
-        <div className="tools">
-          <button
-            className={`tool-btn ${snap ? 'on' : ''}`}
-            aria-pressed={snap}
-            aria-label="Einrasten auf 15 Grad"
-            onClick={() => setSnap((s) => !s)}
-          >
-            <SnapIcon />
-          </button>
-          <button
-            className={`tool-btn ${showOutline ? 'on' : ''}`}
-            aria-pressed={showOutline}
-            aria-label="Umriss der verdeckten Figur"
-            onClick={() => setShowOutline((v) => !v)}
-          >
-            <OutlineIcon />
-          </button>
-          <button className="tool-btn" aria-label="Zurücksetzen" onClick={() => setScene(initialScene())}>
-            <ResetIcon />
-          </button>
-        </div>
-      </aside>
-    </div>
-  );
+      );
+    case 'challenge': {
+      const challenge = challenges?.find((c) => c.id === screen.id);
+      if (!challenge) return null;
+      return (
+        <ChallengePlay
+          key={challenge.id}
+          challenge={challenge}
+          answers={answers[challenge.id] ?? {}}
+          onAnswer={(targetId, a) => saveAnswer(challenge.id, targetId, a)}
+          prefs={prefs}
+          onPrefsChange={setPrefs}
+          onBack={() => setScreen({ name: 'challenges' })}
+        />
+      );
+    }
+  }
 }
