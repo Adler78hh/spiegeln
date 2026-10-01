@@ -3,7 +3,8 @@ import { initialScene, mirrorTransform, type Scene } from '../geometry';
 import { unsolvableCount, type Answer, type Challenge, type ChallengeAnswers, type Decision } from '../challenges/types';
 import { boundsCenter } from '../challenges/generate';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite } from '../render/composite';
-import { BackIcon, CheckIcon, CrossIcon, StarIcon } from './icons';
+import { BackIcon, CheckIcon, CrossIcon, ThumbsUpIcon } from './icons';
+import { checkAnswers } from '../challenges/check';
 import { MirrorCanvas } from './MirrorCanvas';
 import type { ToolPrefs } from '../storage/store';
 import { MirrorTools } from './MirrorTools';
@@ -38,6 +39,17 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
   const selected = targets.find((t) => t.id === selectedId) ?? targets[0];
   const unsolvable = unsolvableCount(challenge);
   const allDone = useMemo(() => targets.every((t) => answers[t.id]), [targets, answers]);
+
+  // Selbstkontrolle: erst wenn alles bearbeitet ist. Markierungen gelten nur
+  // für Antworten, die seit dem Prüfen nicht mehr geändert wurden.
+  const [checkedAt, setCheckedAt] = useState<number | null>(null);
+  const check = useMemo(() => (checkedAt === null ? null : checkAnswers(challenge, answers)), [checkedAt, challenge, answers]);
+  const markOf = (id: string): boolean | undefined => {
+    const a = answers[id];
+    if (!check || !a || checkedAt === null || a.updatedAt > checkedAt) return undefined;
+    return check.perTarget[id];
+  };
+  const checkCurrent = check !== null && checkedAt !== null && targets.every((t) => (answers[t.id]?.updatedAt ?? Infinity) <= checkedAt);
 
   const select = (id: string) => {
     setSelectedId(id);
@@ -93,11 +105,6 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
           <button className="tool-btn" aria-label="Zurück" onClick={onBack}>
             <BackIcon />
           </button>
-          {allDone && (
-            <span className="done-star" aria-label="Alle Figuren bearbeitet">
-              <StarIcon size={36} />
-            </span>
-          )}
           <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(initialScene())} />
         </div>
 
@@ -106,23 +113,37 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
         </div>
 
         <div className="target-area">
-          <div className="unsolvable-hint" aria-label={`${unsolvable} Figuren gehen nicht`}>
-            <span className="hint-icon">
-              <CrossIcon size={22} />
-            </span>
-            <span className="hint-count">{unsolvable}</span>
-            <span className="hint-text">gehen nicht</span>
+          <div className="hint-row">
+            <div className="unsolvable-hint" aria-label={`${unsolvable} Figuren gehen nicht`}>
+              <span className="hint-icon">
+                <CrossIcon size={22} />
+              </span>
+              <span className="hint-count">{unsolvable}</span>
+              <span className="hint-text">gehen nicht</span>
+            </div>
+            {checkCurrent && check && (
+              <div className="check-summary" role="status" aria-label={`${check.correct} von ${check.total} richtig`}>
+                <ThumbsUpIcon size={22} />
+                <span className="hint-count">
+                  {check.correct} / {check.total}
+                </span>
+                <span className="hint-text">richtig</span>
+              </div>
+            )}
           </div>
           <div className="target-grid" role="listbox" aria-label="Zielfiguren">
             {targets.map((t, i) => {
               const a = answers[t.id];
+              const mark = markOf(t.id);
               return (
                 <button
                   key={t.id}
                   role="option"
                   aria-selected={t.id === selected.id}
                   aria-label={`Figur ${i + 1}${a ? (a.decision === 'fits' ? ', passt' : ', geht nicht') : ''}`}
-                  className={`target-thumb ${t.id === selected.id ? 'selected' : ''}`}
+                  className={`target-thumb ${t.id === selected.id ? 'selected' : ''} ${
+                    mark === true ? 'result-ok' : mark === false ? 'result-wrong' : ''
+                  }`}
                   onClick={() => select(t.id)}
                 >
                   <img src={t.image} alt="" />
@@ -131,11 +152,22 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
                       {a.decision === 'fits' ? <CheckIcon size={16} /> : <CrossIcon size={16} />}
                     </span>
                   )}
+                  {mark !== undefined && (
+                    <span className={`result-mark ${mark ? 'ok' : 'wrong'}`} aria-label={mark ? 'richtig' : 'falsch'}>
+                      {mark ? <CheckIcon size={18} /> : <CrossIcon size={18} />}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
         </div>
+
+        {allDone && !checkCurrent && (
+          <button className="check-btn" aria-label="Prüfen, ob alles stimmt" onClick={() => setCheckedAt(Date.now())}>
+            <ThumbsUpIcon size={40} />
+          </button>
+        )}
 
         <div className="decide">
           <button className={`decide-btn fits ${current === 'fits' ? 'chosen' : ''}`} onClick={() => decide('fits')}>

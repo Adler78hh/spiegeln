@@ -200,3 +200,11 @@ export const EditIcon = () => (
     <path d="M4 20h4L19 9l-4-4L4 16z" />
   </Icon>
 );
+
+/** Daumen hoch: Entscheidungen prüfen lassen. */
+export const ThumbsUpIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M7 10v10H4V10z" fill="currentColor" fillOpacity=".25" />
+    <path d="M7 10l4-7c1.5 0 2.5 1.2 2.2 2.7L12.5 9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7" />
+  </Icon>
+);
