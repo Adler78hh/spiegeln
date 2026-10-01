@@ -26,3 +26,11 @@ npm run build     # Produktions-Build nach dist/
 Auf der Profilwahl das Zahnrad oben rechts 3 Sekunden gedrückt halten und die
 Einmaleins-Aufgabe lösen. Dort: Ergebnisse, Herausforderungen erstellen,
 Profile und eigene Motive verwalten.
+
+## Installieren und offline nutzen
+
+Die App ist eine PWA: Nach dem ersten Öffnen über HTTPS speichert sie alle
+Dateien im Gerät und funktioniert danach ohne Internet. Auf dem Tablet im
+Browser „Zum Home-Bildschirm hinzufügen“ wählen. Dafür muss der Inhalt von
+`dist/` (nach `npm run build`) auf einem HTTPS-Webspace liegen; über eine
+einfache LAN-Adresse (http) installieren Browser keine Service Worker.

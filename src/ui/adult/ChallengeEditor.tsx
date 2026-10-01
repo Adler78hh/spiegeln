@@ -211,7 +211,7 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
 
         <section className="editor-section">
           <h2>Lösbare Zielfigur</h2>
-          <p className="hint">Startfigur links drehen/verschieben und den Spiegel anlegen.</p>
+          <p className="hint">Startfigur auf der Arbeitsfläche drehen/verschieben und den Spiegel anlegen.</p>
           <button className="text-btn primary wide" disabled={!image} onClick={addSolvable}>
             <CheckIcon size={22} /> Als lösbare Zielfigur speichern
           </button>
@@ -219,7 +219,7 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
 
         <section className="editor-section">
           <h2>Unlösbare Zielfigur</h2>
-          <p className="hint">Ausgangspunkt ist jeweils die aktuelle Lage links.</p>
+          <p className="hint">Ausgangspunkt ist jeweils die aktuelle Lage auf der Arbeitsfläche.</p>
           <div className="button-grid">
             <button className="text-btn" disabled={!image} onClick={startError}>
               Fehler einbauen

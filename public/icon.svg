@@ -1,1 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#f6f1e7"/><path d="M30 14 14 50h16z" fill="#6fa8dc" stroke="#5b4636" stroke-width="3" stroke-linejoin="round"/><path d="M34 14l16 36H34z" fill="#6fa8dc" opacity=".55" stroke="#5b4636" stroke-width="3" stroke-linejoin="round"/><path d="M32 6v52" stroke="#e0322b" stroke-width="4" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#f6f1e7"/>
+  <g stroke="#5b4636" stroke-width="12" stroke-linejoin="round">
+    <path d="M256 140 L150 236 L150 372 L256 372 Z" fill="#f6c983"/>
+    <path d="M136 244 L256 136 L256 244 Z" fill="#e0675f"/>
+    <rect x="172" y="282" width="44" height="90" rx="6" fill="#7fa6d6"/>
+    <path d="M256 140 L362 236 L362 372 L256 372 Z" fill="#f6c983" opacity=".75"/>
+    <path d="M376 244 L256 136 L256 244 Z" fill="#e0675f" opacity=".75"/>
+    <rect x="296" y="282" width="44" height="90" rx="6" fill="#7fa6d6" opacity=".75"/>
+  </g>
+  <line x1="256" y1="96" x2="256" y2="416" stroke="#e0322b" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="256" cy="96" r="22" fill="#fff" stroke="#e0322b" stroke-width="10"/>
+  <circle cx="256" cy="416" r="22" fill="#fff" stroke="#e0322b" stroke-width="10"/>
+</svg>

@@ -1513,3 +1513,49 @@ button:disabled {
     width: 40%;
   }
 }
+
+.page-hint {
+  margin-bottom: 12px;
+}
+
+.name-field {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name-field span {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.profile-tile .animal-name {
+  margin-top: -4px;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+/* Touch-Flächen im Editor mindestens 48 px */
+.editor-target .chip {
+  min-height: 48px;
+}
+
+.editor-target .icon-btn {
+  width: 48px;
+  height: 48px;
+}
+
+/* Werkzeuge im freien Spiegeln immer als ordentliches 2×2-Raster */
+.free-side .tools {
+  display: grid;
+  grid-template-columns: repeat(2, var(--touch));
+  justify-content: center;
+}
+
+@media (orientation: portrait) {
+  .editor-side .side-top {
+    flex-direction: row;
+  }
+}

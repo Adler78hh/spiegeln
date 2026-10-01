@@ -53,21 +53,27 @@ export function ProfileManager({ store, profiles, onChange, onBack }: Props) {
         </button>
       }
     >
+      <p className="hint page-hint">
+        Den Namen des Kindes ins Feld schreiben, dann erscheint er unter dem Tier. Antippen des Tiers wählt ein anderes Tier.
+      </p>
       <ul className="manage-list">
         {profiles.map((p) => (
           <li key={p.id} className="manage-row">
             <button className="avatar-pick" aria-label={`Tier für ${p.name} ändern`} onClick={() => setAnimalFor(animalFor === p.id ? null : p.id)}>
               <img src={animalImageUrl(p.animal)} alt="" />
             </button>
-            <input
-              id={`profile-name-${p.id}`}
-              className="name-input"
-              defaultValue={p.name}
-              maxLength={24}
-              aria-label="Name"
-              onBlur={(e) => rename(p, e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-            />
+            <label className="name-field" htmlFor={`profile-name-${p.id}`}>
+              <span>Name des Kindes ({ANIMALS[p.animal].name})</span>
+              <input
+                id={`profile-name-${p.id}`}
+                className="name-input"
+                defaultValue={p.name}
+                maxLength={24}
+                placeholder={ANIMALS[p.animal].name}
+                onBlur={(e) => rename(p, e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+              />
+            </label>
             <button className="tool-btn" aria-label={`${p.name} löschen`} onClick={() => setConfirmId(p.id)}>
               <TrashIcon />
             </button>
