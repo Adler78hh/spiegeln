@@ -6,4 +6,3 @@ export * from './affine';
 export * from './mirror';
 export * from './figure';
 export * from './scene';
-export * from './match';

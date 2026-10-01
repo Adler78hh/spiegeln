@@ -29,13 +29,6 @@ export function compose(second: Affine, first: Affine): Affine {
   ];
 }
 
-/** Umkehrabbildung (Determinante darf nicht 0 sein). */
-export function invert(m: Affine): Affine {
-  const [a, b, c, d, e, f] = m;
-  const det = a * d - b * c;
-  return [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det];
-}
-
 export function translation(v: Vec2): Affine {
   return [1, 0, 0, 1, v.x, v.y];
 }

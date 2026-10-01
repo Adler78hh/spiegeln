@@ -103,7 +103,6 @@ export function Results({ store, profiles, challenges, motifs, onBack }: Props) 
                       <CheckIcon size={20} /> Passt
                     </span>
                   )}
-                  {ans?.decision === 'fits' && ans.matched && <span className="answer gold">★ genau getroffen</span>}
                   {ans?.decision === 'impossible' && (
                     <span className="answer impossible">
                       <CrossIcon size={20} /> Geht nicht
