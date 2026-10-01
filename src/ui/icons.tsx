@@ -84,3 +84,11 @@ export const StarIcon = ({ size = 32 }: { size?: number }) => (
     <path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1-4.5-4.2 6.1-.8z" fill="currentColor" />
   </Icon>
 );
+
+/** Fotoapparat: Figur merken. */
+export const CameraIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+    <circle cx="12" cy="13" r="3.5" />
+  </Icon>
+);

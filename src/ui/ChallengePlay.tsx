@@ -5,7 +5,8 @@ import { boundsCenter } from '../challenges/generate';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite } from '../render/composite';
 import { BackIcon, CheckIcon, CrossIcon, StarIcon } from './icons';
 import { MirrorCanvas } from './MirrorCanvas';
-import { MirrorTools, type ToolPrefs } from './MirrorTools';
+import type { ToolPrefs } from '../storage/store';
+import { MirrorTools } from './MirrorTools';
 import { useMotifImage } from './useMotifImage';
 
 const IMAGE_SIZE = { width: 1, height: 1 };

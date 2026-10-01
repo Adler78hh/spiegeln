@@ -1,9 +1,5 @@
+import type { ToolPrefs } from '../storage/store';
 import { OutlineIcon, ResetIcon, SnapIcon } from './icons';
-
-export interface ToolPrefs {
-  snap: boolean;
-  showOutline: boolean;
-}
 
 interface Props {
   prefs: ToolPrefs;

@@ -6,6 +6,7 @@ import { apply, figureTransform, lineOf, mirrorTransform, otherSideTransform, si
 import { applyVariant, findBuiltinMotif, svgToImage } from '../motifs/builtin';
 import { contentBounds, createFigureBuffer, cropSquare, differenceRatio, renderComposite, sampleFigure } from '../render/composite';
 import { boundsCenter, candidateScenes, shuffle, viewSizeFor } from './generate';
+import type { Store } from '../storage/store';
 import type { Challenge, Target, TargetKind } from './types';
 
 type UnsolvableKind = Exclude<TargetKind, 'mirror' | 'upload'>;
@@ -105,10 +106,21 @@ async function buildChallenge(spec: ChallengeSpec): Promise<Challenge> {
   return { id: spec.id, name: spec.name, motifId: spec.motifId, targets: mixed, viewSize };
 }
 
-let cache: Promise<Challenge[]> | null = null;
-
-/** Erzeugt (einmalig) alle vorinstallierten Herausforderungen. */
-export function loadBuiltinChallenges(): Promise<Challenge[]> {
-  cache ??= Promise.all(BUILTIN_CHALLENGES.map(buildChallenge));
-  return cache;
+/**
+ * Lädt alle Herausforderungen aus dem Speicher. Fehlende vorinstallierte
+ * werden einmalig erzeugt und gespeichert. So bleiben die Zielfiguren
+ * (und damit die gespeicherten Antworten) auch nach App-Updates stabil.
+ */
+export async function loadChallenges(store: Store): Promise<Challenge[]> {
+  const stored = await store.listChallenges();
+  const have = new Set(stored.map((c) => c.id));
+  const missing = BUILTIN_CHALLENGES.filter((spec) => !have.has(spec.id));
+  if (missing.length) {
+    const built = await Promise.all(missing.map(buildChallenge));
+    await Promise.all(
+      built.map((c) => store.saveChallenge(c, true, BUILTIN_CHALLENGES.findIndex((s) => s.id === c.id))),
+    );
+    return (await store.listChallenges()).map(({ builtin: _b, ...c }) => c);
+  }
+  return stored.map(({ builtin: _b, ...c }) => c);
 }
