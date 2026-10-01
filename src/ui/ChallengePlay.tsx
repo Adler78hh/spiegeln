@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { initialScene, mirrorTransform, type Scene } from '../geometry';
+import { initialScene, matchScene, mirrorTransform, type Scene } from '../geometry';
 import { unsolvableCount, type Answer, type Challenge, type ChallengeAnswers, type Decision } from '../challenges/types';
 import { boundsCenter } from '../challenges/generate';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite } from '../render/composite';
@@ -55,8 +55,22 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
     return cropSquare(full, boundsCenter(contentBounds(full)), challenge.viewSize, SNAPSHOT_PX).toDataURL('image/png');
   };
 
+  // Genau getroffen? Nur lösbare Ziele mit gespeicherter Lösung können passen.
+  // Geprüft wird beim Loslassen (die Szene ändert sich erst am Ende einer Geste).
+  const matched = useMemo(
+    () => !!(selected.solvable && selected.scene && matchScene(scene, selected.scene).matches),
+    [selected, scene],
+  );
+  const showGold = prefs.goldFrame && matched;
+
+  // Nur in der Entwicklerversion: Szene von außen setzen (automatische Tests).
+  if (import.meta.env.DEV) {
+    (window as unknown as { __challengeDebug: unknown }).__challengeDebug = { selected, setScene };
+  }
+
   const decide = (decision: Decision) => {
     onAnswer(selected.id, {
+      matched,
       decision,
       scene,
       snapshot: decision === 'fits' ? snapshot(scene) : undefined,
@@ -77,7 +91,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
 
   return (
     <div className="screen challenge-screen">
-      <main className="work">
+      <main className={`work ${showGold ? 'gold' : ''}`}>
         <MirrorCanvas
           image={image}
           imageSize={{ width: aspect, height: 1 }}
@@ -101,7 +115,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
           <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(initialScene())} />
         </div>
 
-        <div className="target-big">
+        <div className={`target-big ${showGold ? 'gold' : ''}`}>
           <img src={selected.image} alt="Ausgewählte Zielfigur" />
         </div>
 
@@ -122,7 +136,9 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
                   role="option"
                   aria-selected={t.id === selected.id}
                   aria-label={`Figur ${i + 1}${a ? (a.decision === 'fits' ? ', passt' : ', geht nicht') : ''}`}
-                  className={`target-thumb ${t.id === selected.id ? 'selected' : ''}`}
+                  className={`target-thumb ${t.id === selected.id ? 'selected' : ''} ${
+                    prefs.goldFrame && a?.decision === 'fits' && a.matched ? 'gold' : ''
+                  }`}
                   onClick={() => select(t.id)}
                 >
                   <img src={t.image} alt="" />

@@ -17,9 +17,11 @@ export interface ToolPrefs {
   showOutline: boolean;
   /** Spiegelachse ausblenden (Anfasspunkte bleiben sichtbar). */
   hideLine: boolean;
+  /** Goldener Rahmen, wenn eine Zielfigur genau getroffen ist (Erwachsenenbereich). */
+  goldFrame: boolean;
 }
 
-export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false };
+export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false, goldFrame: true };
 
 export interface Profile {
   id: string;

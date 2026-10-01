@@ -52,6 +52,8 @@ export interface Answer {
   scene: Scene;
   /** Bild des Spiegelergebnisses bei "Passt" (für die Ergebnisübersicht). */
   snapshot?: string;
+  /** Lag die Konfiguration beim Entscheiden innerhalb der Toleranz der Lösung? */
+  matched?: boolean;
   updatedAt: number;
 }
 

@@ -55,6 +55,7 @@ export function ProfileManager({ store, profiles, onChange, onBack }: Props) {
     >
       <p className="hint page-hint">
         Den Namen des Kindes ins Feld schreiben, dann erscheint er unter dem Tier. Antippen des Tiers wählt ein anderes Tier.
+        „Goldrahmen“: Bei Herausforderungen leuchtet der Rahmen golden, wenn das Kind eine Zielfigur genau getroffen hat.
       </p>
       <ul className="manage-list">
         {profiles.map((p) => (
@@ -74,6 +75,17 @@ export function ProfileManager({ store, profiles, onChange, onBack }: Props) {
                 onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
               />
             </label>
+            <button
+              className={`toggle-btn ${p.prefs.goldFrame ? 'on' : ''}`}
+              aria-pressed={p.prefs.goldFrame}
+              title="Goldener Rahmen, wenn eine Zielfigur genau getroffen ist"
+              onClick={async () => {
+                await store.updateProfile(p.id, { prefs: { ...p.prefs, goldFrame: !p.prefs.goldFrame } });
+                await reload();
+              }}
+            >
+              ★ Goldrahmen {p.prefs.goldFrame ? 'an' : 'aus'}
+            </button>
             <button className="tool-btn" aria-label={`${p.name} löschen`} onClick={() => setConfirmId(p.id)}>
               <TrashIcon />
             </button>
