@@ -37,6 +37,8 @@ export interface MirrorCanvasProps {
   /** Wird am Ende jeder Geste mit dem neuen Zustand aufgerufen. */
   onSceneChange: (s: Scene) => void;
   snap: boolean;
+  /** Blasser Umriss, wenn die Figur fast ganz verschwunden ist. */
+  showOutline: boolean;
 }
 
 type Gesture =
@@ -78,6 +80,7 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
       rendererRef.current?.draw({
         ...sceneRef.current,
         active: g?.kind === 'handle' ? g.which : g?.kind === 'line' ? 'line' : null,
+        showOutline: propsRef.current.showOutline,
       });
     });
   };
@@ -111,7 +114,7 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
   useEffect(() => {
     if (!gestureRef.current) sceneRef.current = props.scene;
     requestDraw();
-  }, [props.scene]);
+  }, [props.scene, props.showOutline]);
 
   const local = (e: React.PointerEvent): { css: Vec2; norm: Vec2 } => {
     const rect = canvasRef.current!.getBoundingClientRect();

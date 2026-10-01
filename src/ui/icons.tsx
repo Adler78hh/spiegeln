@@ -17,6 +17,13 @@ export const SnapIcon = () => (
   </Icon>
 );
 
+/** Gestricheltes Haus: Umriss ein/aus. */
+export const OutlineIcon = () => (
+  <Icon>
+    <path d="M4 11 12 4l8 7v9H4z" strokeDasharray="2.6 2.4" />
+  </Icon>
+);
+
 export const ResetIcon = () => (
   <Icon>
     <path d="M4 12a8 8 0 1 0 2.4-5.7" />

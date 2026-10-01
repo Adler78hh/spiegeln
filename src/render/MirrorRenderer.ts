@@ -36,6 +36,8 @@ export interface RenderInput {
   figure: FigureState;
   /** Aktiver Teil des Spiegels (wird hervorgehoben). */
   active?: 'a' | 'b' | 'line' | null;
+  /** Blassen Umriss zeigen, wenn die Figur fast ganz hinter dem Spiegel liegt. */
+  showOutline?: boolean;
 }
 
 export interface Layout {
@@ -208,7 +210,9 @@ export class MirrorRenderer {
     ctx.restore();
 
     // Blasser Umriss des verdeckten Teils, nur wenn die Figur sonst fast ganz verschwände.
-    const ghost = ghostOpacity(visibleFraction(this.samples, input.figure, input.mirror, UNIT_RECT));
+    const ghost = input.showOutline
+      ? ghostOpacity(visibleFraction(this.samples, input.figure, input.mirror, UNIT_RECT))
+      : 0;
     if (ghost > 0) {
       ctx.save();
       pathPolygon(ctx, mirror);

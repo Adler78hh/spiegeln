@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createMirror, INITIAL_FIGURE, UNIT_RECT } from './geometry';
 import { BUILTIN_MOTIFS, svgDataUrl, svgToImage } from './motifs/builtin';
 import { MirrorCanvas, type Scene } from './ui/MirrorCanvas';
-import { ResetIcon, SnapIcon } from './ui/icons';
+import { OutlineIcon, ResetIcon, SnapIcon } from './ui/icons';
 
 const IMAGE_SIZE = { width: 1, height: 1 };
 const initialScene = (): Scene => ({ mirror: createMirror(UNIT_RECT), figure: INITIAL_FIGURE });
@@ -12,6 +12,7 @@ export default function App() {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [scene, setScene] = useState<Scene>(initialScene);
   const [snap, setSnap] = useState(false);
+  const [showOutline, setShowOutline] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -31,6 +32,7 @@ export default function App() {
           scene={scene}
           onSceneChange={setScene}
           snap={snap}
+          showOutline={showOutline}
         />
       </main>
       <aside className="side">
@@ -56,6 +58,14 @@ export default function App() {
             onClick={() => setSnap((s) => !s)}
           >
             <SnapIcon />
+          </button>
+          <button
+            className={`tool-btn ${showOutline ? 'on' : ''}`}
+            aria-pressed={showOutline}
+            aria-label="Umriss der verdeckten Figur"
+            onClick={() => setShowOutline((v) => !v)}
+          >
+            <OutlineIcon />
           </button>
           <button className="tool-btn" aria-label="Zurücksetzen" onClick={() => setScene(initialScene())}>
             <ResetIcon />
