@@ -9,10 +9,12 @@
 import {
   clipLineToRect,
   figureTransform,
+  ghostOpacity,
   halves,
   lineOf,
   mirrorTransform,
   UNIT_RECT,
+  visibleFraction,
   type FigureState,
   type MirrorState,
   type Vec2,
@@ -25,6 +27,7 @@ export const COLORS = {
   lineActive: '#b81d17',
   handleFill: '#ffffff',
   mirrorTint: 'rgba(120, 170, 220, 0.18)',
+  ghost: '#7f9cbf',
 };
 
 export interface RenderInput {
@@ -50,10 +53,19 @@ export interface Layout {
  */
 export const FIGURE_DIAMETER = 0.6;
 
+/** Auflösung der Stichproben-Maske für den sichtbaren Anteil der Figur. */
+const MASK_SIZE = 48;
+/** Maximale Deckkraft des blassen Umrisses. */
+const GHOST_ALPHA = 0.6;
+
 export class MirrorRenderer {
   private ctx: CanvasRenderingContext2D;
   private figure = document.createElement('canvas');
   private figureKey = '';
+  /** Umriss der Figur (für den blassen Hinweis auf der Spiegelseite). */
+  private outline = document.createElement('canvas');
+  /** Stichproben der Figur (normierte Koordinaten der ungedrehten Figur). */
+  private samples: Vec2[] = [];
   private image: CanvasImageSource | null = null;
   private imageAspect = 1;
   private imageVersion = 0;
@@ -111,6 +123,52 @@ export class MirrorRenderer {
     g.translate(px / 2, px / 2);
     g.imageSmoothingQuality = 'high';
     g.drawImage(this.image, -w / 2, -h / 2, w, h);
+    this.buildOutline(px);
+    this.buildSamples(w / px, h / px);
+  }
+
+  /** Außenkontur der Figur als schmaler Ring (einmal pro Bild/Größe). */
+  private buildOutline(px: number): void {
+    const o = this.outline;
+    o.width = px;
+    o.height = px;
+    const g = o.getContext('2d')!;
+    const r = 2.5 * this.dpr;
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      g.drawImage(this.figure, Math.cos(a) * r, Math.sin(a) * r);
+    }
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = COLORS.ghost;
+    g.fillRect(0, 0, px, px);
+    g.globalCompositeOperation = 'destination-out';
+    g.drawImage(this.figure, 0, 0);
+    g.globalCompositeOperation = 'source-over';
+  }
+
+  /** Stichproben der deckenden Pixel; ohne Pixelzugriff: Rechteck der Figur. */
+  private buildSamples(wRel: number, hRel: number): void {
+    const n = MASK_SIZE;
+    const samples: Vec2[] = [];
+    try {
+      const m = document.createElement('canvas');
+      m.width = n;
+      m.height = n;
+      const g = m.getContext('2d', { willReadFrequently: true })!;
+      g.drawImage(this.figure, 0, 0, n, n);
+      const data = g.getImageData(0, 0, n, n).data;
+      for (let i = 0; i < n * n; i++) {
+        if (data[i * 4 + 3] > 64) samples.push({ x: ((i % n) + 0.5) / n, y: (Math.floor(i / n) + 0.5) / n });
+      }
+    } catch {
+      // Canvas nicht lesbar: Bildrechteck als Näherung.
+      for (let i = 0; i < n * n; i++) {
+        const x = ((i % n) + 0.5) / n;
+        const y = (Math.floor(i / n) + 0.5) / n;
+        if (Math.abs(x - 0.5) <= wRel / 2 && Math.abs(y - 0.5) <= hRel / 2) samples.push({ x, y });
+      }
+    }
+    this.samples = samples;
   }
 
   draw(input: RenderInput): void {
@@ -148,6 +206,18 @@ export class MirrorRenderer {
     ctx.transform(...place);
     ctx.drawImage(this.figure, 0, 0, 1, 1);
     ctx.restore();
+
+    // Blasser Umriss des verdeckten Teils, nur wenn die Figur sonst fast ganz verschwände.
+    const ghost = ghostOpacity(visibleFraction(this.samples, input.figure, input.mirror, UNIT_RECT));
+    if (ghost > 0) {
+      ctx.save();
+      pathPolygon(ctx, mirror);
+      ctx.clip();
+      ctx.globalAlpha = ghost * GHOST_ALPHA;
+      ctx.transform(...place);
+      ctx.drawImage(this.outline, 0, 0, 1, 1);
+      ctx.restore();
+    }
 
     // Dezenter "Glas"-Saum auf der Spiegelseite entlang der Geraden
     this.drawGlassEdge(input.mirror, mirror, px);
