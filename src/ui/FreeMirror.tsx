@@ -80,7 +80,8 @@ export function FreeMirror(props: Props) {
         </div>
         <div className="motif-list" role="radiogroup" aria-label="Bild wählen">
           <button className="motif-btn add-motif" aria-label="Eigenes Motiv" onClick={onCreateMotif}>
-            <PlusIcon size={36} />
+            <PlusIcon size={34} />
+            <span>Eigenes Bild</span>
           </button>
           {motifs.map((m) => (
             <button

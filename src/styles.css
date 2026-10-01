@@ -680,10 +680,21 @@ img {
 }
 
 .add-motif {
-  display: grid;
-  place-items: center;
-  border-style: dashed;
-  color: var(--accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.add-motif span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
 }
 
 button:disabled {
