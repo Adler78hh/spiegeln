@@ -153,3 +153,40 @@ export const PhotoIcon = ({ size = 32 }: { size?: number }) => (
     <path d="M3 17l5-5 4 4 3-3 6 6" />
   </Icon>
 );
+
+export const GearIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" />
+    <circle cx="12" cy="12" r="6.5" />
+  </Icon>
+);
+
+export const PeopleIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <circle cx="9" cy="8" r="3.5" />
+    <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+    <circle cx="17" cy="9" r="2.8" />
+    <path d="M16 14.2a5 5 0 0 1 6 4.8" />
+  </Icon>
+);
+
+export const ListIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M9 6h11M9 12h11M9 18h11" />
+    <path d="M4 6h.01M4 12h.01M4 18h.01" strokeWidth="3.5" />
+  </Icon>
+);
+
+export const ShuffleIcon = () => (
+  <Icon>
+    <path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4" />
+    <path d="M18 4l3 3-3 3M18 14l3 3-3 3" />
+  </Icon>
+);
+
+export const EditIcon = () => (
+  <Icon>
+    <path d="M4 20h4L19 9l-4-4L4 16z" />
+  </Icon>
+);

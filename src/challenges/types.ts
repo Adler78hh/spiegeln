@@ -18,6 +18,8 @@ export interface Target {
   kind: TargetKind;
   /** Lösung (nur bei lösbaren Figuren; für Erwachsene/Editor). */
   scene?: Scene;
+  /** Unbeschnittenes Bild der ganzen Arbeitsfläche (nur bei selbst erstellten). */
+  raw?: string;
 }
 
 export interface Challenge {
@@ -33,6 +35,10 @@ export interface Challenge {
   viewSize: number;
   /** Version (bei vorinstallierten Herausforderungen). */
   version?: number;
+  /** Vorgabe aus dem Editor (nur bei selbst erstellten). */
+  plan?: { total: number; unsolvable: number };
+  /** Erstellungszeit (nur bei selbst erstellten; bestimmt die Reihenfolge). */
+  createdAt?: number;
 }
 
 export const unsolvableCount = (c: Challenge): number => c.targets.filter((t) => !t.solvable).length;

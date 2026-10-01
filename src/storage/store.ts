@@ -214,6 +214,11 @@ export class Store {
     return motif;
   }
 
+  async renameMotif(id: string, name: string): Promise<void> {
+    const m = await this.db.get('motifs', id);
+    if (m) await this.db.put('motifs', { ...m, name: name.trim() || m.name });
+  }
+
   async deleteMotif(id: string): Promise<void> {
     await this.db.delete('motifs', id);
   }
@@ -227,5 +232,11 @@ export class Store {
 
   async saveChallenge(c: Challenge, builtin: boolean, order: number): Promise<void> {
     await this.db.put('challenges', { ...c, builtin, order });
+  }
+
+  /** Löscht eine Herausforderung mit allen Antworten dazu. */
+  async deleteChallenge(id: string): Promise<void> {
+    await this.db.delete('challenges', id);
+    await this.deleteAnswersForChallenge(id);
   }
 }

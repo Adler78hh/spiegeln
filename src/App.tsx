@@ -8,10 +8,12 @@ import { ChallengePlay } from './ui/ChallengePlay';
 import { FreeMirror } from './ui/FreeMirror';
 import { Home } from './ui/Home';
 import { MotifCreator } from './ui/MotifCreator';
+import { AdultArea } from './ui/adult/AdultArea';
 import { ProfilePicker } from './ui/ProfilePicker';
 
 type ScreenState =
   | { name: 'profiles' }
+  | { name: 'adult' }
   | { name: 'home' }
   | { name: 'free' }
   | { name: 'create-motif' }
@@ -96,8 +98,27 @@ export default function App() {
   if (error) return <div className="message">{error}</div>;
   if (!store) return <div className="loading" aria-label="Lädt"><span className="spinner" /></div>;
 
+  if (screen.name === 'adult') {
+    return (
+      <AdultArea
+        store={store}
+        profiles={profiles}
+        onProfilesChange={setProfiles}
+        customMotifs={customMotifs}
+        onCustomMotifsChange={setCustomMotifs}
+        motifs={motifs}
+        challenges={challenges ?? []}
+        onChallengesChange={setChallenges}
+        onExit={() => {
+          setProfile(null);
+          setScreen({ name: 'profiles' });
+        }}
+      />
+    );
+  }
+
   if (screen.name === 'profiles' || !profile) {
-    return <ProfilePicker profiles={profiles} onPick={pickProfile} />;
+    return <ProfilePicker profiles={profiles} onPick={pickProfile} onAdult={() => setScreen({ name: 'adult' })} />;
   }
 
   switch (screen.name) {

@@ -112,6 +112,8 @@ describe('Eigene Motive', () => {
     await new Promise((r) => setTimeout(r, 2));
     const m2 = await store.addMotif({ name: 'Foto', source: 'photo', image: 'data:y', width: 10, height: 10 });
     expect((await store.listMotifs()).map((x) => x.id)).toEqual([m.id, m2.id]);
+    await store.renameMotif(m.id, ' Katze ');
+    expect((await store.listMotifs())[0].name).toBe('Katze');
     await store.deleteMotif(m.id);
     expect((await store.listMotifs()).map((x) => x.id)).toEqual([m2.id]);
   });
@@ -125,5 +127,14 @@ describe('Herausforderungen', () => {
     const list = await store.listChallenges();
     expect(list.map((x) => x.id)).toEqual(['a', 'b']);
     expect(list[1].builtin).toBe(true);
+  });
+
+  it('Löschen entfernt auch die Antworten', async () => {
+    const p = await store.createProfile('A', 'fuchs');
+    await store.saveChallenge({ id: 'x', name: 'x', motifId: 'haus', targets: [], viewSize: 1 }, false, 9);
+    await store.saveAnswer(p.id, 'x', 't', answer('fits'));
+    await store.deleteChallenge('x');
+    expect(await store.listChallenges()).toEqual([]);
+    expect(await store.getAnswers(p.id)).toEqual({});
   });
 });

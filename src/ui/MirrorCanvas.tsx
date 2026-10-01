@@ -35,6 +35,8 @@ export interface MirrorCanvasProps {
   /** Wird am Ende jeder Geste mit dem neuen Zustand aufgerufen. */
   onSceneChange: (s: Scene) => void;
   snap: boolean;
+  /** false: nur anzeigen, keine Bedienung (z. B. Ergebnisübersicht). */
+  interactive?: boolean;
   /** Umriss der ganzen Ausgangsfigur in Signalfarbe. */
   showOutline: boolean;
 }
@@ -247,10 +249,10 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
       <canvas
         ref={canvasRef}
         className="mirror-canvas"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={(e) => finish(e, false)}
-        onPointerCancel={(e) => finish(e, true)}
+        onPointerDown={props.interactive === false ? undefined : onPointerDown}
+        onPointerMove={props.interactive === false ? undefined : onPointerMove}
+        onPointerUp={props.interactive === false ? undefined : (e) => finish(e, false)}
+        onPointerCancel={props.interactive === false ? undefined : (e) => finish(e, true)}
       />
     </div>
   );

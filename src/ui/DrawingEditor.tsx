@@ -31,9 +31,45 @@ export interface DrawingResult {
   height: number;
 }
 
+export interface DrawingBackground {
+  image: CanvasImageSource;
+  width: number;
+  height: number;
+}
+
 interface Props {
   onSave: (r: DrawingResult) => void;
   onCancel: () => void;
+  /**
+   * Hintergrundbild zum Übermalen (z. B. Zielfigur oder Motiv). Mit
+   * Hintergrund wird das Ergebnis in dessen Größe gespeichert, nicht
+   * zugeschnitten; der Radierer entfernt nur Gemaltes.
+   */
+  background?: DrawingBackground;
+}
+
+/** Lage des Hintergrunds in der quadratischen Zeichenfläche (normiert). */
+function backgroundRect(bg: DrawingBackground): { x: number; y: number; w: number; h: number } {
+  const a = bg.width / bg.height;
+  return a >= 1 ? { x: 0, y: (1 - 1 / a) / 2, w: 1, h: 1 / a } : { x: (1 - a) / 2, y: 0, w: a, h: 1 };
+}
+
+/** Exportiert Hintergrund plus Gemaltes in Originalgröße des Hintergrunds. */
+function exportWithBackground(strokes: Stroke[], bg: DrawingBackground): DrawingResult {
+  const r = backgroundRect(bg);
+  const layer = document.createElement('canvas');
+  layer.width = bg.width;
+  layer.height = bg.height;
+  const lg = layer.getContext('2d')!;
+  lg.setTransform(bg.width / r.w, 0, 0, bg.height / r.h, (-r.x * bg.width) / r.w, (-r.y * bg.height) / r.h);
+  drawStrokes(lg, strokes);
+  const out = document.createElement('canvas');
+  out.width = bg.width;
+  out.height = bg.height;
+  const g = out.getContext('2d')!;
+  g.drawImage(bg.image, 0, 0, bg.width, bg.height);
+  g.drawImage(layer, 0, 0);
+  return { image: out.toDataURL('image/png'), width: bg.width, height: bg.height };
 }
 
 const TOOLS: Array<{ id: Tool; label: string; icon: ReactNode }> = [
@@ -63,7 +99,7 @@ export function exportDrawing(strokes: Stroke[]): DrawingResult | null {
 }
 
 /** Einfaches Zeichenwerkzeug: Stift, Radierer, Formen, Farben. */
-export function DrawingEditor({ onSave, onCancel }: Props) {
+export function DrawingEditor({ onSave, onCancel, background }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [strokes, setStrokes] = useState<Stroke[]>([]);
@@ -74,6 +110,9 @@ export function DrawingEditor({ onSave, onCancel }: Props) {
   const strokesRef = useRef(strokes);
   strokesRef.current = strokes;
   const frame = useRef(0);
+  const layerRef = useRef<HTMLCanvasElement | null>(null);
+  const bgRef = useRef(background);
+  bgRef.current = background;
 
   const redraw = () => {
     if (frame.current) return;
@@ -82,11 +121,27 @@ export function DrawingEditor({ onSave, onCancel }: Props) {
       const c = canvasRef.current;
       if (!c) return;
       const g = c.getContext('2d')!;
+      // Gemaltes auf eigener Ebene, damit der Radierer den Hintergrund nicht löscht.
+      const layer = (layerRef.current ??= document.createElement('canvas'));
+      if (layer.width !== c.width || layer.height !== c.height) {
+        layer.width = c.width;
+        layer.height = c.height;
+      }
+      const lg = layer.getContext('2d')!;
+      lg.setTransform(1, 0, 0, 1, 0, 0);
+      lg.clearRect(0, 0, layer.width, layer.height);
+      lg.setTransform(c.width, 0, 0, c.height, 0, 0);
+      const all = current.current ? [...strokesRef.current, current.current.stroke] : strokesRef.current;
+      drawStrokes(lg, all);
+
       g.setTransform(1, 0, 0, 1, 0, 0);
       g.clearRect(0, 0, c.width, c.height);
-      g.setTransform(c.width, 0, 0, c.height, 0, 0);
-      const all = current.current ? [...strokesRef.current, current.current.stroke] : strokesRef.current;
-      drawStrokes(g, all);
+      const bg = bgRef.current;
+      if (bg) {
+        const r = backgroundRect(bg);
+        g.drawImage(bg.image, r.x * c.width, r.y * c.height, r.w * c.width, r.h * c.height);
+      }
+      g.drawImage(layer, 0, 0);
     });
   };
 
@@ -150,11 +205,11 @@ export function DrawingEditor({ onSave, onCancel }: Props) {
   };
 
   const save = () => {
-    const r = exportDrawing(strokes);
+    const r = background ? exportWithBackground(strokes, background) : exportDrawing(strokes);
     if (r) onSave(r);
   };
 
-  const hasContent = strokes.some((s) => s.kind !== 'path' || !s.erase);
+  const hasContent = !!background || strokes.some((s) => s.kind !== 'path' || !s.erase);
 
   return (
     <div className="screen">
