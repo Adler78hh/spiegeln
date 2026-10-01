@@ -47,7 +47,7 @@ export function AdultGateButton({ onOpen }: { onOpen: () => void }) {
         onContextMenu={(e) => e.preventDefault()}
       >
         <svg className="gate-ring" viewBox="0 0 40 40" aria-hidden="true">
-          <circle cx="20" cy="20" r="17" pathLength={1} strokeDasharray={`${progress} 1`} />
+          <circle cx="20" cy="20" r="17" pathLength={1} strokeDasharray={`${progress} 1`} opacity={progress > 0 ? 1 : 0} />
         </svg>
         <GearIcon size={26} />
       </button>

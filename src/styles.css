@@ -168,9 +168,12 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* "safe": passt der Inhalt nicht, beginnt er oben statt abgeschnitten zu werden */
+  align-content: safe center;
   gap: clamp(16px, 4vw, 48px);
   padding: 24px;
   flex-wrap: wrap;
+  overflow-y: auto;
 }
 
 .home-tile {
@@ -504,9 +507,13 @@ img {
   height: 100%;
   overflow-y: auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: max(16px, env(safe-area-inset-top)) 16px 16px;
+  /* margin: auto am Raster zentriert, ohne dass zu hohe Inhalte oben
+     unerreichbar abgeschnitten werden (wie bei align-items: center). */
+  padding: calc(max(16px, env(safe-area-inset-top)) + 64px) 16px 16px;
+}
+
+.picker-screen .profile-grid {
+  margin: auto;
 }
 
 .profile-grid {
@@ -1649,4 +1656,34 @@ button:disabled {
 
 .motif-name-field span {
   font-weight: 600;
+}
+
+/* Schmale Bildschirme im Hochformat (z. B. Handy): Leiste einspaltig */
+@media (orientation: portrait) and (max-width: 640px) {
+  .challenge-side {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    max-height: 56%;
+    overflow-y: auto;
+  }
+  .challenge-side .side-top {
+    flex-wrap: wrap;
+  }
+  .challenge-side .target-big {
+    flex: 0 0 auto;
+    height: 140px;
+    min-height: 0;
+  }
+  .challenge-side .target-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .challenge-side .target-thumb {
+    min-width: 0;
+  }
+  .decide-btn {
+    min-height: 60px;
+    font-size: 0.95rem;
+  }
 }
