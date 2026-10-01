@@ -39,6 +39,8 @@ export interface MirrorCanvasProps {
   interactive?: boolean;
   /** Umriss der ganzen Ausgangsfigur in Signalfarbe. */
   showOutline: boolean;
+  /** Spiegelachse ausblenden (Anfasspunkte bleiben sichtbar und ziehbar). */
+  hideLine?: boolean;
 }
 
 type Gesture =
@@ -81,6 +83,7 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
         ...sceneRef.current,
         active: g?.kind === 'handle' ? g.which : g?.kind === 'line' ? 'line' : null,
         showOutline: propsRef.current.showOutline,
+        hideLine: propsRef.current.hideLine,
       });
     });
   };
@@ -114,7 +117,7 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
   useEffect(() => {
     if (!gestureRef.current) sceneRef.current = props.scene;
     requestDraw();
-  }, [props.scene, props.showOutline]);
+  }, [props.scene, props.showOutline, props.hideLine]);
 
   const local = (e: React.PointerEvent): { css: Vec2; norm: Vec2 } => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -156,7 +159,9 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
     }
 
     const area = renderer.layout.area;
-    const hit = hitTest(sceneRef.current.mirror, norm, HANDLE_TOUCH_RADIUS / area, LINE_TOUCH_TOLERANCE / area);
+    // Unsichtbare Linie lässt sich nicht greifen; nur die Anfasspunkte.
+    const lineTolerance = propsRef.current.hideLine ? -1 : LINE_TOUCH_TOLERANCE / area;
+    const hit = hitTest(sceneRef.current.mirror, norm, HANDLE_TOUCH_RADIUS / area, lineTolerance);
     e.currentTarget.setPointerCapture(e.pointerId);
     if (hit === 'a' || hit === 'b') {
       gestureRef.current = { kind: 'handle', pointerId: e.pointerId, which: hit };

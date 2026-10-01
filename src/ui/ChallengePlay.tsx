@@ -85,6 +85,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
           onSceneChange={setScene}
           snap={prefs.snap}
           showOutline={prefs.showOutline}
+          hideLine={prefs.hideLine}
         />
       </main>
       <aside className="side challenge-side">

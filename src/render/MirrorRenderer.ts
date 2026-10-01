@@ -37,6 +37,8 @@ export interface RenderInput {
   active?: 'a' | 'b' | 'line' | null;
   /** Umriss der ganzen Ausgangsfigur zeigen (auch hinter dem Spiegel). */
   showOutline?: boolean;
+  /** Spiegelachse ausblenden; die Anfasspunkte bleiben sichtbar. */
+  hideLine?: boolean;
 }
 
 export interface Layout {
@@ -142,7 +144,7 @@ export class MirrorRenderer {
     const { mirror } = drawComposite(ctx, input, this.figure, this.figure, mirrorTransform(input.mirror));
 
     // Dezenter "Glas"-Saum auf der Spiegelseite entlang der Geraden
-    this.drawGlassEdge(input.mirror, mirror, px);
+    if (!input.hideLine) this.drawGlassEdge(input.mirror, mirror, px);
 
     // Umriss der ganzen Ausgangsfigur an ihrer echten Stelle, über beiden Seiten.
     if (input.showOutline) {
@@ -197,17 +199,19 @@ export class MirrorRenderer {
     const lineActive = input.active === 'line';
 
     ctx.save();
-    ctx.lineCap = 'round';
-    // weißer Unterleger für Kontrast auf bunten Motiven
-    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-    ctx.lineWidth = (lineActive ? 12 : 10) * px;
-    ctx.beginPath();
-    ctx.moveTo(clip.entry.x, clip.entry.y);
-    ctx.lineTo(clip.exit.x, clip.exit.y);
-    ctx.stroke();
-    ctx.strokeStyle = lineActive ? COLORS.lineActive : COLORS.line;
-    ctx.lineWidth = (lineActive ? 7 : 5) * px;
-    ctx.stroke();
+    if (!input.hideLine) {
+      ctx.lineCap = 'round';
+      // weißer Unterleger für Kontrast auf bunten Motiven
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = (lineActive ? 12 : 10) * px;
+      ctx.beginPath();
+      ctx.moveTo(clip.entry.x, clip.entry.y);
+      ctx.lineTo(clip.exit.x, clip.exit.y);
+      ctx.stroke();
+      ctx.strokeStyle = lineActive ? COLORS.lineActive : COLORS.line;
+      ctx.lineWidth = (lineActive ? 7 : 5) * px;
+      ctx.stroke();
+    }
 
     for (const id of ['a', 'b'] as const) {
       const p = m[id];

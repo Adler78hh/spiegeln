@@ -15,7 +15,7 @@ import type { Challenge, TargetKind } from '../../challenges/types';
 import { initialScene, type Scene } from '../../geometry';
 import { applyVariant, findBuiltinMotif, svgToImage } from '../../motifs/builtin';
 import { loadImage, type MotifInfo } from '../../motifs/library';
-import { newId, type ToolPrefs } from '../../storage/store';
+import { DEFAULT_PREFS, newId, type ToolPrefs } from '../../storage/store';
 import { DrawingEditor, type DrawingBackground } from '../DrawingEditor';
 import { MirrorCanvas } from '../MirrorCanvas';
 import { MirrorTools } from '../MirrorTools';
@@ -47,7 +47,7 @@ const toUrl = (c: HTMLCanvasElement) => c.toDataURL('image/png');
 export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Props) {
   const [draft, setDraft] = useState(initial);
   const [scene, setScene] = useState<Scene>(initialScene);
-  const [prefs, setPrefs] = useState<ToolPrefs>({ snap: false, showOutline: false });
+  const [prefs, setPrefs] = useState<ToolPrefs>(DEFAULT_PREFS);
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [pending, setPending] = useState<Pending | null>(null);
   const [busy, setBusy] = useState(false);
@@ -181,6 +181,7 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
           onSceneChange={setScene}
           snap={prefs.snap}
           showOutline={prefs.showOutline}
+          hideLine={prefs.hideLine}
         />
       </main>
       <aside className="side editor-side">

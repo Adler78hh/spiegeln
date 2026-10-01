@@ -15,9 +15,11 @@ import { DEFAULT_ANIMALS, type AnimalId } from '../profiles/animals';
 export interface ToolPrefs {
   snap: boolean;
   showOutline: boolean;
+  /** Spiegelachse ausblenden (Anfasspunkte bleiben sichtbar). */
+  hideLine: boolean;
 }
 
-export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false };
+export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false };
 
 export interface Profile {
   id: string;
@@ -108,7 +110,10 @@ export class Store {
 
   async listProfiles(): Promise<Profile[]> {
     const all = await this.db.getAll('profiles');
-    return all.sort((a, b) => a.order - b.order || a.createdAt - b.createdAt);
+    // Ältere Profile kennen neuere Einstellungen noch nicht → Standardwerte ergänzen.
+    return all
+      .map((p) => ({ ...p, prefs: { ...DEFAULT_PREFS, ...p.prefs } }))
+      .sort((a, b) => a.order - b.order || a.createdAt - b.createdAt);
   }
 
   /** Legt beim ersten Start die 10 Tierprofile an. */

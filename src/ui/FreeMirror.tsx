@@ -66,6 +66,7 @@ export function FreeMirror(props: Props) {
           onSceneChange={setScene}
           snap={prefs.snap}
           showOutline={prefs.showOutline}
+          hideLine={prefs.hideLine}
         />
       </main>
       <aside className="side free-side">

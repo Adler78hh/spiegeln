@@ -34,6 +34,16 @@ export const OutlineIcon = () => (
   </Icon>
 );
 
+/** Zwei Anfasspunkte mit nur angedeuteter Achse: Spiegelachse aus/ein. */
+export const HideLineIcon = () => (
+  <Icon>
+    <circle cx="12" cy="4.5" r="2.5" stroke="#e0322b" />
+    <circle cx="12" cy="19.5" r="2.5" stroke="#e0322b" />
+    <path d="M12 8.5v7" strokeDasharray="1.5 2.5" />
+    <path d="M5 19 19 5" />
+  </Icon>
+);
+
 export const ResetIcon = () => (
   <Icon>
     <path d="M4 12a8 8 0 1 0 2.4-5.7" />
