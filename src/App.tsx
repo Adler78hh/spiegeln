@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
-import { createMirror, UNIT_RECT, type MirrorState } from './geometry';
+import { createMirror, INITIAL_FIGURE, UNIT_RECT } from './geometry';
 import { BUILTIN_MOTIFS, svgDataUrl, svgToImage } from './motifs/builtin';
-import { MirrorCanvas } from './ui/MirrorCanvas';
+import { MirrorCanvas, type Scene } from './ui/MirrorCanvas';
 import { ResetIcon, SnapIcon } from './ui/icons';
 
 const IMAGE_SIZE = { width: 1, height: 1 };
+const initialScene = (): Scene => ({ mirror: createMirror(UNIT_RECT), figure: INITIAL_FIGURE });
 
 export default function App() {
   const [motifId, setMotifId] = useState(BUILTIN_MOTIFS[0].id);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const [mirror, setMirror] = useState<MirrorState>(() => createMirror(UNIT_RECT));
+  const [scene, setScene] = useState<Scene>(initialScene);
   const [snap, setSnap] = useState(false);
 
   useEffect(() => {
@@ -27,9 +28,8 @@ export default function App() {
         <MirrorCanvas
           image={image}
           imageSize={IMAGE_SIZE}
-          mirror={mirror}
-          onMirrorChange={setMirror}
-          rotation={0}
+          scene={scene}
+          onSceneChange={setScene}
           snap={snap}
         />
       </main>
@@ -57,7 +57,7 @@ export default function App() {
           >
             <SnapIcon />
           </button>
-          <button className="tool-btn" aria-label="Spiegel zurücksetzen" onClick={() => setMirror(createMirror(UNIT_RECT))}>
+          <button className="tool-btn" aria-label="Zurücksetzen" onClick={() => setScene(initialScene())}>
             <ResetIcon />
           </button>
         </div>

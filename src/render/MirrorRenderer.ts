@@ -6,7 +6,17 @@
  * damit die Anfasspunkte auf dem Rand vollständig sichtbar und greifbar sind.
  * Gezeichnet wird in normierten Koordinaten (Arbeitsfläche = 0…1).
  */
-import { clipLineToRect, halves, lineOf, mirrorTransform, UNIT_RECT, type MirrorState, type Vec2 } from '../geometry';
+import {
+  clipLineToRect,
+  figureTransform,
+  halves,
+  lineOf,
+  mirrorTransform,
+  UNIT_RECT,
+  type FigureState,
+  type MirrorState,
+  type Vec2,
+} from '../geometry';
 
 export const COLORS = {
   area: '#fffdf8',
@@ -19,8 +29,8 @@ export const COLORS = {
 
 export interface RenderInput {
   mirror: MirrorState;
-  /** Drehung der Figur in Bogenmaß (um die Mitte der Arbeitsfläche). */
-  rotation: number;
+  /** Lage der Ausgangsfigur (Verschiebung und Drehung). */
+  figure: FigureState;
   /** Aktiver Teil des Spiegels (wird hervorgehoben). */
   active?: 'a' | 'b' | 'line' | null;
 }
@@ -34,8 +44,11 @@ export interface Layout {
   area: number;
 }
 
-/** Anteil der Arbeitsfläche, den die Figur einnimmt (Durchmesser des Umkreises). */
-const FIGURE_DIAMETER = 0.9;
+/**
+ * Anteil der Arbeitsfläche, den die Figur einnimmt (Durchmesser des
+ * Umkreises). Kleiner als die Fläche, damit Platz für das Spiegelbild bleibt.
+ */
+export const FIGURE_DIAMETER = 0.6;
 
 export class MirrorRenderer {
   private ctx: CanvasRenderingContext2D;
@@ -75,10 +88,10 @@ export class MirrorRenderer {
     return { x: (xCss - pad) / area, y: (yCss - pad) / area };
   }
 
-  /** Rendert die gedrehte Figur in einen Zwischenspeicher (nur bei Änderung). */
-  private ensureFigure(rotation: number): void {
+  /** Rendert die ungedrehte, mittige Figur in einen Zwischenspeicher (nur bei Änderung). */
+  private ensureFigure(): void {
     const px = Math.max(1, Math.round(this.layout.area * this.dpr));
-    const key = `${px}|${rotation}|${this.imageVersion}`;
+    const key = `${px}|${this.imageVersion}`;
     if (key === this.figureKey) return;
     this.figureKey = key;
     const c = this.figure;
@@ -96,7 +109,6 @@ export class MirrorRenderer {
     const w = k * this.imageAspect;
     const h = k;
     g.translate(px / 2, px / 2);
-    g.rotate(rotation);
     g.imageSmoothingQuality = 'high';
     g.drawImage(this.image, -w / 2, -h / 2, w, h);
   }
@@ -106,7 +118,8 @@ export class MirrorRenderer {
     const { pad, area } = this.layout;
     if (area <= 0) return;
     const s = this.dpr * area;
-    this.ensureFigure(input.rotation);
+    this.ensureFigure();
+    const place = figureTransform(input.figure, UNIT_RECT);
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -123,6 +136,7 @@ export class MirrorRenderer {
     ctx.save();
     pathPolygon(ctx, original);
     ctx.clip();
+    ctx.transform(...place);
     ctx.drawImage(this.figure, 0, 0, 1, 1);
     ctx.restore();
 
@@ -131,6 +145,7 @@ export class MirrorRenderer {
     pathPolygon(ctx, mirror);
     ctx.clip();
     ctx.transform(...mirrorTransform(input.mirror));
+    ctx.transform(...place);
     ctx.drawImage(this.figure, 0, 0, 1, 1);
     ctx.restore();
 
