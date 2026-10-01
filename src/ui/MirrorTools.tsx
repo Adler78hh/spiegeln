@@ -26,7 +26,7 @@ export function MirrorTools({ prefs, onPrefsChange, onReset }: Props) {
       <button
         className={`tool-btn ${prefs.showOutline ? 'on' : ''}`}
         aria-pressed={prefs.showOutline}
-        aria-label="Umriss der verdeckten Figur"
+        aria-label="Umriss der Figur"
         onClick={() => onPrefsChange({ ...prefs, showOutline: !prefs.showOutline })}
       >
         <OutlineIcon />

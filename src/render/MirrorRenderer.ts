@@ -9,16 +9,14 @@
 import {
   clipLineToRect,
   figureTransform,
-  ghostOpacity,
   lineOf,
   mirrorTransform,
   UNIT_RECT,
-  visibleFraction,
   type FigureState,
   type MirrorState,
   type Vec2,
 } from '../geometry';
-import { AREA_COLOR, createFigureBuffer, drawComposite, pathPolygon, sampleFigure } from './composite';
+import { AREA_COLOR, createFigureBuffer, drawComposite, pathPolygon } from './composite';
 
 export const COLORS = {
   area: AREA_COLOR,
@@ -27,7 +25,8 @@ export const COLORS = {
   lineActive: '#b81d17',
   handleFill: '#ffffff',
   mirrorTint: 'rgba(120, 170, 220, 0.18)',
-  ghost: '#7f9cbf',
+  /** Signalfarbe des Umrisses (grelles Pink, kommt in keinem Motiv vor). */
+  outline: '#ff1f8f',
 };
 
 export interface RenderInput {
@@ -36,7 +35,7 @@ export interface RenderInput {
   figure: FigureState;
   /** Aktiver Teil des Spiegels (wird hervorgehoben). */
   active?: 'a' | 'b' | 'line' | null;
-  /** Blassen Umriss zeigen, wenn die Figur fast ganz hinter dem Spiegel liegt. */
+  /** Umriss der ganzen Ausgangsfigur zeigen (auch hinter dem Spiegel). */
   showOutline?: boolean;
 }
 
@@ -49,17 +48,12 @@ export interface Layout {
   area: number;
 }
 
-/** Maximale Deckkraft des blassen Umrisses. */
-const GHOST_ALPHA = 0.6;
-
 export class MirrorRenderer {
   private ctx: CanvasRenderingContext2D;
   private figure = document.createElement('canvas');
   private figureKey = '';
-  /** Umriss der Figur (für den blassen Hinweis auf der Spiegelseite). */
+  /** Umriss der Figur in Signalfarbe (zum Überprüfen fehlender Teile). */
   private outline = document.createElement('canvas');
-  /** Stichproben der Figur (normierte Koordinaten der ungedrehten Figur). */
-  private samples: Vec2[] = [];
   private image: CanvasImageSource | null = null;
   private imageAspect = 1;
   private imageVersion = 0;
@@ -103,12 +97,10 @@ export class MirrorRenderer {
     if (!this.image) {
       this.figure.width = px;
       this.figure.height = px;
-      this.samples = [];
       return;
     }
     createFigureBuffer(this.image, this.imageAspect, px, this.figure);
     this.buildOutline(px);
-    this.samples = sampleFigure(this.figure, this.imageAspect);
   }
 
   /** Außenkontur der Figur als schmaler Ring (einmal pro Bild/Größe). */
@@ -117,13 +109,13 @@ export class MirrorRenderer {
     o.width = px;
     o.height = px;
     const g = o.getContext('2d')!;
-    const r = 2.5 * this.dpr;
+    const r = 3 * this.dpr;
     for (let i = 0; i < 12; i++) {
       const a = (i / 12) * Math.PI * 2;
       g.drawImage(this.figure, Math.cos(a) * r, Math.sin(a) * r);
     }
     g.globalCompositeOperation = 'source-in';
-    g.fillStyle = COLORS.ghost;
+    g.fillStyle = COLORS.outline;
     g.fillRect(0, 0, px, px);
     g.globalCompositeOperation = 'destination-out';
     g.drawImage(this.figure, 0, 0);
@@ -149,22 +141,19 @@ export class MirrorRenderer {
 
     const { mirror } = drawComposite(ctx, input, this.figure, this.figure, mirrorTransform(input.mirror));
 
-    // Blasser Umriss des verdeckten Teils, nur wenn die Figur sonst fast ganz verschwände.
-    const ghost = input.showOutline
-      ? ghostOpacity(visibleFraction(this.samples, input.figure, input.mirror, UNIT_RECT))
-      : 0;
-    if (ghost > 0) {
+    // Dezenter "Glas"-Saum auf der Spiegelseite entlang der Geraden
+    this.drawGlassEdge(input.mirror, mirror, px);
+
+    // Umriss der ganzen Ausgangsfigur an ihrer echten Stelle, über beiden Seiten.
+    if (input.showOutline) {
       ctx.save();
-      pathPolygon(ctx, mirror);
+      ctx.beginPath();
+      ctx.rect(0, 0, 1, 1);
       ctx.clip();
-      ctx.globalAlpha = ghost * GHOST_ALPHA;
       ctx.transform(...place);
       ctx.drawImage(this.outline, 0, 0, 1, 1);
       ctx.restore();
     }
-
-    // Dezenter "Glas"-Saum auf der Spiegelseite entlang der Geraden
-    this.drawGlassEdge(input.mirror, mirror, px);
 
     ctx.strokeStyle = COLORS.areaBorder;
     ctx.lineWidth = 2 * px;

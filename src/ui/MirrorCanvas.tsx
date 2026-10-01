@@ -35,7 +35,7 @@ export interface MirrorCanvasProps {
   /** Wird am Ende jeder Geste mit dem neuen Zustand aufgerufen. */
   onSceneChange: (s: Scene) => void;
   snap: boolean;
-  /** Blasser Umriss, wenn die Figur fast ganz verschwunden ist. */
+  /** Umriss der ganzen Ausgangsfigur in Signalfarbe. */
   showOutline: boolean;
 }
 
