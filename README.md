@@ -31,6 +31,13 @@ Profile und eigene Motive verwalten.
 
 Die App ist eine PWA: Nach dem ersten Öffnen über HTTPS speichert sie alle
 Dateien im Gerät und funktioniert danach ohne Internet. Auf dem Tablet im
-Browser „Zum Home-Bildschirm hinzufügen“ wählen. Dafür muss der Inhalt von
-`dist/` (nach `npm run build`) auf einem HTTPS-Webspace liegen; über eine
-einfache LAN-Adresse (http) installieren Browser keine Service Worker.
+Browser „Zum Home-Bildschirm hinzufügen“ wählen. Dafür muss die App über
+HTTPS ausgeliefert werden; über eine einfache LAN-Adresse (http) installieren
+Browser keine Service Worker.
+
+Veröffentlicht wird automatisch über GitHub Pages (Workflow
+`.github/workflows/deploy.yml`, bei jedem Push auf `main`):
+https://adler78hh.github.io/spiegeln/
+
+Einmalig nötig: im Repository unter *Settings → Pages* bei *Source*
+„GitHub Actions“ wählen.

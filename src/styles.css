@@ -1636,3 +1636,17 @@ button:disabled {
   font-size: 0.8rem;
   font-weight: 700;
 }
+
+.motif-name-field {
+  align-self: center;
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.motif-name-field span {
+  font-weight: 600;
+}

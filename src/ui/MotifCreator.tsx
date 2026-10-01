@@ -35,8 +35,10 @@ async function importPhoto(file: File): Promise<NewMotif> {
 
 /** Eigenes Motiv anlegen: Foto (Kamera/Galerie) oder Zeichnung. */
 export function MotifCreator({ onSave, onCancel }: Props) {
-  const [mode, setMode] = useState<'choose' | 'draw' | 'photo'>('choose');
-  const [photo, setPhoto] = useState<NewMotif | null>(null);
+  const [mode, setMode] = useState<'choose' | 'draw' | 'review'>('choose');
+  // Fertiges Bild (Foto oder Zeichnung), das noch einen Namen bekommt.
+  const [pending, setPending] = useState<NewMotif | null>(null);
+  const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -46,8 +48,9 @@ export function MotifCreator({ onSave, onCancel }: Props) {
     if (!file) return;
     try {
       setError(null);
-      setPhoto(await importPhoto(file));
-      setMode('photo');
+      setPending(await importPhoto(file));
+      setName('');
+      setMode('review');
     } catch {
       setError('Dieses Bild konnte nicht geöffnet werden. Bitte ein anderes Foto wählen.');
     }
@@ -57,12 +60,17 @@ export function MotifCreator({ onSave, onCancel }: Props) {
     return (
       <DrawingEditor
         onCancel={() => setMode('choose')}
-        onSave={(r) => onSave({ name: 'Zeichnung', source: 'drawing', ...r })}
+        onSave={(r) => {
+          setPending({ name: 'Zeichnung', source: 'drawing', ...r });
+          setName('');
+          setMode('review');
+        }}
       />
     );
   }
 
-  if (mode === 'photo' && photo) {
+  if (mode === 'review' && pending) {
+    const save = () => onSave({ ...pending, name: name.trim() || pending.name });
     return (
       <div className="creator-screen">
         <div className="list-top">
@@ -71,10 +79,22 @@ export function MotifCreator({ onSave, onCancel }: Props) {
           </button>
         </div>
         <div className="photo-preview">
-          <img src={photo.image} alt="Gewähltes Foto" />
+          <img src={pending.image} alt={pending.source === 'photo' ? 'Gewähltes Foto' : 'Zeichnung'} />
         </div>
+        <label className="motif-name-field" htmlFor="new-motif-name">
+          <span>Name des Motivs</span>
+          <input
+            id="new-motif-name"
+            className="name-input"
+            value={name}
+            maxLength={30}
+            placeholder={pending.source === 'photo' ? 'z. B. Schmetterling' : 'z. B. Mein Roboter'}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && save()}
+          />
+        </label>
         <div className="creator-actions">
-          <button className="decide-btn fits" onClick={() => onSave(photo)}>
+          <button className="decide-btn fits" onClick={save}>
             <CheckIcon size={36} />
             <span>Als Motiv speichern</span>
           </button>
