@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { unsolvableCount, type Challenge } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
-import { EditIcon, PlusIcon, TrashIcon } from '../icons';
+import { EditIcon, PenIcon, PhotoIcon, PlusIcon, TrashIcon } from '../icons';
 import { AdultPage, ConfirmRow } from './AdultPage';
 
 export interface ManagedChallenge extends Challenge {
@@ -12,26 +12,56 @@ interface Props {
   challenges: ManagedChallenge[];
   motifs: MotifInfo[];
   onNew: (motifId: string) => void;
+  /** Startfigur-Auswahl offen? (von außen gesteuert, bleibt beim Motiv-Anlegen erhalten) */
+  picking: boolean;
+  onPickingChange: (v: boolean) => void;
+  /** Eigenes Motiv anlegen (Foto oder Zeichnung). */
+  onCreateMotif: () => void;
+  /** Zuletzt angelegtes Motiv (wird hervorgehoben). */
+  highlightMotifId?: string | null;
   onEdit: (c: ManagedChallenge) => void;
   onDelete: (id: string) => Promise<void>;
   onBack: () => void;
 }
 
 /** Liste der Herausforderungen; eigene lassen sich bearbeiten und löschen. */
-export function ChallengeManager({ challenges, motifs, onNew, onEdit, onDelete, onBack }: Props) {
-  const [picking, setPicking] = useState(false);
+export function ChallengeManager(props: Props) {
+  const { challenges, motifs, onNew, onEdit, onDelete, onBack, picking, onPickingChange: setPicking, onCreateMotif, highlightMotifId } = props;
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const motifOf = (id: string) => motifs.find((m) => m.id === id);
+  // Eigene Motive zuerst, das neueste vorne.
+  const custom = motifs.filter((m) => !m.builtin).reverse();
+  const builtin = motifs.filter((m) => m.builtin);
 
   if (picking) {
     return (
       <AdultPage title="Startfigur wählen" onBack={() => setPicking(false)}>
+        <button className="create-motif-btn" onClick={onCreateMotif}>
+          <span className="create-motif-icons">
+            <PhotoIcon size={44} />
+            <PenIcon size={40} />
+          </span>
+          <span className="create-motif-text">
+            <strong>Eigenes Motiv anlegen</strong>
+            <span>Foto aufnehmen, aus der Galerie wählen oder selbst zeichnen</span>
+          </span>
+        </button>
+
+        <h2 className="pick-heading">Eigene Motive</h2>
+        {custom.length === 0 ? (
+          <p className="empty">Noch keine eigenen Motive. Mit dem Knopf oben eines anlegen.</p>
+        ) : (
+          <div className="motif-pick-grid">
+            {custom.map((m) => (
+              <PickTile key={m.id} motif={m} highlight={m.id === highlightMotifId} onPick={onNew} />
+            ))}
+          </div>
+        )}
+
+        <h2 className="pick-heading">Vorinstallierte Motive</h2>
         <div className="motif-pick-grid">
-          {motifs.map((m) => (
-            <button key={m.id} className="motif-btn" aria-label={m.name} onClick={() => onNew(m.id)}>
-              <img src={m.src} alt="" />
-              <span>{m.name}</span>
-            </button>
+          {builtin.map((m) => (
+            <PickTile key={m.id} motif={m} onPick={onNew} />
           ))}
         </div>
       </AdultPage>
@@ -81,5 +111,15 @@ export function ChallengeManager({ challenges, motifs, onNew, onEdit, onDelete, 
         ))}
       </ul>
     </AdultPage>
+  );
+}
+
+function PickTile({ motif, highlight, onPick }: { motif: MotifInfo; highlight?: boolean; onPick: (id: string) => void }) {
+  return (
+    <button className={`motif-btn ${highlight ? 'selected new' : ''}`} aria-label={motif.name} onClick={() => onPick(motif.id)}>
+      {highlight && <span className="new-badge">Neu</span>}
+      <img src={motif.src} alt="" />
+      <span>{motif.name}</span>
+    </button>
   );
 }

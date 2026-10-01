@@ -42,18 +42,22 @@ export function AdultArea(props: Props) {
   const { store, profiles, onProfilesChange, customMotifs, onCustomMotifsChange, motifs, challenges, onChallengesChange, onExit } = props;
   const [section, setSection] = useState<AdultSection | null>(null);
   const [editing, setEditing] = useState<{ draft: Draft; createdAt: number } | null>(null);
-  const [creatingMotif, setCreatingMotif] = useState(false);
+  // Motiv anlegen: von wo aus (Motivverwaltung oder Startfigur-Auswahl)?
+  const [creatingMotif, setCreatingMotif] = useState<null | 'motifs' | 'pick'>(null);
+  const [picking, setPicking] = useState(false);
+  const [newMotifId, setNewMotifId] = useState<string | null>(null);
 
   const reloadChallenges = async () => onChallengesChange(await loadChallenges(store));
 
   if (creatingMotif) {
     return (
       <MotifCreator
-        onCancel={() => setCreatingMotif(false)}
+        onCancel={() => setCreatingMotif(null)}
         onSave={async (m) => {
-          await store.addMotif(m);
+          const created = await store.addMotif(m);
           onCustomMotifsChange(await store.listMotifs());
-          setCreatingMotif(false);
+          setNewMotifId(created.id);
+          setCreatingMotif(null);
         }}
       />
     );
@@ -87,7 +91,7 @@ export function AdultArea(props: Props) {
           motifs={customMotifs}
           challenges={challenges}
           onChange={onCustomMotifsChange}
-          onCreate={() => setCreatingMotif(true)}
+          onCreate={() => setCreatingMotif('motifs')}
           onBack={() => setSection(null)}
         />
       );
@@ -96,7 +100,13 @@ export function AdultArea(props: Props) {
         <ChallengeManager
           challenges={challenges.map((c) => ({ ...c, builtin: BUILTIN_IDS.has(c.id) }))}
           motifs={motifs}
+          picking={picking}
+          onPickingChange={setPicking}
+          onCreateMotif={() => setCreatingMotif('pick')}
+          highlightMotifId={newMotifId}
           onNew={(motifId) => {
+            setPicking(false);
+            setNewMotifId(null);
             const motif = motifs.find((m) => m.id === motifId);
             setEditing({ draft: newDraft(`eigen-${newId()}`, motifId, motif?.name ?? 'Neue Herausforderung'), createdAt: Date.now() });
           }}
@@ -105,7 +115,10 @@ export function AdultArea(props: Props) {
             await store.deleteChallenge(id);
             await reloadChallenges();
           }}
-          onBack={() => setSection(null)}
+          onBack={() => {
+            setPicking(false);
+            setSection(null);
+          }}
         />
       );
     case 'results':

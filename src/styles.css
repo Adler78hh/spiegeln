@@ -1570,3 +1570,69 @@ button:disabled {
     flex-direction: row;
   }
 }
+
+/* ---------- Startfigur-Auswahl im Erwachsenenbereich ---------- */
+
+.create-motif-btn {
+  width: 100%;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 24px;
+  border-radius: 20px;
+  border: 3px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  text-align: left;
+  box-shadow: 0 3px 12px rgba(58, 143, 133, 0.3);
+}
+
+.create-motif-icons {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.create-motif-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.create-motif-text strong {
+  font-size: 1.35rem;
+}
+
+.create-motif-text span {
+  opacity: 0.9;
+}
+
+.create-motif-btn:active {
+  transform: scale(0.99);
+}
+
+.pick-heading {
+  margin: 22px 0 10px;
+  font-size: 1.1rem;
+}
+
+.motif-pick-grid .motif-btn {
+  position: relative;
+}
+
+.motif-pick-grid .motif-btn.new {
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.new-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
