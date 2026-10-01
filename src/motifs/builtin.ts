@@ -97,6 +97,105 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         markers: [[73, 93], [128, 105], [138, 154]],
       },
     ],
+  },  {
+    id: 'schnecke',
+    name: 'Schnecke',
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+        <line x1="40" y1="90" x2="30" y2="60"/>
+        <line x1="58" y1="90" x2="66" y2="58"/>
+        <circle cx="30" cy="57" r="5" fill="${INK}"/>
+        <circle cx="66" cy="55" r="5" fill="${INK}"/>
+        <path d="M28,165 L28,110 Q28,86 50,86 Q70,86 70,110 L70,140 L176,140 Q186,152 176,165 Z" fill="#b9d98c"/>
+        <circle cx="118" cy="100" r="46" fill="#f4a259"/>
+        <path d="M112,100 a6,6 0 1,1 12,0 a14,14 0 1,1 -28,0 a22,22 0 1,1 44,0 a30,30 0 1,1 -60,0" fill="none"/>
+        <circle cx="44" cy="104" r="4" fill="${INK}" stroke="none"/>
+        <path d="M38,120 Q46,127 54,120" fill="none"/>
+      </g>`),
+    errorVariants: [[['fill="#f4a259"', 'fill="#8fb8de"']], [['fill="#b9d98c"', 'fill="#f3a6c8"']]],
+    swapVariants: [
+      {
+        // Farben von Haus und Körper vertauscht.
+        replacements: [
+          ['fill="#f4a259"', 'fill="TMP"'],
+          ['fill="#b9d98c"', 'fill="#f4a259"'],
+          ['fill="TMP"', 'fill="#b9d98c"'],
+        ],
+        markers: [[118, 100], [150, 152]],
+      },
+    ],
+  },
+  {
+    id: 'boot',
+    name: 'Segelboot',
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+        <line x1="100" y1="28" x2="100" y2="140"/>
+        <polygon points="100,28 100,46 76,37" fill="#e0675f"/>
+        <polygon points="106,40 106,130 166,130" fill="#fff6e0"/>
+        <polygon points="94,64 94,130 52,130" fill="#f6c983"/>
+        <path d="M28,140 L172,140 L150,172 L50,172 Z" fill="#c98a5a"/>
+        <circle cx="72" cy="156" r="6" fill="#d7eef9"/>
+        <circle cx="100" cy="156" r="6" fill="#d7eef9"/>
+        <circle cx="128" cy="156" r="6" fill="#d7eef9"/>
+      </g>`),
+    errorVariants: [[['fill="#e0675f"', 'fill="#8cc68a"']], [['fill="#f6c983"', 'fill="#8fb8de"']]],
+    swapVariants: [
+      {
+        // Fahne zeigt in die andere Richtung, das große Segel bleibt rechts.
+        replacements: [['points="100,28 100,46 76,37"', 'points="100,28 100,46 124,37"']],
+        markers: [[112, 37], [130, 105], [78, 112]],
+      },
+    ],
+  },
+  {
+    id: 'auto',
+    name: 'Auto',
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M24,140 L24,116 Q24,104 36,104 L82,104 L100,74 L148,74 Q158,74 162,84 L176,110 L176,140 Z" fill="#6fa8dc"/>
+        <path d="M106,82 L144,82 L154,104 L94,104 Z" fill="#d7eef9"/>
+        <line x1="124" y1="82" x2="124" y2="104"/>
+        <rect x="26" y="111" width="13" height="10" rx="2" fill="#ffd166"/>
+        <line x1="110" y1="116" x2="122" y2="116"/>
+        <circle cx="58" cy="146" r="17" fill="#5b4636"/>
+        <circle cx="58" cy="146" r="7" fill="#d9cdb8"/>
+        <circle cx="146" cy="146" r="17" fill="#5b4636"/>
+        <circle cx="146" cy="146" r="7" fill="#d9cdb8"/>
+      </g>`),
+    errorVariants: [[['fill="#d7eef9"', 'fill="#ffd166"']], [['fill="#6fa8dc"', 'fill="#e0675f"']]],
+    swapVariants: [
+      {
+        // Scheinwerfer sitzt hinten statt vorne.
+        replacements: [['<rect x="26" y="111"', '<rect x="161" y="113"']],
+        markers: [[167, 118], [124, 92], [40, 108]],
+      },
+    ],
+  },
+  {
+    id: 'dreieck',
+    name: 'Dreieck',
+    svg: svg(`
+      <polygon points="40,160 160,160 40,50" fill="#8cc68a" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
+    id: 'l-form',
+    name: 'L-Form',
+    svg: svg(`
+      <path d="M50,30 L90,30 L90,130 L150,130 L150,170 L50,170 Z" fill="#6fa8dc" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
+    id: 'viertelkreis',
+    name: 'Viertelkreis',
+    svg: svg(`
+      <path d="M50,160 L50,50 A110,110 0 0,1 160,160 Z" fill="#ffd166" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="80" cy="130" r="10" fill="#e0675f" stroke="${INK}" stroke-width="4"/>`),
+    errorVariants: [],
+    swapVariants: [],
   },
 ];
 

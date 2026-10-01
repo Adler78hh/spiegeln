@@ -39,6 +39,18 @@ export interface Snapshot {
   createdAt: number;
 }
 
+/** Eigenes Motiv (Foto oder Zeichnung), für alle Profile sichtbar. */
+export interface CustomMotif {
+  id: string;
+  name: string;
+  source: 'photo' | 'drawing';
+  /** Bild als Daten-URL (Foto: JPEG, Zeichnung: PNG mit Transparenz). */
+  image: string;
+  width: number;
+  height: number;
+  createdAt: number;
+}
+
 interface AnswerRecord extends Answer {
   profileId: string;
   challengeId: string;
@@ -54,10 +66,11 @@ interface SpiegelnSchema extends DBSchema {
   };
   snapshots: { key: string; value: Snapshot; indexes: { byProfile: string } };
   challenges: { key: string; value: Challenge & { builtin: boolean; order: number } };
+  motifs: { key: string; value: CustomMotif };
 }
 
 export const DB_NAME = 'spiegeln';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export function newId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -70,13 +83,18 @@ export class Store {
 
   static async open(name = DB_NAME): Promise<Store> {
     const db = await openDB<SpiegelnSchema>(name, DB_VERSION, {
-      upgrade(db) {
-        db.createObjectStore('profiles', { keyPath: 'id' });
-        const answers = db.createObjectStore('answers', { keyPath: ['profileId', 'challengeId', 'targetId'] });
-        answers.createIndex('byProfile', 'profileId');
-        const snaps = db.createObjectStore('snapshots', { keyPath: 'id' });
-        snaps.createIndex('byProfile', 'profileId');
-        db.createObjectStore('challenges', { keyPath: 'id' });
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          db.createObjectStore('profiles', { keyPath: 'id' });
+          const answers = db.createObjectStore('answers', { keyPath: ['profileId', 'challengeId', 'targetId'] });
+          answers.createIndex('byProfile', 'profileId');
+          const snaps = db.createObjectStore('snapshots', { keyPath: 'id' });
+          snaps.createIndex('byProfile', 'profileId');
+          db.createObjectStore('challenges', { keyPath: 'id' });
+        }
+        if (oldVersion < 2) {
+          db.createObjectStore('motifs', { keyPath: 'id' });
+        }
       },
     });
     return new Store(db);
@@ -181,6 +199,23 @@ export class Store {
 
   async deleteSnapshot(id: string): Promise<void> {
     await this.db.delete('snapshots', id);
+  }
+
+  // ---------- Eigene Motive ----------
+
+  async listMotifs(): Promise<CustomMotif[]> {
+    const all = await this.db.getAll('motifs');
+    return all.sort((a, b) => a.createdAt - b.createdAt);
+  }
+
+  async addMotif(m: Omit<CustomMotif, 'id' | 'createdAt'>): Promise<CustomMotif> {
+    const motif: CustomMotif = { ...m, id: `eigen-${newId()}`, createdAt: Date.now() };
+    await this.db.put('motifs', motif);
+    return motif;
+  }
+
+  async deleteMotif(id: string): Promise<void> {
+    await this.db.delete('motifs', id);
   }
 
   // ---------- Herausforderungen ----------

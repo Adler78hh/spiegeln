@@ -1,19 +1,22 @@
 import { useRef, useState } from 'react';
 import { boundsCenter } from '../challenges/generate';
 import { initialScene, mirrorTransform, type Scene } from '../geometry';
-import { BUILTIN_MOTIFS, svgDataUrl } from '../motifs/builtin';
+import type { MotifInfo } from '../motifs/library';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite } from '../render/composite';
 import type { Snapshot, ToolPrefs } from '../storage/store';
-import { BackIcon, CameraIcon } from './icons';
+import { BackIcon, CameraIcon, PlusIcon } from './icons';
 import { MirrorCanvas } from './MirrorCanvas';
 import { MirrorTools } from './MirrorTools';
 import { useMotifImage } from './useMotifImage';
 
-const IMAGE_SIZE = { width: 1, height: 1 };
 const RENDER_PX = 768;
 const SNAPSHOT_PX = 256;
 
 interface Props {
+  motifs: MotifInfo[];
+  motifId: string;
+  onMotifChange: (id: string) => void;
+  onCreateMotif: () => void;
   prefs: ToolPrefs;
   onPrefsChange: (p: ToolPrefs) => void;
   snapshots: Snapshot[];
@@ -22,8 +25,8 @@ interface Props {
 }
 
 /** Bild der aktuellen Figur, auf den Inhalt zugeschnitten. */
-function renderSnapshot(image: HTMLImageElement, scene: Scene): string {
-  const fig = createFigureBuffer(image, 1, RENDER_PX);
+function renderSnapshot(image: HTMLImageElement, aspect: number, scene: Scene): string {
+  const fig = createFigureBuffer(image, aspect, RENDER_PX);
   const full = renderComposite(RENDER_PX, scene, fig, fig, mirrorTransform(scene.mirror));
   const b = contentBounds(full);
   const size = b ? Math.min(1, Math.max(b.maxX - b.minX, b.maxY - b.minY) * 1.15) : 1;
@@ -31,23 +34,25 @@ function renderSnapshot(image: HTMLImageElement, scene: Scene): string {
 }
 
 /** Modus 1: Bild wählen, frei spiegeln und Figuren merken. */
-export function FreeMirror({ prefs, onPrefsChange, snapshots, onSnapshot, onBack }: Props) {
-  const [motifId, setMotifId] = useState(BUILTIN_MOTIFS[0].id);
-  const image = useMotifImage(motifId);
+export function FreeMirror(props: Props) {
+  const { motifs, motifId, onMotifChange, onCreateMotif, prefs, onPrefsChange, snapshots, onSnapshot, onBack } = props;
+  const motif = motifs.find((m) => m.id === motifId) ?? motifs[0];
+  const image = useMotifImage(motif);
   const [scene, setScene] = useState<Scene>(initialScene);
   const [flash, setFlash] = useState(false);
   const flashTimer = useRef(0);
 
   const remember = () => {
     if (!image) return;
-    onSnapshot({ motifId, scene, image: renderSnapshot(image, scene) });
+    onSnapshot({ motifId: motif.id, scene, image: renderSnapshot(image, motif.aspect, scene) });
     setFlash(true);
     clearTimeout(flashTimer.current);
     flashTimer.current = window.setTimeout(() => setFlash(false), 250);
   };
 
   const restore = (s: Snapshot) => {
-    setMotifId(s.motifId);
+    if (!motifs.some((m) => m.id === s.motifId)) return; // Motiv wurde gelöscht
+    onMotifChange(s.motifId);
     setScene(s.scene);
   };
 
@@ -56,7 +61,7 @@ export function FreeMirror({ prefs, onPrefsChange, snapshots, onSnapshot, onBack
       <main className={`work ${flash ? 'flash' : ''}`}>
         <MirrorCanvas
           image={image}
-          imageSize={IMAGE_SIZE}
+          imageSize={{ width: motif.aspect, height: 1 }}
           scene={scene}
           onSceneChange={setScene}
           snap={prefs.snap}
@@ -73,19 +78,22 @@ export function FreeMirror({ prefs, onPrefsChange, snapshots, onSnapshot, onBack
           </button>
         </div>
         <div className="motif-list" role="radiogroup" aria-label="Bild wählen">
-          {BUILTIN_MOTIFS.map((m) => (
+          <button className="motif-btn add-motif" aria-label="Eigenes Motiv" onClick={onCreateMotif}>
+            <PlusIcon size={36} />
+          </button>
+          {motifs.map((m) => (
             <button
               key={m.id}
               role="radio"
-              aria-checked={m.id === motifId}
+              aria-checked={m.id === motif.id}
               aria-label={m.name}
-              className={`motif-btn ${m.id === motifId ? 'selected' : ''}`}
+              className={`motif-btn ${m.id === motif.id ? 'selected' : ''}`}
               onClick={() => {
-                setMotifId(m.id);
+                onMotifChange(m.id);
                 setScene(initialScene());
               }}
             >
-              <img src={svgDataUrl(m.svg)} alt="" />
+              <img src={m.src} alt="" />
             </button>
           ))}
         </div>

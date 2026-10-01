@@ -43,6 +43,9 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'haus-1', name: 'Haus', motifId: 'haus', seed: 101, total: 12, unsolvable: ['swap', 'rotate'] },
   { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', seed: 202, total: 12, unsolvable: ['swap', 'error'] },
   { id: 'formen-1', name: 'Formen', motifId: 'formen', seed: 303, total: 12, unsolvable: ['translate', 'error'] },
+  { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', seed: 404, total: 12, unsolvable: ['swap', 'translate'] },
+  { id: 'boot-1', name: 'Segelboot', motifId: 'boot', seed: 505, total: 12, unsolvable: ['swap', 'rotate'] },
+  { id: 'auto-1', name: 'Auto', motifId: 'auto', seed: 606, total: 12, unsolvable: ['error', 'swap'] },
 ];
 
 /**

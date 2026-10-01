@@ -1,17 +1,20 @@
 import { useEffect, useState } from 'react';
 import { loadChallenges } from './challenges/builtin';
 import type { Answer, Challenge, ChallengeAnswers } from './challenges/types';
-import { Store, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
+import { allMotifs, BUILTIN_MOTIF_INFOS } from './motifs/library';
+import { Store, type CustomMotif, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
 import { ChallengeList } from './ui/ChallengeList';
 import { ChallengePlay } from './ui/ChallengePlay';
 import { FreeMirror } from './ui/FreeMirror';
 import { Home } from './ui/Home';
+import { MotifCreator } from './ui/MotifCreator';
 import { ProfilePicker } from './ui/ProfilePicker';
 
 type ScreenState =
   | { name: 'profiles' }
   | { name: 'home' }
   | { name: 'free' }
+  | { name: 'create-motif' }
   | { name: 'challenges' }
   | { name: 'challenge'; id: string };
 
@@ -24,6 +27,9 @@ export default function App() {
   const [challenges, setChallenges] = useState<Challenge[] | null>(null);
   const [answers, setAnswers] = useState<Record<string, ChallengeAnswers>>({});
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const [customMotifs, setCustomMotifs] = useState<CustomMotif[]>([]);
+  const [freeMotifId, setFreeMotifId] = useState(BUILTIN_MOTIF_INFOS[0].id);
+  const motifs = allMotifs(customMotifs);
 
   useEffect(() => {
     let alive = true;
@@ -32,6 +38,7 @@ export default function App() {
         if (!alive) return;
         setStore(s);
         setProfiles(await s.ensureDefaultProfiles());
+        setCustomMotifs(await s.listMotifs());
         const c = await loadChallenges(s);
         if (!alive) return;
         setChallenges(c);
@@ -78,6 +85,14 @@ export default function App() {
     setSnapshots((all) => [snap, ...all]);
   };
 
+  const addMotif = async (m: Omit<CustomMotif, 'id' | 'createdAt'>) => {
+    if (!store) return;
+    const motif = await store.addMotif(m);
+    setCustomMotifs((all) => [...all, motif]);
+    setFreeMotifId(motif.id);
+    setScreen({ name: 'free' });
+  };
+
   if (error) return <div className="message">{error}</div>;
   if (!store) return <div className="loading" aria-label="Lädt"><span className="spinner" /></div>;
 
@@ -98,6 +113,10 @@ export default function App() {
     case 'free':
       return (
         <FreeMirror
+          motifs={motifs}
+          motifId={freeMotifId}
+          onMotifChange={setFreeMotifId}
+          onCreateMotif={() => setScreen({ name: 'create-motif' })}
           prefs={profile.prefs}
           onPrefsChange={setPrefs}
           snapshots={snapshots}
@@ -105,10 +124,13 @@ export default function App() {
           onBack={() => setScreen({ name: 'home' })}
         />
       );
+    case 'create-motif':
+      return <MotifCreator onSave={addMotif} onCancel={() => setScreen({ name: 'free' })} />;
     case 'challenges':
       return (
         <ChallengeList
           challenges={challenges}
+          motifs={motifs}
           answers={answers}
           onOpen={(id) => setScreen({ name: 'challenge', id })}
           onBack={() => setScreen({ name: 'home' })}
@@ -121,6 +143,7 @@ export default function App() {
         <ChallengePlay
           key={`${profile.id}-${challenge.id}`}
           challenge={challenge}
+          motif={motifs.find((m) => m.id === challenge.motifId)}
           answers={answers[challenge.id] ?? {}}
           onAnswer={(targetId, a) => saveAnswer(challenge.id, targetId, a)}
           prefs={profile.prefs}

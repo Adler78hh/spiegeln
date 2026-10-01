@@ -8,8 +8,8 @@ import { MirrorCanvas } from './MirrorCanvas';
 import type { ToolPrefs } from '../storage/store';
 import { MirrorTools } from './MirrorTools';
 import { useMotifImage } from './useMotifImage';
+import type { MotifInfo } from '../motifs/library';
 
-const IMAGE_SIZE = { width: 1, height: 1 };
 /** Auflösung, in der das Spiegelergebnis berechnet wird. */
 const RENDER_PX = 768;
 /** Auflösung des gespeicherten Spiegelergebnisses. */
@@ -17,6 +17,7 @@ const SNAPSHOT_PX = 256;
 
 interface Props {
   challenge: Challenge;
+  motif: MotifInfo | undefined;
   answers: ChallengeAnswers;
   onAnswer: (targetId: string, answer: Answer) => void;
   prefs: ToolPrefs;
@@ -25,8 +26,9 @@ interface Props {
 }
 
 /** Modus 2: Startfigur drehen/spiegeln und zu jeder Zielfigur entscheiden. */
-export function ChallengePlay({ challenge, answers, onAnswer, prefs, onPrefsChange, onBack }: Props) {
-  const image = useMotifImage(challenge.motifId);
+export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPrefsChange, onBack }: Props) {
+  const image = useMotifImage(motif);
+  const aspect = motif?.aspect ?? 1;
   const targets = challenge.targets;
   const firstOpen = targets.find((t) => !answers[t.id]) ?? targets[0];
   const [selectedId, setSelectedId] = useState(firstOpen.id);
@@ -45,7 +47,7 @@ export function ChallengePlay({ challenge, answers, onAnswer, prefs, onPrefsChan
   const snapshot = (s: Scene): string | undefined => {
     if (!image) return undefined;
     if (figureRef.current?.image !== image) {
-      figureRef.current = { image, buffer: createFigureBuffer(image, 1, RENDER_PX) };
+      figureRef.current = { image, buffer: createFigureBuffer(image, aspect, RENDER_PX) };
     }
     const fig = figureRef.current.buffer;
     const full = renderComposite(RENDER_PX, s, fig, fig, mirrorTransform(s.mirror));
@@ -78,7 +80,7 @@ export function ChallengePlay({ challenge, answers, onAnswer, prefs, onPrefsChan
       <main className="work">
         <MirrorCanvas
           image={image}
-          imageSize={IMAGE_SIZE}
+          imageSize={{ width: aspect, height: 1 }}
           scene={scene}
           onSceneChange={setScene}
           snap={prefs.snap}

@@ -105,6 +105,18 @@ describe('Schnappschüsse', () => {
   });
 });
 
+describe('Eigene Motive', () => {
+  it('anlegen (mit eigener ID-Kennung), auflisten, löschen', async () => {
+    const m = await store.addMotif({ name: 'Mein Bild', source: 'drawing', image: 'data:x', width: 300, height: 200 });
+    expect(m.id.startsWith('eigen-')).toBe(true);
+    await new Promise((r) => setTimeout(r, 2));
+    const m2 = await store.addMotif({ name: 'Foto', source: 'photo', image: 'data:y', width: 10, height: 10 });
+    expect((await store.listMotifs()).map((x) => x.id)).toEqual([m.id, m2.id]);
+    await store.deleteMotif(m.id);
+    expect((await store.listMotifs()).map((x) => x.id)).toEqual([m2.id]);
+  });
+});
+
 describe('Herausforderungen', () => {
   it('werden in Reihenfolge gespeichert und geladen', async () => {
     const c = (id: string): Challenge => ({ id, name: id, motifId: 'haus', targets: [], viewSize: 1 });

@@ -92,3 +92,64 @@ export const CameraIcon = ({ size = 32 }: { size?: number }) => (
     <circle cx="12" cy="13" r="3.5" />
   </Icon>
 );
+
+export const PenIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M4 20l1-5L16 4l4 4L9 19z" />
+    <path d="M14 6l4 4" />
+  </Icon>
+);
+
+export const EraserIcon = () => (
+  <Icon>
+    <path d="M8 20h12" />
+    <path d="M4 15 14 5l6 6-9 9H8z" />
+    <path d="M9 10l6 6" />
+  </Icon>
+);
+
+export const RectIcon = () => (
+  <Icon>
+    <rect x="4" y="6" width="16" height="12" rx="1" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+export const EllipseIcon = () => (
+  <Icon>
+    <ellipse cx="12" cy="12" rx="8" ry="6" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+export const TriangleIcon = () => (
+  <Icon>
+    <path d="M12 4 21 19H3z" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+export const UndoIcon = () => (
+  <Icon>
+    <path d="M9 7 4 12l5 5" />
+    <path d="M4 12h11a5 5 0 0 1 0 10h-3" />
+  </Icon>
+);
+
+export const TrashIcon = () => (
+  <Icon>
+    <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+  </Icon>
+);
+
+export const PlusIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M12 5v14M5 12h14" strokeWidth="3" />
+  </Icon>
+);
+
+/** Bild/Foto aus der Galerie. */
+export const PhotoIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <circle cx="9" cy="10" r="2" />
+    <path d="M3 17l5-5 4 4 3-3 6 6" />
+  </Icon>
+);
