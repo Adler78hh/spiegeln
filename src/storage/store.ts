@@ -155,6 +155,17 @@ export class Store {
     await this.db.put('answers', { ...answer, profileId, challengeId, targetId });
   }
 
+  /** Entfernt alle Antworten aller Profile zu einer Herausforderung. */
+  async deleteAnswersForChallenge(challengeId: string): Promise<void> {
+    const tx = this.db.transaction('answers', 'readwrite');
+    let cursor = await tx.store.openCursor();
+    while (cursor) {
+      if (cursor.value.challengeId === challengeId) await cursor.delete();
+      cursor = await cursor.continue();
+    }
+    await tx.done;
+  }
+
   // ---------- Schnappschüsse ----------
 
   async listSnapshots(profileId: string): Promise<Snapshot[]> {

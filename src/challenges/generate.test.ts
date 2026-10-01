@@ -82,3 +82,16 @@ describe('Bildausschnitt', () => {
     expect(boundsCenter(null)).toEqual({ x: 0.5, y: 0.5 });
   });
 });
+
+describe('Merkmale auf der Originalseite', () => {
+  it('prüft den Mindestabstand zur Geraden', async () => {
+    const { allOnOriginalSide } = await import('./generate');
+    const { initialScene } = await import('../geometry');
+    const scene = initialScene(); // senkrecht durch die Mitte, links Original
+    expect(allOnOriginalSide([{ x: 0.3, y: 0.2 }, { x: 0.45, y: 0.8 }], scene)).toBe(true);
+    expect(allOnOriginalSide([{ x: 0.3, y: 0.2 }, { x: 0.49, y: 0.8 }], scene)).toBe(false);
+    expect(allOnOriginalSide([{ x: 0.7, y: 0.5 }], scene)).toBe(false);
+    const moved = { ...scene, figure: { offset: { x: -0.3, y: 0 }, rotation: 0 } };
+    expect(allOnOriginalSide([{ x: 0.7, y: 0.5 }], moved)).toBe(true);
+  });
+});

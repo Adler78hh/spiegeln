@@ -240,3 +240,9 @@ function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
+
+/** Punkt im Motiv (0…1 relativ zum Bild) → Koordinaten der ungedrehten, mittigen Figur. */
+export function motifToFigurePoint(p: { x: number; y: number }, aspect: number): Vec2 {
+  const { w, h } = figureSize(aspect);
+  return { x: 0.5 + (p.x - 0.5) * w, y: 0.5 + (p.y - 0.5) * h };
+}

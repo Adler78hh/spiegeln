@@ -80,6 +80,19 @@ describe('Antworten', () => {
   });
 });
 
+describe('Antworten zu einer Herausforderung verwerfen', () => {
+  it('betrifft alle Profile, aber nur diese Herausforderung', async () => {
+    const a = await store.createProfile('A', 'fuchs');
+    const b = await store.createProfile('B', 'eule');
+    await store.saveAnswer(a.id, 'haus-1', 't1', answer('fits'));
+    await store.saveAnswer(b.id, 'haus-1', 't1', answer('fits'));
+    await store.saveAnswer(a.id, 'fisch-1', 't1', answer('fits'));
+    await store.deleteAnswersForChallenge('haus-1');
+    expect(Object.keys(await store.getAnswers(a.id))).toEqual(['fisch-1']);
+    expect(await store.getAnswers(b.id)).toEqual({});
+  });
+});
+
 describe('Schnappschüsse', () => {
   it('neueste zuerst, pro Profil, löschbar', async () => {
     const a = await store.createProfile('A', 'fuchs');

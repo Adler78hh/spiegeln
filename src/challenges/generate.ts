@@ -14,6 +14,7 @@ import {
   lineOf,
   otherSideTransform,
   sideOf,
+  signedDistance,
   UNIT_RECT,
   type ComposeMode,
   type Scene,
@@ -127,4 +128,15 @@ export function viewSizeFor(bounds: Array<{ minX: number; minY: number; maxX: nu
 /** Mittelpunkt eines Begrenzungsrechtecks (ohne Inhalt: Flächenmitte). */
 export function boundsCenter(b: { minX: number; minY: number; maxX: number; maxY: number } | null): Vec2 {
   return b ? { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 } : { x: 0.5, y: 0.5 };
+}
+
+/**
+ * Liegen alle Punkte (Figurkoordinaten der ungedrehten, mittigen Figur)
+ * nach dem Platzieren deutlich auf der Originalseite? `minDistance` ist der
+ * Mindestabstand zur Geraden.
+ */
+export function allOnOriginalSide(points: Vec2[], scene: Scene, minDistance = 0.02): boolean {
+  const place = figureTransform(scene.figure, UNIT_RECT);
+  const line = lineOf(scene.mirror);
+  return points.every((p) => scene.mirror.originalSide * signedDistance(apply(place, p), line) >= minDistance);
 }

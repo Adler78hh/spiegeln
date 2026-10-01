@@ -1,7 +1,14 @@
 import type { Scene } from '../geometry';
 
-/** Wie eine Zielfigur entstanden ist. Nur 'mirror' ist durch Spiegeln erreichbar. */
-export type TargetKind = 'mirror' | 'error' | 'rotate' | 'translate' | 'upload';
+/**
+ * Wie eine Zielfigur entstanden ist. Nur 'mirror' ist durch Spiegeln erreichbar.
+ * - error: ein Fehler (Farbe/Detail) nur in der gespiegelten Hälfte
+ * - rotate: zweite Hälfte um 180° gedreht statt gespiegelt
+ * - translate: zweite Hälfte verschoben statt gespiegelt
+ * - swap: Teile der Figur vertauscht, dann gespiegelt (symmetrisch, ähnlich)
+ * - upload: eigenes Bild
+ */
+export type TargetKind = 'mirror' | 'error' | 'rotate' | 'translate' | 'swap' | 'upload';
 
 export interface Target {
   id: string;
@@ -24,6 +31,8 @@ export interface Challenge {
    * Das Spiegelergebnis des Kindes wird mit demselben Ausschnitt gespeichert.
    */
   viewSize: number;
+  /** Version (bei vorinstallierten Herausforderungen). */
+  version?: number;
 }
 
 export const unsolvableCount = (c: Challenge): number => c.targets.filter((t) => !t.solvable).length;

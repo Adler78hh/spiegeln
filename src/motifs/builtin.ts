@@ -11,6 +11,13 @@ export interface BuiltinMotif {
    * SVG (andere Farbe oder fehlendes Detail).
    */
   errorVariants: Array<Array<[from: string, to: string]>>;
+  /**
+   * Varianten mit vertauschten Teilen (z. B. Tür und Fenster). Daraus
+   * entstehen symmetrische, sehr ähnliche, aber unlösbare Zielfiguren.
+   * `markers` (Motivkoordinaten 0…200) müssen alle im verwendeten Teil liegen,
+   * damit die Figur nicht doch durch Spiegeln des Originals entstehen kann.
+   */
+  swapVariants: Array<{ replacements: Array<[from: string, to: string]>; markers: Array<[number, number]> }>;
 }
 
 const svg = (body: string) =>
@@ -34,6 +41,20 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <line x1="106" y1="127" x2="140" y2="127"/>
       </g>`),
     errorVariants: [[['fill="#e0675f"', 'fill="#8cc68a"']], [['fill="#7fa6d6"', 'fill="#ffd166"']]],
+    swapVariants: [
+      {
+        // Tür und Fenster tauschen die Plätze; der Schornstein unterscheidet
+        // das Ergebnis vom Spiegelbild des Originals.
+        replacements: [
+          ['<rect x="56" y="118" width="32" height="56" rx="4"', '<rect x="108" y="118" width="32" height="56" rx="4"'],
+          ['<circle cx="80" cy="147"', '<circle cx="132" cy="147"'],
+          ['<rect x="106" y="112" width="34" height="30"', '<rect x="58" y="112" width="34" height="30"'],
+          ['<line x1="123" y1="112" x2="123" y2="142"/>', '<line x1="75" y1="112" x2="75" y2="142"/>'],
+          ['<line x1="106" y1="127" x2="140" y2="127"/>', '<line x1="58" y1="127" x2="92" y2="127"/>'],
+        ],
+        markers: [[124, 146], [75, 127], [129, 60]],
+      },
+    ],
   },
   {
     id: 'fisch',
@@ -50,6 +71,14 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <path d="M40,108 Q46,113 52,110" fill="none"/>
       </g>`),
     errorVariants: [[['fill="#f59a4a"', 'fill="#7fa6d6"']], [['fill="#ffc46b"', 'fill="#f3a6c8"']]],
+    swapVariants: [
+      {
+        // Rückenflosse sitzt am Bauch; Auge und Maul unterscheiden das
+        // Ergebnis vom an der Längsachse gespiegelten Original.
+        replacements: [['M84,66 Q100,48 120,68', 'M84,134 Q100,152 120,132']],
+        markers: [[102, 140], [62, 92], [46, 110]],
+      },
+    ],
   },
   {
     id: 'formen',
@@ -61,6 +90,13 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <circle cx="72" cy="154" r="20" fill="#ffd166"/>
       </g>`),
     errorVariants: [[['fill="#6fa8dc"', 'fill="#e0675f"']], [['fill="#8cc68a"', 'fill="#ffd166"']]],
+    swapVariants: [
+      {
+        // Kreis wandert unter das Dreieck.
+        replacements: [['<circle cx="72" cy="154"', '<circle cx="138" cy="154"']],
+        markers: [[73, 93], [128, 105], [138, 154]],
+      },
+    ],
   },
 ];
 
