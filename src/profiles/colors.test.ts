@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { firstFreeColor, GROUP_COLORS, initialsOf, suggestGroupName, textOn, tintOf } from './colors';
 
 describe('Gruppenfarben', () => {
-  it('28 verschiedene Farben', () => {
-    expect(GROUP_COLORS).toHaveLength(28);
-    expect(new Set(GROUP_COLORS.map((c) => c.id)).size).toBe(28);
-    expect(new Set(GROUP_COLORS.map((c) => c.name)).size).toBe(28);
+  it('32 verschiedene Farben', () => {
+    expect(GROUP_COLORS).toHaveLength(32);
+    expect(new Set(GROUP_COLORS.map((c) => c.id)).size).toBe(32);
+    expect(new Set(GROUP_COLORS.map((c) => c.name)).size).toBe(32);
   });
 
   it('Name mit Nummer, wenn die Farbe schon vergeben ist', () => {
@@ -20,6 +20,11 @@ describe('Gruppenfarben', () => {
     const all = GROUP_COLORS.map((c) => c.id);
     expect(firstFreeColor(all)).toBe('weiss');
     expect(firstFreeColor([...all, 'weiss'])).toBe('beige');
+  });
+
+  it('Rot, Grün und Blau sind die RGB-Grundfarben', () => {
+    const hex = (id: string) => GROUP_COLORS.find((c) => c.id === id)!.hex;
+    expect([hex('rot'), hex('gruen'), hex('blau')]).toEqual(['#ff0000', '#00ff00', '#0000ff']);
   });
 
   it('heller Hintergrund und lesbare Schrift', () => {

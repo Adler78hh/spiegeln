@@ -29,7 +29,7 @@ Herausforderungen erstellen, eigene Motive verwalten.
 
 ## Gruppen
 
-Jede Gruppe hat eine eigene Farbe (28 Farben, danach mit Nummer, z. B.
+Jede Gruppe hat eine eigene Farbe (32 Farben, danach mit Nummer, z. B.
 „Gelb2“) und eigene Kinder; jedes Tier gibt es pro Gruppe höchstens einmal.
 Ohne Tier zeigt das Profilbild die ersten beiden Buchstaben des Namens.
 Gewechselt wird auf der Profilwahl: das Oval mit dem Gruppennamen 3 Sekunden
