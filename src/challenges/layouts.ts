@@ -506,6 +506,7 @@ export const GESICHT_LAYOUT: PlannedTarget[] = [
   keeping(0, 0, 0, EYE_LEFT, 0, BELOW),
   // Wie Nr. 2, aber der Mund ist die seitenverkehrte Locke.
   keeping(0, 0, 0, NOSE, 0, ABOVE, 'error', 1),
-  // Senkrecht durch das linke Auge, rechts bleibt: breit und traurig.
-  keeping(0, 0, 0, EYE_LEFT, 90, RIGHT),
+  // Senkrecht zwischen linkem Auge und Nase, links bleibt: schmales,
+  // fröhliches Gesicht mit zwei Augen und ohne Nase.
+  keeping(0, 0, 0, [82, 100], 90, LEFT),
 ];
