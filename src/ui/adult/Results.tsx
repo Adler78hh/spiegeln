@@ -26,15 +26,16 @@ export function Results({ store, group, profiles, challenges, motifs, open, onOp
   const [answers, setAnswers] = useState<Record<string, Record<string, ChallengeAnswers>> | null>(null);
   const tint = tintOf(findColor(group.color).hex);
 
+  const ids = profiles.map((p) => p.id).join(',');
   useEffect(() => {
     let alive = true;
-    Promise.all(profiles.map(async (p) => [p.id, await store.getAnswers(p.id)] as const)).then((all) => {
+    Promise.all(ids.split(',').filter(Boolean).map(async (id) => [id, await store.getAnswers(id)] as const)).then((all) => {
       if (alive) setAnswers(Object.fromEntries(all));
     });
     return () => {
       alive = false;
     };
-  }, [store, profiles]);
+  }, [store, ids]);
 
   if (!answers) return null;
 

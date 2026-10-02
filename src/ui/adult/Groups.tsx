@@ -59,6 +59,7 @@ export function NewGroupDialog(props: { groups: Group[]; onCreate: (name: string
   const [name, setName] = useState(() => suggestGroupName(color, usedColors));
   const [nameEdited, setNameEdited] = useState(false);
   const [countText, setCountText] = useState('20');
+  const [busy, setBusy] = useState(false);
 
   const pickColor = (id: string) => {
     setColor(id);
@@ -133,7 +134,14 @@ export function NewGroupDialog(props: { groups: Group[]; onCreate: (name: string
           <button className="text-btn" onClick={onCancel}>
             Abbrechen
           </button>
-          <button className="text-btn primary" onClick={() => onCreate(name.trim() || findColor(color).name, color, count)}>
+          <button
+            className="text-btn primary"
+            disabled={busy}
+            onClick={() => {
+              setBusy(true);
+              onCreate(name.trim() || findColor(color).name, color, count);
+            }}
+          >
             Anlegen
           </button>
         </div>
@@ -181,7 +189,11 @@ export function GroupPage(props: PageProps) {
             className="name-input"
             defaultValue={group.name}
             maxLength={24}
-            onBlur={(e) => e.target.value.trim() && e.target.value.trim() !== group.name && onRename(e.target.value)}
+            onBlur={(e) => {
+              const name = e.target.value.trim();
+              if (!name) e.target.value = group.name;
+              else if (name !== group.name) onRename(name);
+            }}
             onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
           />
         </label>

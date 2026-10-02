@@ -97,8 +97,14 @@ export function newId(): string {
 export class Store {
   private constructor(private db: IDBPDatabase<SpiegelnSchema>) {}
 
-  static async open(name = DB_NAME): Promise<Store> {
+  static async open(name = DB_NAME, onOutdated?: () => void): Promise<Store> {
     const db = await openDB<SpiegelnSchema>(name, DB_VERSION, {
+      // Eine neuere App-Version (z. B. in einem zweiten Fenster) will die
+      // Datenbank umbauen: diese Verbindung freigeben, sonst wartet sie ewig.
+      blocking() {
+        db.close();
+        onOutdated?.();
+      },
       upgrade(db, oldVersion) {
         if (oldVersion < 1) {
           db.createObjectStore('profiles', { keyPath: 'id' });

@@ -2,10 +2,33 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/**
+ * Nur Inhalte von der eigenen Adresse; Bilder auch als data:/blob: (Tierbilder,
+ * Fotos, Zeichnungen). Keine Verbindungen zu fremden Servern.
+ */
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "connect-src 'self'",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+].join('; ');
+
 export default defineConfig({
   base: './',
   plugins: [
     react(),
+    {
+      name: 'content-security-policy',
+      apply: 'build',
+      transformIndexHtml: (html) =>
+        html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`),
+    },
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',

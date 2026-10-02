@@ -21,6 +21,8 @@ export function ProfileManager({ store, group, profiles, onChange }: Props) {
   const [flash, setFlash] = useState(false);
   const [newId, setNewId] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const busy = useRef(false);
+  const focused = useRef<string | null>(null);
   const tint = tintOf(findColor(group.color).hex);
 
   const used = new Set(profiles.map((p) => p.animal).filter(Boolean));
@@ -30,37 +32,56 @@ export function ProfileManager({ store, group, profiles, onChange }: Props) {
 
   // Neues Profil sichtbar machen: hinscrollen, Namensfeld markieren.
   useEffect(() => {
-    if (!newId) return;
+    if (!newId || focused.current === newId) return;
     const input = listRef.current?.querySelector<HTMLInputElement>(`#profile-name-${CSS.escape(newId)}`);
     if (!input) return;
     input.closest('li')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     input.focus({ preventScroll: true });
     input.select();
-    const t = setTimeout(() => setNewId(null), 2500);
-    return () => clearTimeout(t);
+    focused.current = newId;
   }, [newId, profiles]);
 
-  const rename = async (p: Profile, name: string) => {
+  useEffect(() => {
+    if (!newId) return;
+    const t = setTimeout(() => setNewId(null), 2500);
+    return () => clearTimeout(t);
+  }, [newId]);
+
+  const rename = async (p: Profile, input: HTMLInputElement) => {
+    const name = input.value;
+    if (!name.trim()) input.value = p.name;
     if (!name.trim() || name.trim() === p.name) return;
     await store.updateProfile(p.id, { name });
     await reload();
   };
 
   const setAnimal = async (p: Profile, animal: AnimalId | null) => {
-    // Trägt das Profil noch den Tiernamen, wandert der Name mit dem Tier mit.
-    const keepsAnimalName = p.animal !== null && p.name === ANIMALS[p.animal].name;
-    await store.updateProfile(p.id, animal && keepsAnimalName ? { animal, name: ANIMALS[animal].name } : { animal });
-    setAnimalFor(null);
-    await reload();
+    if (busy.current) return;
+    busy.current = true;
+    try {
+      // Trägt das Profil noch den Tiernamen, wandert der Name mit dem Tier mit.
+      const keepsAnimalName = p.animal !== null && p.name === ANIMALS[p.animal].name;
+      await store.updateProfile(p.id, animal && keepsAnimalName ? { animal, name: ANIMALS[animal].name } : { animal });
+      setAnimalFor(null);
+      await reload();
+    } finally {
+      busy.current = false;
+    }
   };
 
   const add = async () => {
-    if (!nextAnimal) return;
+    // Schnelles Doppeltippen darf kein Tier doppelt vergeben.
+    if (!nextAnimal || busy.current) return;
+    busy.current = true;
     setFlash(true);
     setTimeout(() => setFlash(false), 600);
-    const created = await store.createProfile(group.id, nextAnimal.name, nextAnimal.id);
-    await reload();
-    setNewId(created.id);
+    try {
+      const created = await store.createProfile(group.id, nextAnimal.name, nextAnimal.id);
+      await reload();
+      setNewId(created.id);
+    } finally {
+      busy.current = false;
+    }
   };
 
   const remove = async (id: string) => {
@@ -100,7 +121,7 @@ export function ProfileManager({ store, group, profiles, onChange }: Props) {
                 defaultValue={p.name}
                 maxLength={24}
                 placeholder={p.animal ? ANIMALS[p.animal].name : 'Name'}
-                onBlur={(e) => rename(p, e.target.value)}
+                onBlur={(e) => rename(p, e.target)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
               />
             </label>

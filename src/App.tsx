@@ -54,7 +54,9 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    Store.open()
+    // Daten nicht vom Browser aufräumen lassen (z. B. Safari nach 7 Tagen ohne Nutzung).
+    navigator.storage?.persist?.().catch(() => {});
+    Store.open(undefined, () => location.reload())
       .then(async (s) => {
         if (!alive) return;
         setStore(s);
