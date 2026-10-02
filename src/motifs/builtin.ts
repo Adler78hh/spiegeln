@@ -261,6 +261,27 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [],
   },
   {
+    id: 'tetraktys',
+    name: 'Tetraktys',
+    // Zehn Kreise im gleichseitigen Dreieck (Reihen zu 1, 2, 3, 4),
+    // Mittelpunktabstand 44, Radius 14.
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="4">
+        <circle cx="100.0" cy="42.8" r="14" fill="#1e6f73"/>
+        <circle cx="78.0" cy="80.9" r="14" fill="#1e6f73"/>
+        <circle cx="122.0" cy="80.9" r="14" fill="#1e6f73"/>
+        <circle cx="56.0" cy="119.1" r="14" fill="#1e6f73"/>
+        <circle cx="100.0" cy="119.1" r="14" fill="#1e6f73"/>
+        <circle cx="144.0" cy="119.1" r="14" fill="#1e6f73"/>
+        <circle cx="34.0" cy="157.2" r="14" fill="#1e6f73"/>
+        <circle cx="78.0" cy="157.2" r="14" fill="#1e6f73"/>
+        <circle cx="122.0" cy="157.2" r="14" fill="#1e6f73"/>
+        <circle cx="166.0" cy="157.2" r="14" fill="#1e6f73"/>
+      </g>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
     id: 'dreieck',
     name: 'Dreieck',
     svg: svg(`
