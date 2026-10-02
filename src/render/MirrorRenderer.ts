@@ -10,6 +10,7 @@ import {
   clipLineToRect,
   figureTransform,
   lineOf,
+  sideOf,
   UNIT_RECT,
   type FigureState,
   type MirrorState,
@@ -22,6 +23,8 @@ export const COLORS = {
   areaBorder: '#d9cdb8',
   line: '#e0322b',
   lineActive: '#b81d17',
+  /** Spiegelnde Seite der Achse. */
+  mirrorSilver: '#9ea7b1',
   handleFill: '#ffffff',
   mirrorTint: 'rgba(120, 170, 220, 0.18)',
   /** Signalfarbe des Umrisses (grelles Pink, kommt in keinem Motiv vor). */
@@ -207,13 +210,35 @@ export class MirrorRenderer {
     ctx.save();
     if (!input.hideLine) {
       ctx.lineCap = 'round';
-      // weißer Unterleger für Kontrast auf bunten Motiven
-      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-      ctx.lineWidth = (lineActive ? 8 : 6) * px;
+      const band = (lineActive ? 6 : 5) * px;
+      // Unterleger für Kontrast auf bunten Motiven: auf der Originalseite,
+      // der spiegelnden Fläche zugewandt, silbrig grau, auf der Seite des
+      // Spiegelbilds weiß. Umdrehen des Spiegels wechselt die Seiten.
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+      ctx.lineWidth = 2 * band;
       ctx.beginPath();
       ctx.moveTo(clip.entry.x, clip.entry.y);
       ctx.lineTo(clip.exit.x, clip.exit.y);
       ctx.stroke();
+      const len = Math.hypot(clip.exit.x - clip.entry.x, clip.exit.y - clip.entry.y) || 1;
+      let nx = -(clip.exit.y - clip.entry.y) / len;
+      let ny = (clip.exit.x - clip.entry.x) / len;
+      const probe = { x: clip.entry.x + nx * 0.01, y: clip.entry.y + ny * 0.01 };
+      if (sideOf(probe, lineOf(m), 0) !== m.originalSide) {
+        nx = -nx;
+        ny = -ny;
+      }
+      ctx.lineCap = 'butt';
+      ctx.strokeStyle = COLORS.mirrorSilver;
+      ctx.lineWidth = band;
+      ctx.beginPath();
+      ctx.moveTo(clip.entry.x + (nx * band) / 2, clip.entry.y + (ny * band) / 2);
+      ctx.lineTo(clip.exit.x + (nx * band) / 2, clip.exit.y + (ny * band) / 2);
+      ctx.stroke();
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(clip.entry.x, clip.entry.y);
+      ctx.lineTo(clip.exit.x, clip.exit.y);
       ctx.strokeStyle = lineActive ? COLORS.lineActive : COLORS.line;
       ctx.lineWidth = (lineActive ? 4 : 3) * px;
       ctx.stroke();
