@@ -205,8 +205,8 @@ export const BOOT_LAYOUT: PlannedTarget[] = [
   t('mirror', 315, -0.0697, -0.0605, 135, 0.438, 0.438, -1),
   // An der langen Seite des großen Segels: zwei Segel ergeben ein Quadrat.
   keeping(0, -0.08, -0.05, BIG_SAIL_TOP, 45, HULL),
-  // Wie Nr. 1, aber das gespiegelte kleine Segel ist blau statt gelb.
-  keeping(0, 0.04, 0, MAST, 90, LEFT, 'error', 1),
+  // Wie Nr. 1, aber beide kleinen Segel in der Farbe des großen Segels.
+  { ...keeping(0, 0.04, 0, MAST, 90, LEFT, 'error', 2), variantBoth: true },
   t('mirror', 180, -0.0141, 0.0074, 90, 0.4392, 0.5, 1),
   t('mirror', 315, 0.0491, -0.0343, 30, 0.51, 0.3913, 1),
   // Wie Nr. 9 (zwei große Segel), aber mit Fahne: Am echten Boot sitzt die

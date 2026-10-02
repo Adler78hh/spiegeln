@@ -172,7 +172,12 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <circle cx="100" cy="156" r="6" fill="#d7eef9"/>
         <circle cx="128" cy="156" r="6" fill="#d7eef9"/>
       </g>`),
-    errorVariants: [[['fill="#e0675f"', 'fill="#8cc68a"']], [['fill="#f6c983"', 'fill="#8fb8de"']]],
+    errorVariants: [
+      [['fill="#e0675f"', 'fill="#8cc68a"']],
+      [['fill="#f6c983"', 'fill="#8fb8de"']],
+      // Kleines Segel in der Farbe des großen.
+      [['fill="#f6c983"', 'fill="#fff6e0"']],
+    ],
     swapVariants: [
       {
         // Fahne zeigt in die andere Richtung, das große Segel bleibt rechts.
