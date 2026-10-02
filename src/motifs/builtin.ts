@@ -411,6 +411,20 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [],
   },
   {
+    id: 'boa',
+    name: 'BOA',
+    // Das Wort BOA in Großbuchstaben, Magenta. Jeder Buchstabe ist in sich
+    // symmetrisch (B waagrecht, O beides, A senkrecht); zwischen den
+    // Buchstaben ist Platz für eine Spiegelachse.
+    svg: svg(`
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20,60 L20,140 M20,60 L34,60 A20,20 0 0 1 34,100 L20,100 M20,100 L34,100 A20,20 0 0 1 34,140 L20,140 M100,60 A20,40 0 1 1 100,140 A20,40 0 1 1 100,60 Z M146,140 L166,60 L186,140 M151.5,118 L180.5,118" stroke="${INK}" stroke-width="18"/>
+        <path d="M20,60 L20,140 M20,60 L34,60 A20,20 0 0 1 34,100 L20,100 M20,100 L34,100 A20,20 0 0 1 34,140 L20,140 M100,60 A20,40 0 1 1 100,140 A20,40 0 1 1 100,60 Z M146,140 L166,60 L186,140 M151.5,118 L180.5,118" stroke="#e6007e" stroke-width="11"/>
+      </g>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
     id: 'tetraktys',
     name: 'Tetraktys',
     // Zehn Kreise im gleichseitigen Dreieck (Reihen zu 1, 2, 3, 4),
