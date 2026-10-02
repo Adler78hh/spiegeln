@@ -372,8 +372,8 @@ export const HASEN_LAYOUT: PlannedTarget[] = [
   keeping(0, 0.1, 0, FRONT_BUNNY, 90, LEFT),
   // Waagrecht durch die Bauchmitte des vorderen Hasen, oben bleibt.
   keeping(0, 0, -0.1, [100, 154], 0, ABOVE),
-  // Wie Nr. 5 (nur der hintere Hase), aber mit Weste.
-  { ...keeping(0, -0.1, 0, BACK_BUNNY, 90, RIGHT, 'error', 1), variantBoth: true },
+  // Wie Nr. 8, aber die Farben der beiden Hasen sind vertauscht.
+  keeping(0, 0.05, 0, FRONT_BUNNY, 90, RIGHT, 'swap', 0),
   // Senkrecht durch den rechten Fuß des hinteren Hasen: vier Hasen, die
   // hinteren teilen sich einen Fuß (sehr breit, daher eigener Maßstab).
   { ...keeping(0, -0.12, 0, BACK_RIGHT_FOOT, 90, LEFT), ownScale: true },

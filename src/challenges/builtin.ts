@@ -82,7 +82,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'boot-1', name: 'Segelboot', motifId: 'boot', version: 5, seed: 505, total: 12, unsolvable: ['swap', 'error', 'swap'], layout: BOOT_LAYOUT },
   { id: 'auto-1', name: 'Auto', motifId: 'auto', version: 5, seed: 606, total: 12, unsolvable: ['swap', 'error', 'error'], layout: AUTO_LAYOUT },
   { id: 'eichhoernchen-1', name: 'Eichhörnchen', motifId: 'eichhoernchen', version: 4, seed: 707, total: 12, unsolvable: ['error', 'error', 'error'], layout: EICHHOERNCHEN_LAYOUT },
-  { id: 'hasen-1', name: 'Stoffhasen', motifId: 'hasen', version: 1, seed: 909, total: 12, unsolvable: ['error', 'error', 'error'], layout: HASEN_LAYOUT },
+  { id: 'hasen-1', name: 'Stoffhasen', motifId: 'hasen', version: 2, seed: 909, total: 12, unsolvable: ['swap', 'error', 'error'], layout: HASEN_LAYOUT },
   { id: 'tetraktys-1', name: 'Tetraktys', motifId: 'tetraktys', version: 1, seed: 808, total: 20, unsolvable: [], layout: TETRAKTYS_LAYOUT },
 ];
 
