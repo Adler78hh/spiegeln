@@ -476,3 +476,36 @@ export const STIFTE_LAYOUT: PlannedTarget[] = [
   // Wie Nr. 3, aber gedreht: der grüne Stift liegt waagrecht.
   keeping(240, 0, 0, PEN.gruen, 30, [40, 150]),
 ];
+
+/** Gesicht: Nase (Mitte) und linkes Auge (Motivkoordinaten). */
+const NOSE: [number, number] = [100, 100];
+const EYE_LEFT: [number, number] = [68, 78];
+
+const EYE_RIGHT: [number, number] = [132, 78];
+
+export const GESICHT_LAYOUT: PlannedTarget[] = [
+  // Senkrecht durch die Nase, links bleibt: fröhlich.
+  keeping(0, 0, 0, NOSE, 90, LEFT),
+  // Waagrecht durch die Nase, oben bleibt: vier Augen, die Locke wird zum Mund.
+  keeping(0, 0, 0, NOSE, 0, ABOVE),
+  // Waagrecht durch die Augen, oben bleibt: gestauchtes Gesicht mit zwei Augen.
+  keeping(0, 0, 0, EYE_LEFT, 0, ABOVE),
+  // Fröhliches Gesicht ohne Nase: Die Achse müsste durch die Nase gehen.
+  { ...keeping(0, 0, 0, NOSE, 90, LEFT, 'error', 0), variantBoth: true },
+  // Senkrecht durch die Nase, rechts bleibt: traurig.
+  keeping(0, 0, 0, NOSE, 90, RIGHT),
+  // Senkrecht durch das rechte Auge, links bleibt: breit und fröhlich, drei Augen.
+  keeping(0, 0, 0, EYE_RIGHT, 90, LEFT),
+  // Diagonal durch das linke Auge: zwei Gesichter schräg übereinander.
+  keeping(0, 0, 0, EYE_LEFT, -45, [180, 180]),
+  // Ganzes Gesicht neben dem ganzen Gesicht (Verschiebung, eigener Maßstab).
+  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
+  // Waagrecht durch die Nase, unten bleibt: der Mund wird oben zur Locke.
+  keeping(0, 0, 0, NOSE, 0, BELOW),
+  // Waagrecht durch die Augen, unten bleibt: langes Gesicht mit zwei Nasen.
+  keeping(0, 0, 0, EYE_LEFT, 0, BELOW),
+  // Wie Nr. 2, aber der Mund ist die seitenverkehrte Locke.
+  keeping(0, 0, 0, NOSE, 0, ABOVE, 'error', 1),
+  // Senkrecht durch das linke Auge, rechts bleibt: breit und traurig.
+  keeping(0, 0, 0, EYE_LEFT, 90, RIGHT),
+];
