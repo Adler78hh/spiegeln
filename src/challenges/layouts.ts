@@ -143,8 +143,9 @@ export const FORMEN_LAYOUT: PlannedTarget[] = [
   keeping(330, 0.0023, -0.0284, SQUARE_CENTER, 45, TRIANGLE),
   keeping(345, -0.0254, 0.0275, SQUARE_CENTER, 135, CIRCLE_CENTER),
   t('mirror', 105, -0.0071, 0.0164, 60, 0.4846, 0.5, 1),
-  // Drehung um 180° wie bei einer Spielkarte.
-  keeping(0, 0, -0.08, [100, 128], 0, SQUARE_CENTER, 'rotate'),
+  // Drehung um 180° wie bei einer Spielkarte, um die untere Ecke zwischen
+  // Quadrat und Dreieck: Ecken von Quadraten und Dreiecken treffen sich dort.
+  { ...keeping(0, 0, -0.08, [108, 128], 0, SQUARE_CENTER, 'rotate'), pivot: [108, 128] },
   t('mirror', 225, 0.0867, -0.0968, 75, 0.6032, 0.5, 1),
   t('mirror', 45, 0.0103, -0.0476, 105, 0.437, 0.5, -1),
   // Nur das große grüne Quadrat aus zwei Dreiecken: Mit dem Original kämen

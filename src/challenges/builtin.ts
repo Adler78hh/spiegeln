@@ -10,6 +10,7 @@ import {
   mirrorTransform,
   originalHalfExtent,
   otherSideTransform,
+  pointReflection,
   translationAcrossLine,
   sideOf,
   UNIT_RECT,
@@ -52,6 +53,8 @@ export interface PlannedTarget {
   gap?: number;
   /** Nur bei Fehler: die Fehlervariante gilt für beide Hälften, nicht nur für das Spiegelbild. */
   variantBoth?: boolean;
+  /** Nur bei Drehung: Drehpunkt im Motiv (Koordinaten 0…200) statt auf der Achse unter der Figurmitte. */
+  pivot?: [number, number];
 }
 
 interface ChallengeSpec {
@@ -74,7 +77,7 @@ interface ChallengeSpec {
 export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 7, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
   { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', version: 4, seed: 202, total: 12, unsolvable: ['error', 'translate', 'swap'], layout: FISCH_LAYOUT },
-  { id: 'formen-1', name: 'Formen', motifId: 'formen', version: 4, seed: 303, total: 12, unsolvable: ['rotate', 'swap', 'error'], layout: FORMEN_LAYOUT },
+  { id: 'formen-1', name: 'Formen', motifId: 'formen', version: 5, seed: 303, total: 12, unsolvable: ['rotate', 'swap', 'error'], layout: FORMEN_LAYOUT },
   { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', version: 2, seed: 404, total: 12, unsolvable: ['swap', 'translate'] },
   { id: 'boot-1', name: 'Segelboot', motifId: 'boot', version: 2, seed: 505, total: 12, unsolvable: ['swap', 'rotate'] },
   { id: 'auto-1', name: 'Auto', motifId: 'auto', version: 2, seed: 606, total: 12, unsolvable: ['error', 'swap'] },
@@ -140,7 +143,9 @@ async function renderPlanned(p: PlannedTarget, ctx: Context): Promise<Raw> {
   const line = lineOf(scene.mirror);
   const placed = ctx.samples.map((s) => apply(place, s)).filter((q) => sideOf(q, line, 0) === scene.mirror.originalSide);
   const transform =
-    p.kind === 'translate' && p.gap
+    p.kind === 'rotate' && p.pivot
+      ? pointReflection(apply(figureTransform(scene.figure, UNIT_RECT), motifToFigurePoint({ x: p.pivot[0] / 200, y: p.pivot[1] / 200 }, 1)))
+      : p.kind === 'translate' && p.gap
       ? translationAcrossLine(line, scene.mirror.originalSide, originalHalfExtent(placed, scene.mirror) + p.gap)
       : otherSideTransform(mode, scene, placed);
   return { canvas: renderComposite(RENDER_PX, scene, first, other, transform), solvable: false, kind: p.kind };
