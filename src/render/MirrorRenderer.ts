@@ -203,13 +203,13 @@ export class MirrorRenderer {
       ctx.lineCap = 'round';
       // weißer Unterleger für Kontrast auf bunten Motiven
       ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-      ctx.lineWidth = (lineActive ? 12 : 10) * px;
+      ctx.lineWidth = (lineActive ? 8 : 6) * px;
       ctx.beginPath();
       ctx.moveTo(clip.entry.x, clip.entry.y);
       ctx.lineTo(clip.exit.x, clip.exit.y);
       ctx.stroke();
       ctx.strokeStyle = lineActive ? COLORS.lineActive : COLORS.line;
-      ctx.lineWidth = (lineActive ? 7 : 5) * px;
+      ctx.lineWidth = (lineActive ? 4 : 3) * px;
       ctx.stroke();
     }
 
