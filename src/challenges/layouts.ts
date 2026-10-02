@@ -280,8 +280,8 @@ export const EICHHOERNCHEN_LAYOUT: PlannedTarget[] = [
   keeping(0, 0.05, 0, SQ_BODY, 90, [10, 100]),
   // Die Kuh, Achse knapp hinter der Nase.
   cow(0.02),
-  // Wie Nr. 7 (zwei Schwänze), aber ein Schwanz blau.
-  keeping(0, -0.05, 0, SQ_HEAD, 90, [190, 100], 'error', 0),
+  // Wie Nr. 7 (zwei Schwänze), aber mit zwei Augen, die geradeaus schauen.
+  { ...keeping(0, -0.05, 0, SQ_HEAD, 90, [190, 100], 'error', 3), variantBoth: true },
   // Waagrecht durch die Bauchmitte, oben bleibt: zwei Eichhörnchen übereinander.
   keeping(0, 0, -0.05, SQ_BODY, 0, [96, 20]),
   // Diagonale durch die Körpermitte.

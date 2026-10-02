@@ -250,6 +250,13 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
       [['<path d="M97,138 q5,-6 10,0" fill="none" transform="rotate(-30 102 137)"/>', '']],
       // Ohne Pinsel an den Ohren.
       [['<path d="M58,24 L54,15 M58,24 L62,14 M106,22 L104,12 M106,22 L112,14"/>', '']],
+      // Zusätzliches Auge mitten in der hinteren Kopfhälfte, Blick geradeaus.
+      [
+        [
+          '<circle cx="70" cy="72" r="7" fill="#fff"/>',
+          `<circle cx="70" cy="72" r="7" fill="#fff"/><circle cx="90" cy="74" r="7" fill="#fff"/><circle cx="90" cy="74" r="3.5" fill="${INK}" stroke="none"/>`,
+        ],
+      ],
     ],
     swapVariants: [],
   },
