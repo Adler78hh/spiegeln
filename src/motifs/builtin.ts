@@ -189,13 +189,16 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
   {
     id: 'auto',
     name: 'Auto',
+    // Fenster: vorne Quadrat mit angesetztem gleichschenklig-rechtwinkligem
+    // Dreieck, Mitte Quadrat, hinten Dreieck; Kabine vorne und hinten 45°.
     svg: svg(`
       <g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-        <path d="M24,140 L24,116 Q24,104 36,104 L82,104 L100,74 L148,74 Q158,74 162,84 L176,110 L176,140 Z" fill="#6fa8dc"/>
-        <path d="M106,82 L144,82 L154,104 L94,104 Z" fill="#d7eef9"/>
-        <line x1="124" y1="82" x2="124" y2="104"/>
+        <path d="M24,140 L24,114 Q24,104 34,104 L38,104 L68,74 L132,74 L162,104 L166,104 Q176,104 176,114 L176,140 Z" fill="#6fa8dc"/>
+        <polygon points="46,104 70,80 94,80 94,104" fill="#d7eef9"/>
+        <rect x="100" y="80" width="24" height="24" fill="#d7eef9"/>
+        <polygon points="130,80 130,104 154,104" fill="#d7eef9"/>
         <rect x="26" y="111" width="13" height="10" rx="2" fill="#ffd166"/>
-        <line x1="110" y1="116" x2="122" y2="116"/>
+        <line x1="104" y1="116" x2="116" y2="116"/>
         <circle cx="58" cy="146" r="17" fill="#5b4636"/>
         <circle cx="58" cy="146" r="7" fill="#d9cdb8"/>
         <circle cx="146" cy="146" r="17" fill="#5b4636"/>

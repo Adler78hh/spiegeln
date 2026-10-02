@@ -219,3 +219,39 @@ export const BOOT_LAYOUT: PlannedTarget[] = [
   t('mirror', 330, 0.0693, 0.0027, 0, 0.5, 0.6014, -1),
   t('mirror', 0, -0.0796, 0.0751, 150, 0.49, 0.5428, -1),
 ];
+
+/** Auto: Radachsen, Wagenmitte, Fenster (Motivkoordinaten). */
+const FRONT_AXLE: [number, number] = [58, 146];
+const REAR_AXLE: [number, number] = [146, 146];
+const CAR_CENTER: [number, number] = [100, 122];
+const FRONT_SQUARE: [number, number] = [82, 92];
+const REAR_SQUARE: [number, number] = [112, 92];
+const FRONT_SLOPE: [number, number] = [58, 92];
+const REAR_SLOPE: [number, number] = [142, 92];
+
+export const AUTO_LAYOUT: PlannedTarget[] = [
+  // Senkrecht durch die Wagenmitte, vordere Hälfte bleibt: zwei Fronten.
+  keeping(0, 0, 0, CAR_CENTER, 90, LEFT),
+  // An der schrägen Kante des vorderen Dreiecks.
+  keeping(0, 0.1, 0.05, FRONT_SLOPE, 135, CAR_CENTER),
+  // Wie Nr. 9 (zwei Hecks), aber mit Scheinwerfern hinten.
+  keeping(0, 0, 0, CAR_CENTER, 90, RIGHT, 'swap'),
+  // Senkrecht durch die Vorderachse, hinterer Teil bleibt: lange Limousine.
+  keeping(0, 0.12, 0, FRONT_AXLE, 90, RIGHT),
+  // An der Diagonale des hinteren Quadrats.
+  keeping(0, 0.05, 0.05, REAR_SQUARE, 135, [124, 104]),
+  // Waagrecht durch die Wagenmitte, obere Hälfte bleibt, gespiegelte Fenster gelb.
+  keeping(0, 0, 0, CAR_CENTER, 0, ABOVE, 'error', 0),
+  // Waagrecht durch die Wagenmitte, untere Hälfte bleibt: Räder oben und unten.
+  keeping(0, 0, 0, CAR_CENTER, 0, BELOW),
+  // An der schrägen Kante des hinteren Dreiecks.
+  keeping(0, -0.1, 0.05, REAR_SLOPE, 45, CAR_CENTER),
+  // Senkrecht durch die Wagenmitte, hintere Hälfte bleibt: zwei Hecks.
+  keeping(0, 0, 0, CAR_CENTER, 90, RIGHT),
+  // Zwei ganze Autos übereinander.
+  wholeBeside(0, 0, -0.15, 0, [0.5, 0.52], CAR_CENTER),
+  // An der Diagonale des vorderen Quadrats.
+  keeping(0, 0.05, 0.05, FRONT_SQUARE, 135, [94, 104]),
+  // Senkrecht durch die Hinterachse, vorderer Teil bleibt: lange Limousine.
+  keeping(0, -0.12, 0, REAR_AXLE, 90, LEFT),
+];
