@@ -48,10 +48,19 @@ function throughPoint(kind: Kind, rotDeg: number, ox: number, oy: number, mx: nu
  * Spiegelachse durch einen Motivpunkt (Winkel im Motiv gemessen); sichtbar
  * bleibt die Hälfte, in der der Motivpunkt `keep` liegt.
  */
-function keeping(rotDeg: number, ox: number, oy: number, through: [number, number], motifLineDeg: number, keep: [number, number]): PlannedTarget {
-  const target = throughPoint('mirror', rotDeg, ox, oy, ...through, 1, motifLineDeg);
+function keeping(
+  rotDeg: number,
+  ox: number,
+  oy: number,
+  through: [number, number],
+  motifLineDeg: number,
+  keep: [number, number],
+  kind: Kind = 'mirror',
+  variant?: number,
+): PlannedTarget {
+  const target = throughPoint(kind, rotDeg, ox, oy, ...through, 1, motifLineDeg);
   const side = sideOf(motifPoint(target.scene.figure, ...keep), lineOf(target.scene.mirror), 0) as Side;
-  return { ...target, scene: { ...target.scene, mirror: { ...target.scene.mirror, originalSide: side } } };
+  return { ...target, variant, scene: { ...target.scene, mirror: { ...target.scene.mirror, originalSide: side } } };
 }
 
 /**
@@ -115,4 +124,32 @@ export const FISCH_LAYOUT: PlannedTarget[] = [
   t('mirror', 120, -0.08, -0.0044, 30, 0.5, 0.5307, -1),
   t('swap', 240, -0.0659, 0.0751, 120, 0.3788, 0.5, -1),
   t('mirror', 165, -0.0784, -0.0602, 60, 0.4174, 0.5, 1),
+];
+
+/** Formen: Mitte von Quadrat und Kreis, Dreieck, Ecken des Quadrats (Motivkoordinaten). */
+const SQUARE_CENTER: [number, number] = [73, 93];
+const CIRCLE_CENTER: [number, number] = [72, 154];
+const TRIANGLE: [number, number] = [131, 105];
+const TRIANGLE_TOP: [number, number] = [108, 58];
+
+export const FORMEN_LAYOUT: PlannedTarget[] = [
+  // Nicht gedreht, Achse durch die Kreismitte: Rechteck, Kreis, zwei Dreiecke.
+  keeping(0, 0, -0.05, CIRCLE_CENTER, 90, TRIANGLE),
+  // Achse durch die Mitte des Quadrats: das Blaue bleibt ein Quadrat.
+  keeping(270, -0.0198, 0.0495, SQUARE_CENTER, 90, TRIANGLE),
+  t('mirror', 45, 0.0103, -0.0476, 105, 0.437, 0.5, -1),
+  // Spiegelung an den Diagonalen des Quadrats.
+  keeping(330, 0.0023, -0.0284, SQUARE_CENTER, 45, TRIANGLE),
+  keeping(345, -0.0254, 0.0275, SQUARE_CENTER, 135, CIRCLE_CENTER),
+  t('mirror', 105, -0.0071, 0.0164, 60, 0.4846, 0.5, 1),
+  // Drehung um 180° wie bei einer Spielkarte.
+  keeping(0, 0, -0.08, [100, 128], 0, SQUARE_CENTER, 'rotate'),
+  t('mirror', 225, 0.0867, -0.0968, 75, 0.6032, 0.5, 1),
+  // Dreieck andersherum; Achse durch die Kreismitte wie bei Nr. 1.
+  keeping(60, -0.0076, 0.0863, CIRCLE_CENTER, 90, TRIANGLE, 'swap', 1),
+  // Blaues Quadrat zur Hälfte rot.
+  t('error', 120, -0.0439, -0.0519, 120, 0.4122, 0.5, -1, 0),
+  t('mirror', 270, -0.0093, -0.0846, 150, 0.5, 0.4716, -1),
+  // Achse auf der langen Dreieckseite: zwei Dreiecke ergeben ein großes grünes Quadrat.
+  keeping(90, 0, 0, TRIANGLE_TOP, 45, SQUARE_CENTER),
 ];

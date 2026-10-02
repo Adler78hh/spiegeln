@@ -89,15 +89,21 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     svg: svg(`
       <g stroke="${INK}" stroke-width="4" stroke-linejoin="round">
         <rect x="38" y="58" width="70" height="70" fill="#6fa8dc"/>
-        <polygon points="108,128 108,58 168,128" fill="#8cc68a"/>
+        <polygon points="108,128 108,58 178,128" fill="#8cc68a"/>
         <circle cx="72" cy="154" r="20" fill="#ffd166"/>
       </g>`),
     errorVariants: [[['fill="#6fa8dc"', 'fill="#e0675f"']], [['fill="#8cc68a"', 'fill="#ffd166"']]],
     swapVariants: [
       {
         // Kreis wandert unter das Dreieck.
-        replacements: [['<circle cx="72" cy="154"', '<circle cx="138" cy="154"']],
-        markers: [[73, 93], [128, 105], [138, 154]],
+        replacements: [['<circle cx="72" cy="154"', '<circle cx="143" cy="154"']],
+        markers: [[73, 93], [131, 105], [143, 154]],
+      },
+      {
+        // Dreieck andersherum (oben am Quadrat). Der Kreis muss mit im Bild
+        // sein, sonst wäre das Ergebnis doch mit dem Original erreichbar.
+        replacements: [['<polygon points="108,128 108,58 178,128"', '<polygon points="108,58 108,128 178,58"']],
+        markers: [[90, 93], [131, 82], [85, 160]],
       },
     ],
   },  {
