@@ -81,7 +81,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', version: 5, seed: 404, total: 12, unsolvable: ['error', 'error', 'swap'], layout: SCHNECKE_LAYOUT },
   { id: 'boot-1', name: 'Segelboot', motifId: 'boot', version: 5, seed: 505, total: 12, unsolvable: ['swap', 'error', 'swap'], layout: BOOT_LAYOUT },
   { id: 'auto-1', name: 'Auto', motifId: 'auto', version: 5, seed: 606, total: 12, unsolvable: ['swap', 'error', 'error'], layout: AUTO_LAYOUT },
-  { id: 'eichhoernchen-1', name: 'Eichhörnchen', motifId: 'eichhoernchen', version: 2, seed: 707, total: 12, unsolvable: ['error', 'error', 'error'], layout: EICHHOERNCHEN_LAYOUT },
+  { id: 'eichhoernchen-1', name: 'Eichhörnchen', motifId: 'eichhoernchen', version: 3, seed: 707, total: 12, unsolvable: ['error', 'error', 'error'], layout: EICHHOERNCHEN_LAYOUT },
 ];
 
 /** Auflösung, in der die Zielfiguren berechnet werden. */

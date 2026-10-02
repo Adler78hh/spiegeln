@@ -258,6 +258,7 @@ export const AUTO_LAYOUT: PlannedTarget[] = [
 
 /** Eichhörnchen: Nase, Augen-, Kopf- und Körpermitte, Punkte am Rand (Motivkoordinaten). */
 const SQ_NOSE: [number, number] = [44, 86];
+const SQ_NUT: [number, number] = [44, 122];
 const SQ_EYE: [number, number] = [70, 72];
 const SQ_HEAD: [number, number] = [80, 78];
 const SQ_BODY: [number, number] = [96, 136];
@@ -278,8 +279,9 @@ function cow(dx: number, kind: Kind = 'mirror', variant?: number): PlannedTarget
 export const EICHHOERNCHEN_LAYOUT: PlannedTarget[] = [
   // Senkrecht durch die Körpermitte, vordere Hälfte bleibt: Eichhörnchen von vorne.
   keeping(0, 0.05, 0, SQ_BODY, 90, [10, 100]),
-  // Die Kuh, Achse knapp hinter der Nase.
-  cow(0.02),
+  // Senkrecht durch die Nuss: zwei Eichhörnchen teilen sich eine Nuss
+  // (sehr breit, daher eigener Maßstab).
+  { ...keeping(0, 0.15, 0, SQ_NUT, 90, [190, 100]), ownScale: true },
   // Wie Nr. 7 (zwei Schwänze), aber mit zwei Augen, die geradeaus schauen.
   { ...keeping(0, -0.05, 0, SQ_HEAD, 90, [190, 100], 'error', 3), variantBoth: true },
   // Waagrecht durch die Bauchmitte, oben bleibt: zwei Eichhörnchen übereinander.
@@ -292,8 +294,8 @@ export const EICHHOERNCHEN_LAYOUT: PlannedTarget[] = [
   keeping(0, -0.05, 0, SQ_HEAD, 90, [190, 100]),
   // Die Kuh, Achse etwas weiter im Gesicht: Augen enger.
   cow(0.03),
-  // Waagrecht zwischen Kopf und Körper, unten bleibt.
-  keeping(0, 0, -0.05, [96, 104], 0, [96, 190]),
+  // Waagrecht durch die Körpermitte, unten bleibt: nur die beiden Unterteile.
+  keeping(0, 0, -0.1, SQ_BODY, 0, [96, 190]),
   // Wie Nr. 1, aber die Ohren ohne Pinsel.
   { ...keeping(0, 0.05, 0, SQ_BODY, 90, [10, 100], 'error', 2), variantBoth: true },
   // Diagonale durch die Kopfmitte.
