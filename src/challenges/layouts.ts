@@ -513,3 +513,38 @@ export const GESICHT_LAYOUT: PlannedTarget[] = [
   // fröhliches Gesicht mit zwei Augen und ohne Nase.
   keeping(0, 0, 0, [82, 100], 90, LEFT),
 ];
+
+/** BOA: Mitte des O, Lücken zwischen den Buchstaben, Mitte des A (Motivkoordinaten). */
+const O_MID: [number, number] = [100, 100];
+const GAP_BO: [number, number] = [67, 100];
+const GAP_OA: [number, number] = [133, 100];
+const A_MID: [number, number] = [166, 100];
+/** Knapp unter den Buchstaben. */
+const UNDER_WORD: [number, number] = [100, 152];
+
+export const BOA_LAYOUT: PlannedTarget[] = [
+  // Senkrecht durch das O, rechts bleibt: AOA.
+  keeping(0, 0, 0, O_MID, 90, RIGHT),
+  // Waagrecht durch die Mitte, oben bleibt: aus dem A wird eine Raute.
+  keeping(0, 0, 0, O_MID, 0, ABOVE),
+  // Senkrecht durch das O, links bleibt: BO und ein seitenverkehrtes B.
+  keeping(0, 0, 0, O_MID, 90, LEFT),
+  // „BOB“ mit zwei richtig herum geschriebenen B: Ein gespiegeltes B ist immer seitenverkehrt.
+  keeping(0, 0, 0, O_MID, 90, LEFT, 'error', 0),
+  // In der Lücke zwischen B und O, rechts bleibt: AOOA.
+  keeping(0, 0, 0, GAP_BO, 90, RIGHT),
+  // Knapp unter dem Wort, oben bleibt: darunter BO und ein A auf dem Kopf.
+  keeping(0, 0, -0.08, UNDER_WORD, 0, ABOVE),
+  // BOA über BOA (verschoben statt gespiegelt: das untere A steht nicht auf dem Kopf).
+  { ...keeping(0, 0, -0.08, UNDER_WORD, 0, ABOVE, 'translate'), gap: 0.02 },
+  // In der Lücke zwischen O und A, rechts bleibt: AA.
+  keeping(0, -0.04, 0, GAP_OA, 90, RIGHT),
+  // In der Lücke zwischen B und O, links bleibt: B und seitenverkehrtes B.
+  keeping(0, 0.04, 0, GAP_BO, 90, LEFT),
+  // Wie AA, aber einem A fehlt der Querstrich.
+  keeping(0, -0.04, 0, GAP_OA, 90, RIGHT, 'error', 1),
+  // Waagrecht durch die Mitte, unten bleibt.
+  keeping(0, 0, 0, O_MID, 0, BELOW),
+  // Senkrecht durch das A, links bleibt: BOAOB (das zweite B seitenverkehrt).
+  { ...keeping(0, -0.14, 0, A_MID, 90, LEFT), ownScale: true },
+];
