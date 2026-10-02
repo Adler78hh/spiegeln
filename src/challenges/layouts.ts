@@ -294,8 +294,8 @@ export const EICHHOERNCHEN_LAYOUT: PlannedTarget[] = [
   keeping(0, -0.05, 0, SQ_HEAD, 90, [190, 100]),
   // Die Kuh, Achse etwas weiter im Gesicht: Augen enger.
   cow(0.03),
-  // Waagrecht durch die Körpermitte, unten bleibt: nur die beiden Unterteile.
-  keeping(0, 0, -0.1, SQ_BODY, 0, [96, 190]),
+  // Waagrecht knapp unter dem Kopf, unten bleibt: nur die beiden Unterteile.
+  keeping(0, 0, -0.05, [96, 110], 0, [96, 190]),
   // Wie Nr. 1, aber die Ohren ohne Pinsel.
   { ...keeping(0, 0.05, 0, SQ_BODY, 90, [10, 100], 'error', 2), variantBoth: true },
   // Diagonale durch die Kopfmitte.
