@@ -59,6 +59,8 @@ function sideBySide(rotDeg: number, ox: number, oy: number, lineX: number): Plan
 /** Dachspitze und rechte untere Wandecke des Hauses (Motivkoordinaten). */
 const ROOF_TOP: [number, number] = [100, 16];
 const WALL_CORNER: [number, number] = [156, 184];
+/** Mitte des Fensters (Kreuzungspunkt der Fensterstreben). */
+const WINDOW_CENTER: [number, number] = [125, 130];
 
 export const HAUS_LAYOUT: PlannedTarget[] = [
   t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
@@ -73,7 +75,8 @@ export const HAUS_LAYOUT: PlannedTarget[] = [
   throughPoint('mirror', 15, -0.0129, 0.072, ...ROOF_TOP, 1),
   t('rotate', 225, 0.015, 0.0863, 15, 0.5, 0.5265, 1),
   t('mirror', 300, 0.0114, -0.0609, 105, 0.5261, 0.5, -1),
-  t('mirror', 180, -0.0755, -0.0653, 0, 0.5, 0.3429, -1),
+  // Achse durch die waagrechte Fensterstrebe: das Fenster erscheint ganz.
+  throughPoint('mirror', 180, -0.0755, -0.0653, ...WINDOW_CENTER, -1, 0),
   // Ganzes Haus neben dem ganzen Haus (eigener, kleinerer Maßstab).
   sideBySide(0, -0.2, 0, 0.51),
   t('mirror', 210, -0.0845, -0.0229, 165, 0.5, 0.3936, 1),
