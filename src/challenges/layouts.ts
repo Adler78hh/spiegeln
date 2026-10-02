@@ -435,3 +435,44 @@ export const WUERFEL_LAYOUT: PlannedTarget[] = [
   // Entlang der Außenkante links oben: Würfel verdoppelt nach links oben.
   keeping(0, 0.08, 0.08, CUBE.UL, deg(CUBE.UL, CUBE.T), CUBE.C),
 ];
+
+/** Buntstifte: Mitten der Stifte (Motivkoordinaten). */
+const PEN = {
+  magenta: [73.5, 145.9] as [number, number],
+  gruen: [47, 100] as [number, number],
+  cyan: [100, 100] as [number, number],
+  rot: [126.5, 54.1] as [number, number],
+  gelb: [153, 100] as [number, number],
+};
+/** Achse parallel zum Cyan-Stift in der Lücke daneben (Abstand 9,7 zur Stiftmitte). */
+const besideCyan = (dir: 1 | -1): [number, number] => [100 - dir * 9.7 * Math.sin(60 * DEG), 100 + dir * 9.7 * Math.cos(60 * DEG)];
+
+export const STIFTE_LAYOUT: PlannedTarget[] = [
+  // Senkrecht durch die Mitte des Magenta-Stifts, links bleibt:
+  // Dreieck aus zwei grünen Stiften, Magenta mit zwei Enden.
+  keeping(0, 0.05, -0.04, PEN.magenta, 90, [30, 140]),
+  // Längs mitten im Cyan-Stift, links bleibt.
+  keeping(0, 0, 0, PEN.cyan, 60, [20, 140]),
+  // Quer durch die Mitte des grünen Stifts: zwei Magenta-Stifte, Grün mit zwei Spitzen.
+  keeping(0, 0.04, -0.06, PEN.gruen, 30, [40, 150]),
+  // Wie das Dreieck aus Nr. 1, aber rechts bleibt – Magenta hätte zwei Spitzen;
+  // eingesetzt ist der gewöhnliche Stift mit einer Spitze.
+  keeping(0, 0, 0, PEN.magenta, 90, [180, 60], 'error', 0),
+  // Längs mitten im gelben Stift.
+  { ...keeping(0, 0, 0, PEN.gelb, -60, [20, 140]), ownScale: true },
+  // Senkrecht durch die Mitte des roten Stifts, rechts bleibt:
+  // zwei gelbe Stifte, Rot mit zwei Enden.
+  keeping(0, -0.05, 0.04, PEN.rot, 90, [170, 60]),
+  // Links neben dem Cyan-Stift, links bleibt: Raute aus Magenta und Grün.
+  keeping(0, 0.04, -0.03, besideCyan(1), 60, [20, 140]),
+  // Wie Nr. 3, aber Grün mit nur einer Spitze.
+  keeping(0, 0.04, -0.06, PEN.gruen, 30, [40, 150], 'error', 1),
+  // Quer durch die Mitte des gelben Stifts: zwei rote Stifte, Gelb mit zwei Spitzen.
+  keeping(0, -0.04, 0.06, PEN.gelb, 30, [170, 40]),
+  // Rechts neben dem Cyan-Stift, rechts bleibt: Raute aus Rot und Gelb.
+  keeping(0, -0.04, 0.03, besideCyan(-1), 60, [180, 60]),
+  // Wie Nr. 6, aber Rot mit nur einem Ende.
+  keeping(0, -0.05, 0.04, PEN.rot, 90, [170, 60], 'error', 2),
+  // Wie Nr. 3, aber gedreht: der grüne Stift liegt waagrecht.
+  keeping(240, 0, 0, PEN.gruen, 30, [40, 150]),
+];

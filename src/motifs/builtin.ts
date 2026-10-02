@@ -369,7 +369,13 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <g transform="translate(126.50 54.10) rotate(180.00)"><path d="M-36,-6.5 L22,-6.5 L22,6.5 L-36,6.5 Z" fill="#e2231a"/><path d="M22,-6.5 L36,0 L22,6.5 Z" fill="#f4d3ad"/><path d="M31.5,-2.09 L36,0 L31.5,2.09 Z" fill="#e2231a"/></g>
         <g transform="translate(153.00 100.00) rotate(-60.00)"><path d="M-36,-6.5 L22,-6.5 L22,6.5 L-36,6.5 Z" fill="#ffd600"/><path d="M22,-6.5 L36,0 L22,6.5 Z" fill="#f4d3ad"/><path d="M31.5,-2.09 L36,0 L31.5,2.09 Z" fill="#ffd600"/></g>
       </g>`),
-    errorVariants: [],
+    // Fehler: ein Stift umgedreht. Wird er an seiner Mitte gespiegelt, erscheint
+    // er dadurch wie ein gewöhnlicher Stift mit nur einer Spitze.
+    errorVariants: [
+      [['translate(73.50 145.90) rotate(0.00)', 'translate(73.50 145.90) rotate(180.00)']],
+      [['translate(47.00 100.00) rotate(120.00)', 'translate(47.00 100.00) rotate(300.00)']],
+      [['translate(126.50 54.10) rotate(180.00)', 'translate(126.50 54.10) rotate(0.00)']],
+    ],
     swapVariants: [],
   },
   {

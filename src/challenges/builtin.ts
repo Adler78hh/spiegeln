@@ -29,7 +29,7 @@ import {
   sampleFigure,
 } from '../render/composite';
 import { allOnOriginalSide, boundsCenter, candidateScenes, shuffle, solvableFirst, viewSizeFor, type CandidateOptions } from './generate';
-import { AUTO_LAYOUT, BOOT_LAYOUT, EICHHOERNCHEN_LAYOUT, HASEN_LAYOUT, WUERFEL_LAYOUT, TETRAKTYS_LAYOUT, FISCH_LAYOUT, FORMEN_LAYOUT, HAUS_LAYOUT, SCHNECKE_LAYOUT } from './layouts';
+import { AUTO_LAYOUT, BOOT_LAYOUT, EICHHOERNCHEN_LAYOUT, HASEN_LAYOUT, WUERFEL_LAYOUT, STIFTE_LAYOUT, TETRAKTYS_LAYOUT, FISCH_LAYOUT, FORMEN_LAYOUT, HAUS_LAYOUT, SCHNECKE_LAYOUT } from './layouts';
 import type { Store } from '../storage/store';
 import type { Challenge, Target, TargetKind } from './types';
 
@@ -84,6 +84,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'eichhoernchen-1', name: 'Eichhörnchen', motifId: 'eichhoernchen', version: 4, seed: 707, total: 12, unsolvable: ['error', 'error', 'error'], layout: EICHHOERNCHEN_LAYOUT },
   { id: 'hasen-1', name: 'Stoffhasen', motifId: 'hasen', version: 3, seed: 909, total: 12, unsolvable: ['swap', 'error', 'error'], layout: HASEN_LAYOUT },
   { id: 'wuerfel-1', name: 'Würfel', motifId: 'wuerfel', version: 1, seed: 1010, total: 12, unsolvable: ['rotate', 'error', 'translate'], layout: WUERFEL_LAYOUT },
+  { id: 'stifte-1', name: 'Buntstifte', motifId: 'stifte', version: 1, seed: 1111, total: 12, unsolvable: ['error', 'error', 'error'], layout: STIFTE_LAYOUT },
   { id: 'tetraktys-1', name: 'Tetraktys', motifId: 'tetraktys', version: 1, seed: 808, total: 20, unsolvable: [], layout: TETRAKTYS_LAYOUT },
 ];
 
