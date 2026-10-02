@@ -334,6 +334,28 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     ],
   },
   {
+    id: 'wuerfel',
+    name: 'Würfel',
+    // Isometrischer Würfel: Sechseck aus drei Rauten (60°/120°), Seitenlänge 60.
+    // Ecken: oben (100,40), rechts oben (152,70), rechts unten (152,130),
+    // unten (100,160), links unten (48,130), links oben (48,70), Mitte (100,100).
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="4" stroke-linejoin="round">
+        <polygon points="100,40 152,70 100,100 48,70" fill="#1fc8e0"/>
+        <polygon points="48,70 100,100 100,160 48,130" fill="#e6007e"/>
+        <polygon points="100,100 152,70 152,130 100,160" fill="#ffe500"/>
+      </g>`),
+    errorVariants: [
+      // Spiegelverkehrter Würfel (für „nur der Würfel selbst“: Original links,
+      // Spiegelbild davon ergibt die rechte Seite des Originals).
+      [
+        ['<g stroke="', '<g transform="translate(200 0) scale(-1 1)"><g stroke="'],
+        ['</g>', '</g></g>'],
+      ],
+    ],
+    swapVariants: [],
+  },
+  {
     id: 'tetraktys',
     name: 'Tetraktys',
     // Zehn Kreise im gleichseitigen Dreieck (Reihen zu 1, 2, 3, 4),

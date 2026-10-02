@@ -396,3 +396,42 @@ export const HASEN_LAYOUT: PlannedTarget[] = [
   // purzelt schräg nach unten weg.
   { ...keeping(0, 0.12, -0.14, [41, 178], 30, [150, 20]), ownScale: true },
 ];
+
+/** Würfel: Ecken des Sechsecks und Mitte (Motivkoordinaten). */
+const CUBE = {
+  T: [100, 40] as [number, number],
+  UR: [152, 70] as [number, number],
+  LR: [152, 130] as [number, number],
+  B: [100, 160] as [number, number],
+  LL: [48, 130] as [number, number],
+  UL: [48, 70] as [number, number],
+  C: [100, 100] as [number, number],
+};
+const deg = (p: [number, number], q: [number, number]) => (Math.atan2(q[1] - p[1], q[0] - p[0]) * 180) / Math.PI;
+
+export const WUERFEL_LAYOUT: PlannedTarget[] = [
+  // Senkrecht durch die Mitte, links bleibt: beide Seiten magenta.
+  keeping(0, 0, 0, CUBE.C, 90, LEFT),
+  // An der langen Diagonale der linken Raute.
+  keeping(0, 0.05, -0.03, CUBE.UL, deg(CUBE.UL, CUBE.B), [190, 60]),
+  // Würfel und daneben derselbe Würfel um 180° gedreht (wie Nr. 8, aber gedreht).
+  { ...keeping(0, -0.06, -0.06, CUBE.LR, deg(CUBE.LR, CUBE.B), CUBE.C, 'rotate'), pivot: [126, 145] },
+  // Entlang der rechten Außenkante: der ganze Würfel verdoppelt.
+  keeping(0, -0.1, 0, CUBE.UR, 90, LEFT),
+  // Waagrecht durch die lange Diagonale der oberen Raute, unten bleibt.
+  keeping(0, 0, 0.1, CUBE.UL, 0, BELOW),
+  // Entlang der Kante von der Mitte nach links unten, rechts oben bleibt.
+  keeping(0, 0, 0, CUBE.UR, deg(CUBE.UR, CUBE.LL), [150, 20]),
+  // Nur der Würfel selbst: Er ist nicht symmetrisch, kann also nicht entstehen.
+  keeping(0, 0, 0, CUBE.C, 90, LEFT, 'error', 0),
+  // Entlang der Außenkante rechts unten: Würfel verdoppelt nach rechts unten.
+  keeping(0, -0.08, -0.08, CUBE.LR, deg(CUBE.LR, CUBE.B), CUBE.C),
+  // An der langen Diagonale der rechten Raute.
+  keeping(0, -0.05, -0.03, CUBE.UR, deg(CUBE.UR, CUBE.B), [10, 60]),
+  // Wie Nr. 4, aber verschoben statt gespiegelt (beide Würfel gleich gefärbt).
+  keeping(0, -0.1, 0, CUBE.UR, 90, LEFT, 'translate'),
+  // Waagrecht durch die lange Diagonale der oberen Raute, oben bleibt: nur die obere Raute.
+  keeping(0, 0, 0.05, CUBE.UL, 0, ABOVE),
+  // Entlang der Außenkante links oben: Würfel verdoppelt nach links oben.
+  keeping(0, 0.08, 0.08, CUBE.UL, deg(CUBE.UL, CUBE.T), CUBE.C),
+];
