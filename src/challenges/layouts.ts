@@ -248,8 +248,8 @@ export const AUTO_LAYOUT: PlannedTarget[] = [
   keeping(0, -0.1, 0.05, REAR_SLOPE, 45, CAR_CENTER),
   // Senkrecht durch die Wagenmitte, hintere Hälfte bleibt: zwei Hecks.
   keeping(0, 0, 0, CAR_CENTER, 90, RIGHT),
-  // Zwei ganze Autos übereinander.
-  wholeBeside(0, 0, -0.15, 0, [0.5, 0.52], CAR_CENTER),
+  // Wie Nr. 9 (zwei Hecks), aber ganz ohne Türgriffe.
+  { ...keeping(0, 0, 0, CAR_CENTER, 90, RIGHT, 'error', 2), variantBoth: true },
   // Waagrecht unter dem Auto durch die Radmitten: Die Räder bleiben ganze Kreise.
   keeping(0, 0, -0.1, WHEEL_LINE, 0, ABOVE),
   // Senkrecht durch die Hinterachse, vorderer Teil bleibt: lange Limousine.

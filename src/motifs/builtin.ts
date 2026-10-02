@@ -204,7 +204,12 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <circle cx="146" cy="146" r="17" fill="#5b4636"/>
         <circle cx="146" cy="146" r="7" fill="#d9cdb8"/>
       </g>`),
-    errorVariants: [[['fill="#d7eef9"', 'fill="#ffd166"']], [['fill="#6fa8dc"', 'fill="#e0675f"']]],
+    errorVariants: [
+      [['fill="#d7eef9"', 'fill="#ffd166"']],
+      [['fill="#6fa8dc"', 'fill="#e0675f"']],
+      // Ohne Türgriff.
+      [['<line x1="104" y1="116" x2="116" y2="116"/>', '']],
+    ],
     swapVariants: [
       {
         // Scheinwerfer sitzt hinten statt vorne.
