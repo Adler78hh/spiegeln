@@ -7,6 +7,7 @@ import {
   figureTransform,
   halves,
   lineOf,
+  mirrorTransform,
   normal,
   rectCorners,
   scale,
@@ -142,6 +143,98 @@ export function drawComposite(
   return parts;
 }
 
+/**
+ * Farbumkehr beim Spiegeln:
+ * - 'silhouette': zweifarbig – Originalhälfte schwarze Figur auf Orange,
+ *   Spiegelhälfte orange Figur auf Schwarz (Figur und Grund tauschen).
+ * - 'negative': Originalhälfte unverändert, Spiegelhälfte als Negativ
+ *   (alle Farben umgekehrt, dunkler Grund).
+ */
+export type InvertMode = 'none' | 'silhouette' | 'negative';
+
+export const INVERT_COLORS = { light: '#f28c28', dark: '#1d1b19', negativeGround: '#2d2a26' };
+
+/** Figur einfarbig (nur ihre Form). */
+export function silhouetteOf(fig: HTMLCanvasElement, color: string, out = document.createElement('canvas')): HTMLCanvasElement {
+  out.width = fig.width;
+  out.height = fig.height;
+  const g = out.getContext('2d')!;
+  g.clearRect(0, 0, out.width, out.height);
+  g.drawImage(fig, 0, 0);
+  g.globalCompositeOperation = 'source-in';
+  g.fillStyle = color;
+  g.fillRect(0, 0, out.width, out.height);
+  g.globalCompositeOperation = 'source-over';
+  return out;
+}
+
+/** Figur mit umgekehrten Farben (Transparenz bleibt). */
+export function negativeOf(fig: HTMLCanvasElement, out = document.createElement('canvas')): HTMLCanvasElement {
+  out.width = fig.width;
+  out.height = fig.height;
+  const g = out.getContext('2d')!;
+  g.clearRect(0, 0, out.width, out.height);
+  g.drawImage(fig, 0, 0);
+  try {
+    const d = g.getImageData(0, 0, out.width, out.height);
+    const a = d.data;
+    for (let i = 0; i < a.length; i += 4) {
+      a[i] = 255 - a[i];
+      a[i + 1] = 255 - a[i + 1];
+      a[i + 2] = 255 - a[i + 2];
+    }
+    g.putImageData(d, 0, 0);
+  } catch {
+    // Ohne Pixelzugriff bleibt die Figur unverändert.
+  }
+  return out;
+}
+
+/** Vorbereitete Figuren für eine Farbumkehr (einmal pro Bild berechnen). */
+export interface InvertBuffers {
+  dark: HTMLCanvasElement;
+  light: HTMLCanvasElement;
+  negative: HTMLCanvasElement;
+}
+
+export function invertBuffers(fig: HTMLCanvasElement): InvertBuffers {
+  return {
+    dark: silhouetteOf(fig, INVERT_COLORS.dark),
+    light: silhouetteOf(fig, INVERT_COLORS.light),
+    negative: negativeOf(fig),
+  };
+}
+
+/**
+ * Zeichnet Hintergrund und gespiegelte Figur mit Farbumkehr (normierte
+ * Koordinaten, Fläche 0…1). Bei 'none' wie gewohnt.
+ */
+export function drawInvertedComposite(
+  ctx: CanvasRenderingContext2D,
+  scene: Scene,
+  fig: HTMLCanvasElement,
+  mode: InvertMode,
+  buffers: InvertBuffers | null,
+): { original: Vec2[]; mirror: Vec2[] } {
+  const parts = halves(scene.mirror, UNIT_RECT);
+  const t = mirrorTransform(scene.mirror);
+  if (mode === 'none' || !buffers) {
+    ctx.fillStyle = AREA_COLOR;
+    ctx.fillRect(0, 0, 1, 1);
+    return drawComposite(ctx, scene, fig, fig, t);
+  }
+  const [groundOriginal, groundMirror] =
+    mode === 'silhouette' ? [INVERT_COLORS.light, INVERT_COLORS.dark] : [AREA_COLOR, INVERT_COLORS.negativeGround];
+  ctx.fillStyle = groundOriginal;
+  pathPolygon(ctx, parts.original);
+  ctx.fill();
+  ctx.fillStyle = groundMirror;
+  pathPolygon(ctx, parts.mirror);
+  ctx.fill();
+  const [first, other] = mode === 'silhouette' ? [buffers.dark, buffers.light] : [fig, buffers.negative];
+  return drawComposite(ctx, scene, first, other, t);
+}
+
 /** Rendert eine zusammengesetzte Figur als eigenständiges Bild. */
 export function renderComposite(
   px: number,
@@ -158,6 +251,17 @@ export function renderComposite(
   ctx.fillStyle = AREA_COLOR;
   ctx.fillRect(0, 0, 1, 1);
   drawComposite(ctx, scene, originalFigure, otherFigure, other);
+  return c;
+}
+
+/** Wie `renderComposite`, aber mit Farbumkehr (Hintergrund gehört dazu). */
+export function renderInvertedComposite(px: number, scene: Scene, fig: HTMLCanvasElement, mode: InvertMode): HTMLCanvasElement {
+  const c = document.createElement('canvas');
+  c.width = px;
+  c.height = px;
+  const ctx = c.getContext('2d')!;
+  ctx.setTransform(px, 0, 0, px, 0, 0);
+  drawInvertedComposite(ctx, scene, fig, mode, mode === 'none' ? null : invertBuffers(fig));
   return c;
 }
 

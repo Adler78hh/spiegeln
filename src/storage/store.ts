@@ -11,6 +11,7 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Answer, Challenge, ChallengeAnswers } from '../challenges/types';
 import type { Scene } from '../geometry';
+import type { InvertMode } from '../render/composite';
 import { ANIMAL_ORDER, ANIMALS, DEFAULT_ANIMALS, type AnimalId } from '../profiles/animals';
 import { findColor } from '../profiles/colors';
 
@@ -19,9 +20,11 @@ export interface ToolPrefs {
   showOutline: boolean;
   /** Spiegelachse ausblenden (Anfasspunkte bleiben sichtbar). */
   hideLine: boolean;
+  /** Farbumkehr im freien Spiegeln. */
+  invert: InvertMode;
 }
 
-export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false };
+export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false, invert: 'none' };
 
 export interface Group {
   id: string;

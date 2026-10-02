@@ -16,6 +16,7 @@ import {
   type Vec2,
 } from '../geometry';
 import { isTap, movedDistance, type PointerSample } from '../input/tap';
+import type { InvertMode } from '../render/composite';
 import { MirrorRenderer } from '../render/MirrorRenderer';
 
 /** Radius der Touch-Fläche eines Anfasspunkts (CSS-Pixel), Durchmesser ≥ 48 px. */
@@ -41,6 +42,8 @@ export interface MirrorCanvasProps {
   showOutline: boolean;
   /** Spiegelachse ausblenden (Anfasspunkte bleiben sichtbar und ziehbar). */
   hideLine?: boolean;
+  /** Farbumkehr im Spiegelbild. */
+  invert?: InvertMode;
 }
 
 type Gesture =
@@ -84,6 +87,7 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
         active: g?.kind === 'handle' ? g.which : g?.kind === 'line' ? 'line' : null,
         showOutline: propsRef.current.showOutline,
         hideLine: propsRef.current.hideLine,
+        invert: propsRef.current.invert,
       });
     });
   };
@@ -117,7 +121,7 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
   useEffect(() => {
     if (!gestureRef.current) sceneRef.current = props.scene;
     requestDraw();
-  }, [props.scene, props.showOutline, props.hideLine]);
+  }, [props.scene, props.showOutline, props.hideLine, props.invert]);
 
   const local = (e: React.PointerEvent): { css: Vec2; norm: Vec2 } => {
     const rect = canvasRef.current!.getBoundingClientRect();

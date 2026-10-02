@@ -208,3 +208,23 @@ export const ThumbsUpIcon = ({ size = 32 }: { size?: number }) => (
     <path d="M7 10l4-7c1.5 0 2.5 1.2 2.2 2.7L12.5 9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7" />
   </Icon>
 );
+
+/** Zweifarbige Umkehr: Form schwarz auf Farbe, gespiegelt Farbe auf Schwarz. */
+export const InvertTwoToneIcon = () => (
+  <svg viewBox="0 0 24 24" width={32} height={32} aria-hidden="true">
+    <rect x="2.5" y="3.5" width="9.5" height="17" rx="1.5" fill="#f28c28" />
+    <rect x="12" y="3.5" width="9.5" height="17" rx="1.5" fill="#1d1b19" />
+    <path d="M12 7a5 5 0 0 0 0 10z" fill="#1d1b19" />
+    <path d="M12 7a5 5 0 0 1 0 10z" fill="#f28c28" />
+  </svg>
+);
+
+/** Negativ: Spiegelhälfte mit umgekehrten Farben. */
+export const InvertNegativeIcon = () => (
+  <svg viewBox="0 0 24 24" width={32} height={32} aria-hidden="true">
+    <rect x="2.5" y="3.5" width="9.5" height="17" rx="1.5" fill="#fffdf8" stroke="#5b4636" strokeWidth="1.5" />
+    <rect x="12" y="3.5" width="9.5" height="17" rx="1.5" fill="#2d2a26" />
+    <path d="M12 7a5 5 0 0 0 0 10z" fill="#f28c28" />
+    <path d="M12 7a5 5 0 0 1 0 10z" fill="#0d73d7" />
+  </svg>
+);

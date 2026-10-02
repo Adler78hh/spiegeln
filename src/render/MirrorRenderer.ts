@@ -10,13 +10,12 @@ import {
   clipLineToRect,
   figureTransform,
   lineOf,
-  mirrorTransform,
   UNIT_RECT,
   type FigureState,
   type MirrorState,
   type Vec2,
 } from '../geometry';
-import { AREA_COLOR, createFigureBuffer, drawComposite, pathPolygon } from './composite';
+import { AREA_COLOR, createFigureBuffer, drawInvertedComposite, invertBuffers, pathPolygon, type InvertBuffers, type InvertMode } from './composite';
 
 export const COLORS = {
   area: AREA_COLOR,
@@ -39,6 +38,8 @@ export interface RenderInput {
   showOutline?: boolean;
   /** Spiegelachse ausblenden; die Anfasspunkte bleiben sichtbar. */
   hideLine?: boolean;
+  /** Farbumkehr im Spiegelbild (nur freies Spiegeln). */
+  invert?: InvertMode;
 }
 
 export interface Layout {
@@ -56,6 +57,8 @@ export class MirrorRenderer {
   private figureKey = '';
   /** Umriss der Figur in Signalfarbe (zum Überprüfen fehlender Teile). */
   private outline = document.createElement('canvas');
+  /** Einfarbige und negative Fassungen der Figur, erst bei Bedarf berechnet. */
+  private inverted: InvertBuffers | null = null;
   private image: CanvasImageSource | null = null;
   private imageAspect = 1;
   private imageVersion = 0;
@@ -96,6 +99,7 @@ export class MirrorRenderer {
     const key = `${px}|${this.imageVersion}`;
     if (key === this.figureKey) return;
     this.figureKey = key;
+    this.inverted = null;
     if (!this.image) {
       this.figure.width = px;
       this.figure.height = px;
@@ -138,10 +142,9 @@ export class MirrorRenderer {
     ctx.setTransform(s, 0, 0, s, this.dpr * pad, this.dpr * pad);
     const px = 1 / area; // ein CSS-Pixel in normierten Einheiten
 
-    ctx.fillStyle = COLORS.area;
-    ctx.fillRect(0, 0, 1, 1);
-
-    const { mirror } = drawComposite(ctx, input, this.figure, this.figure, mirrorTransform(input.mirror));
+    const invert = input.invert ?? 'none';
+    if (invert !== 'none' && !this.inverted) this.inverted = invertBuffers(this.figure);
+    const { mirror } = drawInvertedComposite(ctx, input, this.figure, invert, this.inverted);
 
     // Dezenter "Glas"-Saum auf der Spiegelseite entlang der Geraden
     if (!input.hideLine) this.drawGlassEdge(input.mirror, mirror, px);
