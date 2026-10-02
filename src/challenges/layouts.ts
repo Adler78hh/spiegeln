@@ -156,27 +156,39 @@ export const FORMEN_LAYOUT: PlannedTarget[] = [
   keeping(90, 0, 0, TRIANGLE_TOP, 45, SQUARE_CENTER),
 ];
 
-/** Schnecke: Mitte des Hauses, ein Punkt oben rechts im Haus, Mitte der Schnecke (Motivkoordinaten). */
+/** Schnecke: Kopf-, Haus- und Körpermitte, Punkte links/rechts/oben/unten (Motivkoordinaten). */
 const SHELL_CENTER: [number, number] = [118, 100];
 const SHELL_UPPER_RIGHT: [number, number] = [150, 70];
 const SNAIL_CENTER: [number, number] = [104, 110];
+const HEAD_CENTER: [number, number] = [49, 120];
+const FOOT_CENTER: [number, number] = [118, 152.5];
+const LEFT: [number, number] = [10, 120];
+const RIGHT: [number, number] = [190, 120];
+const ABOVE: [number, number] = [118, 60];
+const BELOW: [number, number] = [118, 190];
 
 export const SCHNECKE_LAYOUT: PlannedTarget[] = [
-  t('mirror', 225, -0.0084, 0.0159, 120, 0.5277, 0.49, 1),
+  // Ohne Drehung, senkrecht durch die Mitte des Hauses, linke Seite bleibt.
+  keeping(0, 0.05, 0, SHELL_CENTER, 90, LEFT),
   t('mirror', 135, 0.0584, 0.0594, 150, 0.5, 0.5542, -1),
   // Nur das Schneckenhaus als Kreis: Ohne Fühler ginge das, mit dem echten
   // Motiv kommt bei jeder Achse durch die Hausmitte ein Fühler oder das
   // Körperende mit ins Bild.
   { ...keeping(0, 0, 0, SHELL_CENTER, 30, SHELL_UPPER_RIGHT, 'error', 2), variantBoth: true },
-  t('mirror', 105, -0.0159, -0.0204, 165, 0.5, 0.4227, -1),
-  t('mirror', 180, -0.026, 0.0928, 15, 0.5052, 0.5715, 1),
+  // Ohne Drehung, senkrecht durch die Kopfmitte, rechte Seite bleibt.
+  keeping(0, 0.1, 0, HEAD_CENTER, 90, RIGHT),
+  // Ohne Drehung, waagrecht durch die Mitte des Körpers, obere Seite bleibt.
+  keeping(0, 0, -0.1, FOOT_CENTER, 0, ABOVE),
   t('mirror', 270, -0.087, -0.0136, 90, 0.4163, 0.5, -1),
   // Zwei ganze Schnecken übereinander.
   wholeBeside(0, 0, -0.19, 0, [0.5, 0.53], SNAIL_CENTER),
   t('mirror', 90, 0.0504, -0.0779, 75, 0.5078, 0.5, -1),
-  // Farben von Haus und Körper vertauscht.
-  t('swap', 150, 0.0998, -0.0536, 30, 0.49, 0.3946, 1),
-  t('mirror', 285, 0.0541, 0.047, 45, 0.4994, 0.5006, 1),
-  t('mirror', 15, -0.0795, 0.0111, 120, 0.4528, 0.5, 1),
-  t('mirror', 90, -0.0725, 0.0415, 60, 0.3248, 0.5, -1),
+  // Wie Nr. 1, aber Farben von Haus und Körper vertauscht.
+  keeping(0, 0.05, 0, SHELL_CENTER, 90, LEFT, 'swap'),
+  // Ohne Drehung, senkrecht durch die Mitte des Hauses, rechte Seite bleibt.
+  keeping(0, -0.05, 0, SHELL_CENTER, 90, RIGHT),
+  // Ohne Drehung, senkrecht durch die Kopfmitte, linke Seite bleibt.
+  keeping(0, 0.1, 0, HEAD_CENTER, 90, LEFT),
+  // Ohne Drehung, waagrecht durch die Mitte des Körpers, untere Seite bleibt.
+  keeping(0, 0, 0, FOOT_CENTER, 0, BELOW),
 ];
