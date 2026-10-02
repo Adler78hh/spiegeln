@@ -85,7 +85,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'hasen-1', name: 'Stoffhasen', motifId: 'hasen', version: 3, seed: 909, total: 12, unsolvable: ['swap', 'error', 'error'], layout: HASEN_LAYOUT },
   { id: 'wuerfel-1', name: 'Würfel', motifId: 'wuerfel', version: 1, seed: 1010, total: 12, unsolvable: ['rotate', 'error', 'translate'], layout: WUERFEL_LAYOUT },
   { id: 'stifte-1', name: 'Buntstifte', motifId: 'stifte', version: 1, seed: 1111, total: 12, unsolvable: ['error', 'error', 'error'], layout: STIFTE_LAYOUT },
-  { id: 'gesicht-1', name: 'Gesicht', motifId: 'gesicht', version: 2, seed: 1212, total: 12, unsolvable: ['error', 'translate', 'error'], layout: GESICHT_LAYOUT },
+  { id: 'gesicht-1', name: 'Gesicht', motifId: 'gesicht', version: 3, seed: 1212, total: 12, unsolvable: ['error', 'rotate', 'error'], layout: GESICHT_LAYOUT },
   { id: 'tetraktys-1', name: 'Tetraktys', motifId: 'tetraktys', version: 1, seed: 808, total: 20, unsolvable: [], layout: TETRAKTYS_LAYOUT },
 ];
 

@@ -482,6 +482,8 @@ const NOSE: [number, number] = [100, 100];
 const EYE_LEFT: [number, number] = [68, 78];
 
 const EYE_RIGHT: [number, number] = [132, 78];
+/** Punkt links am Kinn, knapp innerhalb des Kopfkreises. */
+const CHIN_LEFT: [number, number] = [52, 148];
 
 export const GESICHT_LAYOUT: PlannedTarget[] = [
   // Senkrecht durch die Nase, links bleibt: fröhlich.
@@ -498,8 +500,9 @@ export const GESICHT_LAYOUT: PlannedTarget[] = [
   keeping(0, 0, 0, EYE_RIGHT, 90, LEFT),
   // Diagonal durch das linke Auge: zwei Gesichter schräg übereinander.
   keeping(0, 0, 0, EYE_LEFT, -45, [180, 180]),
-  // Ganzes Gesicht neben dem ganzen Gesicht (Verschiebung, eigener Maßstab).
-  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
+  // Drehsymmetrie: das zweite Gesicht steht auf dem Kopf und hängt links
+  // am Kinn mit dem ersten zusammen (Drehung um einen Punkt am Kinn).
+  { ...keeping(0, 0.06, -0.06, CHIN_LEFT, 45, [180, 20], 'rotate'), pivot: CHIN_LEFT },
   // Waagrecht durch die Nase, unten bleibt: der Mund wird oben zur Locke.
   keeping(0, 0, 0, NOSE, 0, BELOW),
   // Waagrecht durch die Augen, unten bleibt: langes Gesicht mit zwei Nasen.
