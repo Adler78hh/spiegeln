@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { ChallengeIcon, ListIcon, PeopleIcon, PhotoIcon } from '../icons';
+import { ChallengeIcon, PeopleIcon, PhotoIcon } from '../icons';
 
-export type AdultSection = 'profiles' | 'motifs' | 'challenges' | 'results';
+export type AdultSection = 'groups' | 'motifs' | 'challenges';
 
 interface Props {
   onOpen: (s: AdultSection) => void;
@@ -11,9 +11,8 @@ interface Props {
 /** Startseite des Erwachsenenbereichs. */
 export function AdultHome({ onOpen, onExit }: Props) {
   const tiles: Array<{ id: AdultSection; label: string; icon: ReactNode; hint: string }> = [
-    { id: 'results', label: 'Ergebnisse', icon: <ListIcon size={56} />, hint: 'Eingaben der Kinder ansehen' },
+    { id: 'groups', label: 'Gruppen', icon: <PeopleIcon size={56} />, hint: 'Kinder und Ergebnisse je Gruppe' },
     { id: 'challenges', label: 'Herausforderungen', icon: <ChallengeIcon size={56} />, hint: 'Eigene erstellen und bearbeiten' },
-    { id: 'profiles', label: 'Profile', icon: <PeopleIcon size={56} />, hint: 'Umbenennen, anlegen, löschen' },
     { id: 'motifs', label: 'Eigene Motive', icon: <PhotoIcon size={56} />, hint: 'Fotos und Zeichnungen verwalten' },
   ];
   return (

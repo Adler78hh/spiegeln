@@ -1,82 +1,129 @@
 import { useEffect, useState } from 'react';
 import type { Answer, Challenge, ChallengeAnswers } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
-import { animalImageUrl } from '../../profiles/animals';
-import type { Profile, Store } from '../../storage/store';
-import { CheckIcon, CrossIcon } from '../icons';
+import { checkAnswers } from '../../challenges/check';
+import { findColor, tintOf } from '../../profiles/colors';
+import type { Group, Profile, Store } from '../../storage/store';
+import { ProfileImage } from '../Avatar';
+import { BackIcon, CheckIcon, CrossIcon } from '../icons';
 import { MirrorCanvas } from '../MirrorCanvas';
 import { useMotifImage } from '../useMotifImage';
-import { AdultPage } from './AdultPage';
 
 interface Props {
   store: Store;
+  group: Group;
+  /** Kinder der Gruppe. */
   profiles: Profile[];
   challenges: Challenge[];
   motifs: MotifInfo[];
-  onBack: () => void;
+  /** Gewählte Zelle (Kind × Herausforderung), vom Elternteil gehalten. */
+  open: { profileId: string; challengeId: string } | null;
+  onOpen: (cell: { profileId: string; challengeId: string } | null) => void;
 }
 
-/** Ergebnisübersicht: Profil → Herausforderung → Eingaben je Zielfigur. */
-export function Results({ store, profiles, challenges, motifs, onBack }: Props) {
-  const [profileId, setProfileId] = useState<string | null>(null);
-  const [challengeId, setChallengeId] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<Record<string, ChallengeAnswers>>({});
-  const [detail, setDetail] = useState<{ targetIndex: number; answer: Answer } | null>(null);
+/** Ergebnisse einer Gruppe: Kinder × Herausforderungen, Antippen zeigt Details. */
+export function Results({ store, group, profiles, challenges, motifs, open, onOpen }: Props) {
+  const [answers, setAnswers] = useState<Record<string, Record<string, ChallengeAnswers>> | null>(null);
+  const tint = tintOf(findColor(group.color).hex);
 
   useEffect(() => {
-    if (profileId) store.getAnswers(profileId).then(setAnswers);
-  }, [store, profileId]);
+    let alive = true;
+    Promise.all(profiles.map(async (p) => [p.id, await store.getAnswers(p.id)] as const)).then((all) => {
+      if (alive) setAnswers(Object.fromEntries(all));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [store, profiles]);
 
-  const profile = profiles.find((p) => p.id === profileId);
-  const challenge = challenges.find((c) => c.id === challengeId);
+  if (!answers) return null;
 
-  if (!profile) {
+  const profile = open && profiles.find((p) => p.id === open.profileId);
+  const challenge = open && challenges.find((c) => c.id === open.challengeId);
+  if (profile && challenge) {
     return (
-      <AdultPage title="Ergebnisse: Profil wählen" onBack={onBack}>
-        <div className="result-profiles">
-          {profiles.map((p) => (
-            <button key={p.id} className="profile-tile small" onClick={() => setProfileId(p.id)}>
-              <img src={animalImageUrl(p.animal)} alt="" />
-              <span>{p.name}</span>
-            </button>
-          ))}
-        </div>
-      </AdultPage>
+      <ChallengeResult
+        profile={profile}
+        challenge={challenge}
+        answers={answers[profile.id]?.[challenge.id] ?? {}}
+        motif={motifs.find((m) => m.id === challenge.motifId)}
+        onBack={() => onOpen(null)}
+      />
     );
   }
 
-  if (!challenge) {
-    return (
-      <AdultPage title={`Ergebnisse von ${profile.name}`} onBack={() => setProfileId(null)}>
-        <ul className="manage-list">
-          {challenges.map((c) => {
-            const a = answers[c.id] ?? {};
-            const fits = c.targets.filter((t) => a[t.id]?.decision === 'fits').length;
-            const impossible = c.targets.filter((t) => a[t.id]?.decision === 'impossible').length;
-            const open = c.targets.length - fits - impossible;
-            const motif = motifs.find((m) => m.id === c.motifId);
-            return (
-              <li key={c.id}>
-                <button className="manage-row as-button" onClick={() => setChallengeId(c.id)}>
-                  {motif && <img className="motif-thumb" src={motif.src} alt="" />}
-                  <strong className="row-title">{c.name}</strong>
-                  <span className="row-meta">
-                    {fits} Passt · {impossible} Geht nicht · {open} noch offen
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </AdultPage>
-    );
-  }
-
-  const a = answers[challenge.id] ?? {};
-  const motif = motifs.find((m) => m.id === challenge.motifId);
+  if (profiles.length === 0) return <p className="empty">In dieser Gruppe gibt es noch keine Kinder.</p>;
 
   return (
-    <AdultPage title={`${profile.name}: ${challenge.name}`} onBack={() => setChallengeId(null)}>
+    <>
+      <div className="matrix-scroll">
+        <table className="result-matrix">
+          <thead>
+            <tr>
+              <th className="kid-col">Kind</th>
+              {challenges.map((c) => {
+                const motif = motifs.find((m) => m.id === c.motifId);
+                return (
+                  <th key={c.id}>
+                    {motif && <img className="matrix-motif" src={motif.src} alt="" />}
+                    <span>{c.name}</span>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {profiles.map((p) => (
+              <tr key={p.id}>
+                <th className="kid-col" scope="row">
+                  <span className="matrix-kid">
+                    <span className="matrix-avatar" style={{ background: tint }}>
+                      <ProfileImage profile={p} />
+                    </span>
+                    {p.name}
+                  </span>
+                </th>
+                {challenges.map((c) => {
+                  const a = answers[p.id]?.[c.id];
+                  const started = a && c.targets.some((t) => a[t.id]);
+                  const result = started ? checkAnswers(c, a) : null;
+                  return (
+                    <td key={c.id}>
+                      <button
+                        className={`matrix-cell ${result ? '' : 'empty-cell'}`}
+                        aria-label={`${p.name}, ${c.name}: ${result ? `richtig ${result.correct} von ${result.total}` : 'noch nicht begonnen'}`}
+                        onClick={() => onOpen({ profileId: p.id, challengeId: c.id })}
+                      >
+                        {result ? `richtig ${result.correct}/${result.total}` : '–'}
+                      </button>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="hint">„richtig“ zählt die Entscheidungen „Passt“/„Geht nicht“, die stimmen; offene Figuren zählen als nicht richtig. Ein Feld antippen für die Einzelheiten.</p>
+    </>
+  );
+}
+
+/** Eingaben eines Kindes zu einer Herausforderung, je Zielfigur. */
+function ChallengeResult(props: { profile: Profile; challenge: Challenge; answers: ChallengeAnswers; motif: MotifInfo | undefined; onBack: () => void }) {
+  const { profile, challenge, answers: a, motif, onBack } = props;
+  const [detail, setDetail] = useState<{ targetIndex: number; answer: Answer } | null>(null);
+
+  return (
+    <div className="challenge-result">
+      <div className="sub-header">
+        <button className="tool-btn" aria-label="Zurück zur Übersicht" onClick={onBack}>
+          <BackIcon />
+        </button>
+        <h2>
+          {profile.name}: {challenge.name}
+        </h2>
+      </div>
       <table className="result-table">
         <thead>
           <tr>
@@ -126,7 +173,7 @@ export function Results({ store, profiles, challenges, motifs, onBack }: Props) 
           onClose={() => setDetail(null)}
         />
       )}
-    </AdultPage>
+    </div>
   );
 }
 

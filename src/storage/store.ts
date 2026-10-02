@@ -2,7 +2,8 @@
  * Lokale Speicherung im Gerät (IndexedDB). Keine Daten verlassen das Gerät.
  *
  * Stores:
- * - profiles:   Profile der Kinder
+ * - groups:     Gruppen (z. B. Klassen), jede mit eigener Farbe
+ * - profiles:   Profile der Kinder, jedes in genau einer Gruppe
  * - answers:    Eingaben pro Profil × Herausforderung × Zielfigur
  * - snapshots:  gemerkte Figuren aus dem freien Spiegeln, pro Profil
  * - challenges: Herausforderungen (vorinstalliert und selbst erstellt)
@@ -10,7 +11,8 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Answer, Challenge, ChallengeAnswers } from '../challenges/types';
 import type { Scene } from '../geometry';
-import { DEFAULT_ANIMALS, type AnimalId } from '../profiles/animals';
+import { ANIMAL_ORDER, ANIMALS, DEFAULT_ANIMALS, type AnimalId } from '../profiles/animals';
+import { findColor } from '../profiles/colors';
 
 export interface ToolPrefs {
   snap: boolean;
@@ -21,10 +23,21 @@ export interface ToolPrefs {
 
 export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false };
 
-export interface Profile {
+export interface Group {
   id: string;
   name: string;
-  animal: AnimalId;
+  /** Farbe (siehe GROUP_COLORS), nach dem Anlegen fest. */
+  color: string;
+  order: number;
+  createdAt: number;
+}
+
+export interface Profile {
+  id: string;
+  groupId: string;
+  name: string;
+  /** Tier im Profilbild; null = Anfangsbuchstaben des Namens. */
+  animal: AnimalId | null;
   /** Reihenfolge in der Profilauswahl. */
   order: number;
   prefs: ToolPrefs;
@@ -60,6 +73,7 @@ interface AnswerRecord extends Answer {
 }
 
 interface SpiegelnSchema extends DBSchema {
+  groups: { key: string; value: Group };
   profiles: { key: string; value: Profile };
   answers: {
     key: [string, string, string];
@@ -72,7 +86,7 @@ interface SpiegelnSchema extends DBSchema {
 }
 
 export const DB_NAME = 'spiegeln';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 export function newId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -97,6 +111,9 @@ export class Store {
         if (oldVersion < 2) {
           db.createObjectStore('motifs', { keyPath: 'id' });
         }
+        if (oldVersion < 3) {
+          db.createObjectStore('groups', { keyPath: 'id' });
+        }
       },
     });
     return new Store(db);
@@ -104,6 +121,61 @@ export class Store {
 
   close(): void {
     this.db.close();
+  }
+
+  // ---------- Gruppen ----------
+
+  async listGroups(): Promise<Group[]> {
+    const all = await this.db.getAll('groups');
+    return all.sort((a, b) => a.order - b.order || a.createdAt - b.createdAt);
+  }
+
+  /**
+   * Beim ersten Start: Gruppe „Weiß“ mit den 10 Tierprofilen. Profile aus
+   * älteren Versionen (noch ohne Gruppe) kommen in die erste Gruppe.
+   */
+  async ensureDefaults(): Promise<{ groups: Group[]; profiles: Profile[] }> {
+    let groups = await this.listGroups();
+    if (groups.length === 0) {
+      const weiss = findColor('weiss');
+      const group: Group = { id: newId(), name: weiss.name, color: weiss.id, order: 0, createdAt: Date.now() };
+      await this.db.put('groups', group);
+      groups = [group];
+      if ((await this.db.count('profiles')) === 0) {
+        await this.addProfiles(group.id, DEFAULT_ANIMALS.map((a) => a.id), 0);
+      }
+    }
+    const tx = this.db.transaction('profiles', 'readwrite');
+    let cursor = await tx.store.openCursor();
+    while (cursor) {
+      if (!cursor.value.groupId) await cursor.update({ ...cursor.value, groupId: groups[0].id });
+      cursor = await cursor.continue();
+    }
+    await tx.done;
+    return { groups, profiles: await this.listProfiles() };
+  }
+
+  /** Neue Gruppe mit den ersten `count` Tieren in fester Reihenfolge. */
+  async createGroup(name: string, color: string, count: number): Promise<Group> {
+    const groups = await this.listGroups();
+    const order = groups.reduce((m, g) => Math.max(m, g.order), -1) + 1;
+    const group: Group = { id: newId(), name: name.trim() || findColor(color).name, color, order, createdAt: Date.now() };
+    await this.db.put('groups', group);
+    const n = Math.max(1, Math.min(ANIMAL_ORDER.length, Math.round(count)));
+    await this.addProfiles(group.id, ANIMAL_ORDER.slice(0, n).map((a) => a.id), 0);
+    return group;
+  }
+
+  async renameGroup(id: string, name: string): Promise<void> {
+    const g = await this.db.get('groups', id);
+    if (g && name.trim()) await this.db.put('groups', { ...g, name: name.trim() });
+  }
+
+  /** Löscht eine Gruppe mit allen Kindern, Antworten und Schnappschüssen. */
+  async deleteGroup(id: string): Promise<void> {
+    const profiles = (await this.listProfiles()).filter((p) => p.groupId === id);
+    for (const p of profiles) await this.deleteProfile(p.id);
+    await this.db.delete('groups', id);
   }
 
   // ---------- Profile ----------
@@ -116,25 +188,21 @@ export class Store {
       .sort((a, b) => a.order - b.order || a.createdAt - b.createdAt);
   }
 
-  /** Legt beim ersten Start die 10 Tierprofile an. */
-  async ensureDefaultProfiles(): Promise<Profile[]> {
-    if ((await this.db.count('profiles')) === 0) {
-      const tx = this.db.transaction('profiles', 'readwrite');
-      const now = Date.now();
-      await Promise.all(
-        DEFAULT_ANIMALS.map((a, i) =>
-          tx.store.put({ id: newId(), name: a.name, animal: a.id, order: i, prefs: DEFAULT_PREFS, createdAt: now + i }),
-        ),
-      );
-      await tx.done;
-    }
-    return this.listProfiles();
+  private async addProfiles(groupId: string, animals: AnimalId[], firstOrder: number): Promise<void> {
+    const tx = this.db.transaction('profiles', 'readwrite');
+    const now = Date.now();
+    await Promise.all(
+      animals.map((a, i) =>
+        tx.store.put({ id: newId(), groupId, name: ANIMALS[a].name, animal: a, order: firstOrder + i, prefs: DEFAULT_PREFS, createdAt: now + i }),
+      ),
+    );
+    await tx.done;
   }
 
-  async createProfile(name: string, animal: AnimalId): Promise<Profile> {
-    const profiles = await this.listProfiles();
+  async createProfile(groupId: string, name: string, animal: AnimalId | null): Promise<Profile> {
+    const profiles = (await this.listProfiles()).filter((p) => p.groupId === groupId);
     const order = profiles.reduce((m, p) => Math.max(m, p.order), -1) + 1;
-    const profile: Profile = { id: newId(), name: name.trim(), animal, order, prefs: DEFAULT_PREFS, createdAt: Date.now() };
+    const profile: Profile = { id: newId(), groupId, name: name.trim(), animal, order, prefs: DEFAULT_PREFS, createdAt: Date.now() };
     await this.db.put('profiles', profile);
     return profile;
   }

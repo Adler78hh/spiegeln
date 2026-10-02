@@ -3,17 +3,18 @@ import { BUILTIN_CHALLENGES, loadChallenges } from '../../challenges/builtin';
 import { newDraft, type Draft } from '../../challenges/draft';
 import type { Challenge } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
-import { newId, type CustomMotif, type Profile, type Store } from '../../storage/store';
+import { newId, type CustomMotif, type Group, type Profile, type Store } from '../../storage/store';
 import { MotifCreator } from '../MotifCreator';
 import { AdultHome, type AdultSection } from './AdultHome';
 import { ChallengeEditor } from './ChallengeEditor';
 import { ChallengeManager } from './ChallengeManager';
 import { MotifManager } from './MotifManager';
-import { ProfileManager } from './ProfileManager';
-import { Results } from './Results';
+import { GroupList, GroupPage, NewGroupDialog, type GroupTab } from './Groups';
 
 interface Props {
   store: Store;
+  groups: Group[];
+  onGroupsChange: (g: Group[]) => void;
   profiles: Profile[];
   onProfilesChange: (p: Profile[]) => void;
   customMotifs: CustomMotif[];
@@ -37,15 +38,30 @@ function draftFrom(c: Challenge): Draft {
   };
 }
 
-/** Erwachsenenbereich: Editor, Ergebnisse, Profile, eigene Motive. */
+/** Erwachsenenbereich: Gruppen (Kinder, Ergebnisse), Herausforderungen, eigene Motive. */
 export function AdultArea(props: Props) {
-  const { store, profiles, onProfilesChange, customMotifs, onCustomMotifsChange, motifs, challenges, onChallengesChange, onExit } = props;
+  const { store, groups, onGroupsChange, profiles, onProfilesChange, customMotifs, onCustomMotifsChange, motifs, challenges, onChallengesChange, onExit } = props;
   const [section, setSection] = useState<AdultSection | null>(null);
   const [editing, setEditing] = useState<{ draft: Draft; createdAt: number } | null>(null);
   // Motiv anlegen: von wo aus (Motivverwaltung oder Startfigur-Auswahl)?
   const [creatingMotif, setCreatingMotif] = useState<null | 'motifs' | 'pick'>(null);
   const [picking, setPicking] = useState(false);
   const [newMotifId, setNewMotifId] = useState<string | null>(null);
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [groupTab, setGroupTab] = useState<GroupTab>('kids');
+  const [resultCell, setResultCell] = useState<{ profileId: string; challengeId: string } | null>(null);
+  const [creatingGroup, setCreatingGroup] = useState(false);
+
+  const reloadGroups = async () => {
+    onGroupsChange(await store.listGroups());
+    onProfilesChange(await store.listProfiles());
+  };
+
+  const openGroup = (id: string | null) => {
+    setGroupId(id);
+    setGroupTab('kids');
+    setResultCell(null);
+  };
 
   const reloadChallenges = async () => onChallengesChange(await loadChallenges(store));
 
@@ -82,8 +98,56 @@ export function AdultArea(props: Props) {
   }
 
   switch (section) {
-    case 'profiles':
-      return <ProfileManager store={store} profiles={profiles} onChange={onProfilesChange} onBack={() => setSection(null)} />;
+    case 'groups': {
+      const group = groups.find((g) => g.id === groupId);
+      if (group) {
+        return (
+          <GroupPage
+            store={store}
+            group={group}
+            groups={groups}
+            profiles={profiles}
+            onProfilesChange={onProfilesChange}
+            onRename={async (name) => {
+              await store.renameGroup(group.id, name);
+              await reloadGroups();
+            }}
+            onDelete={async () => {
+              await store.deleteGroup(group.id);
+              openGroup(null);
+              await reloadGroups();
+            }}
+            challenges={challenges}
+            motifs={motifs}
+            tab={groupTab}
+            onTabChange={(t) => {
+              setGroupTab(t);
+              setResultCell(null);
+            }}
+            resultCell={resultCell}
+            onResultCell={setResultCell}
+            onBack={() => openGroup(null)}
+          />
+        );
+      }
+      return (
+        <>
+          <GroupList groups={groups} profiles={profiles} onOpen={openGroup} onNew={() => setCreatingGroup(true)} onBack={() => setSection(null)} />
+          {creatingGroup && (
+            <NewGroupDialog
+              groups={groups}
+              onCancel={() => setCreatingGroup(false)}
+              onCreate={async (name, color, count) => {
+                const g = await store.createGroup(name, color, count);
+                await reloadGroups();
+                setCreatingGroup(false);
+                openGroup(g.id);
+              }}
+            />
+          )}
+        </>
+      );
+    }
     case 'motifs':
       return (
         <MotifManager
@@ -121,8 +185,6 @@ export function AdultArea(props: Props) {
           }}
         />
       );
-    case 'results':
-      return <Results store={store} profiles={profiles} challenges={challenges} motifs={motifs} onBack={() => setSection(null)} />;
     default:
       return <AdultHome onOpen={setSection} onExit={onExit} />;
   }

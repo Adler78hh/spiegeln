@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { loadChallenges } from './challenges/builtin';
 import type { Answer, Challenge, ChallengeAnswers } from './challenges/types';
 import { allMotifs, BUILTIN_MOTIF_INFOS } from './motifs/library';
-import { Store, type CustomMotif, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
+import { Store, type CustomMotif, type Group, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
 import { ChallengeList } from './ui/ChallengeList';
 import { ChallengePlay } from './ui/ChallengePlay';
 import { FreeMirror } from './ui/FreeMirror';
@@ -10,6 +10,23 @@ import { Home } from './ui/Home';
 import { MotifCreator } from './ui/MotifCreator';
 import { AdultArea } from './ui/adult/AdultArea';
 import { ProfilePicker } from './ui/ProfilePicker';
+
+/** Zuletzt gewählte Gruppe, nur auf diesem Gerät. */
+const GROUP_KEY = 'spiegeln.gruppe';
+function loadGroupId(): string | null {
+  try {
+    return localStorage.getItem(GROUP_KEY);
+  } catch {
+    return null;
+  }
+}
+function saveGroupId(id: string) {
+  try {
+    localStorage.setItem(GROUP_KEY, id);
+  } catch {
+    // Ohne Speicher gilt die Wahl nur bis zum Neuladen.
+  }
+}
 
 type ScreenState =
   | { name: 'profiles' }
@@ -23,6 +40,8 @@ type ScreenState =
 export default function App() {
   const [store, setStore] = useState<Store | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [groupId, setGroupId] = useState<string | null>(loadGroupId);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [screen, setScreen] = useState<ScreenState>({ name: 'profiles' });
@@ -39,7 +58,9 @@ export default function App() {
       .then(async (s) => {
         if (!alive) return;
         setStore(s);
-        setProfiles(await s.ensureDefaultProfiles());
+        const data = await s.ensureDefaults();
+        setGroups(data.groups);
+        setProfiles(data.profiles);
         setCustomMotifs(await s.listMotifs());
         const c = await loadChallenges(s);
         if (!alive) return;
@@ -54,6 +75,13 @@ export default function App() {
       alive = false;
     };
   }, []);
+
+  const group = groups.find((g) => g.id === groupId) ?? groups[0];
+
+  const chooseGroup = (id: string) => {
+    setGroupId(id);
+    saveGroupId(id);
+  };
 
   const pickProfile = async (p: Profile) => {
     if (!store) return;
@@ -102,6 +130,8 @@ export default function App() {
     return (
       <AdultArea
         store={store}
+        groups={groups}
+        onGroupsChange={setGroups}
         profiles={profiles}
         onProfilesChange={setProfiles}
         customMotifs={customMotifs}
@@ -118,7 +148,17 @@ export default function App() {
   }
 
   if (screen.name === 'profiles' || !profile) {
-    return <ProfilePicker profiles={profiles} onPick={pickProfile} onAdult={() => setScreen({ name: 'adult' })} />;
+    if (!group) return <div className="loading" aria-label="Lädt"><span className="spinner" /></div>;
+    return (
+      <ProfilePicker
+        groups={groups}
+        group={group}
+        profiles={profiles.filter((p) => p.groupId === group.id)}
+        onPick={pickProfile}
+        onGroupChange={chooseGroup}
+        onAdult={() => setScreen({ name: 'adult' })}
+      />
+    );
   }
 
   switch (screen.name) {
@@ -126,6 +166,7 @@ export default function App() {
       return (
         <Home
           profile={profile}
+          group={groups.find((g) => g.id === profile.groupId)}
           onSwitchProfile={switchProfile}
           onFree={() => setScreen({ name: 'free' })}
           onChallenges={() => setScreen({ name: 'challenges' })}

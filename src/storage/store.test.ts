@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { initialScene } from '../geometry';
 import type { Challenge } from '../challenges/types';
+import { openDB } from 'idb';
 import { Store } from './store';
 
 let store: Store;
@@ -15,18 +16,21 @@ afterEach(() => store.close());
 const answer = (decision: 'fits' | 'impossible') => ({ decision, scene: initialScene(), updatedAt: 1 });
 
 describe('Profile', () => {
-  it('legt beim ersten Start 10 Tierprofile an, nur einmal', async () => {
-    const first = await store.ensureDefaultProfiles();
-    expect(first.map((p) => p.name)).toEqual([
+  it('legt beim ersten Start Gruppe Weiß mit 10 Tierprofilen an, nur einmal', async () => {
+    const first = await store.ensureDefaults();
+    expect(first.groups.map((g) => [g.name, g.color])).toEqual([['Weiß', 'weiss']]);
+    expect(first.profiles.map((p) => p.name)).toEqual([
       'Fuchs', 'Eule', 'Igel', 'Bär', 'Hase', 'Katze', 'Frosch', 'Pinguin', 'Löwe', 'Maus',
     ]);
-    const again = await store.ensureDefaultProfiles();
-    expect(again).toHaveLength(10);
+    expect(first.profiles.every((p) => p.groupId === first.groups[0].id)).toBe(true);
+    const again = await store.ensureDefaults();
+    expect(again.groups).toHaveLength(1);
+    expect(again.profiles).toHaveLength(10);
   });
 
   it('anlegen, umbenennen, löschen', async () => {
-    await store.ensureDefaultProfiles();
-    const p = await store.createProfile('  Lotta ', 'katze');
+    const { groups } = await store.ensureDefaults();
+    const p = await store.createProfile(groups[0].id, '  Lotta ', 'katze');
     expect(p.name).toBe('Lotta');
     expect((await store.listProfiles()).at(-1)!.id).toBe(p.id);
     const renamed = await store.updateProfile(p.id, { name: 'Lotte' });
@@ -36,17 +40,74 @@ describe('Profile', () => {
   });
 
   it('Einstellungen werden pro Profil gespeichert', async () => {
-    const p = await store.createProfile('Ben', 'baer');
+    const p = await store.createProfile('g', 'Ben', 'baer');
     await store.updateProfile(p.id, { prefs: { snap: true, showOutline: true, hideLine: true } });
     const [loaded] = await store.listProfiles();
     expect(loaded.prefs).toEqual({ snap: true, showOutline: true, hideLine: true });
   });
 });
 
+describe('Gruppen', () => {
+  it('neue Gruppe bekommt die ersten N Tiere', async () => {
+    await store.ensureDefaults();
+    const g = await store.createGroup('Gelb', 'gelb', 12);
+    const kids = (await store.listProfiles()).filter((p) => p.groupId === g.id);
+    expect(kids.map((p) => p.animal)).toEqual([
+      'fuchs', 'eule', 'igel', 'baer', 'hase', 'katze', 'frosch', 'pinguin', 'loewe', 'maus', 'hund', 'schwein',
+    ]);
+    expect((await store.listGroups()).map((x) => x.name)).toEqual(['Weiß', 'Gelb']);
+  });
+
+  it('umbenennen behält die Farbe, löschen entfernt Kinder und Antworten', async () => {
+    await store.ensureDefaults();
+    const g = await store.createGroup('Rot', 'rot', 2);
+    await store.renameGroup(g.id, ' Klasse 1a ');
+    const [, renamed] = await store.listGroups();
+    expect([renamed.name, renamed.color]).toEqual(['Klasse 1a', 'rot']);
+    const kid = (await store.listProfiles()).find((p) => p.groupId === g.id)!;
+    await store.saveAnswer(kid.id, 'haus-1', 'haus-1-1', answer('fits'));
+    await store.deleteGroup(g.id);
+    expect(await store.listGroups()).toHaveLength(1);
+    expect((await store.listProfiles()).some((p) => p.groupId === g.id)).toBe(false);
+    expect(await store.getAnswers(kid.id)).toEqual({});
+  });
+
+  it('bisherige Profile (Version 2) kommen mit allen Antworten in Gruppe Weiß', async () => {
+    const name = `alt-${n++}`;
+    const old = await openDB(name, 2, {
+      upgrade(db) {
+        db.createObjectStore('profiles', { keyPath: 'id' });
+        const answers = db.createObjectStore('answers', { keyPath: ['profileId', 'challengeId', 'targetId'] });
+        answers.createIndex('byProfile', 'profileId');
+        const snaps = db.createObjectStore('snapshots', { keyPath: 'id' });
+        snaps.createIndex('byProfile', 'profileId');
+        db.createObjectStore('challenges', { keyPath: 'id' });
+        db.createObjectStore('motifs', { keyPath: 'id' });
+      },
+    });
+    await old.put('profiles', { id: 'p1', name: 'Lotta', animal: 'katze', order: 0, prefs: {}, createdAt: 1 });
+    await old.put('answers', { ...answer('fits'), profileId: 'p1', challengeId: 'haus-1', targetId: 'haus-1-1' });
+    old.close();
+
+    const s2 = await Store.open(name);
+    const { groups, profiles } = await s2.ensureDefaults();
+    expect(groups.map((g) => g.name)).toEqual(['Weiß']);
+    expect(profiles.map((p) => [p.name, p.groupId])).toEqual([['Lotta', groups[0].id]]);
+    expect((await s2.getAnswers('p1'))['haus-1']['haus-1-1'].decision).toBe('fits');
+    s2.close();
+  });
+
+  it('Profil ohne Tier', async () => {
+    const p = await store.createProfile('g', 'Mia', null);
+    expect((await store.listProfiles())[0].animal).toBeNull();
+    expect(p.animal).toBeNull();
+  });
+});
+
 describe('Antworten', () => {
   it('werden pro Profil getrennt gespeichert', async () => {
-    const a = await store.createProfile('A', 'fuchs');
-    const b = await store.createProfile('B', 'eule');
+    const a = await store.createProfile('g', 'A', 'fuchs');
+    const b = await store.createProfile('g', 'B', 'eule');
     await store.saveAnswer(a.id, 'haus-1', 'haus-1-1', answer('fits'));
     await store.saveAnswer(a.id, 'haus-1', 'haus-1-2', answer('impossible'));
     await store.saveAnswer(b.id, 'haus-1', 'haus-1-1', answer('impossible'));
@@ -61,15 +122,15 @@ describe('Antworten', () => {
   });
 
   it('eine geänderte Entscheidung überschreibt die alte', async () => {
-    const a = await store.createProfile('A', 'fuchs');
+    const a = await store.createProfile('g', 'A', 'fuchs');
     await store.saveAnswer(a.id, 'c', 't', answer('fits'));
     await store.saveAnswer(a.id, 'c', 't', answer('impossible'));
     expect((await store.getAnswers(a.id)).c.t.decision).toBe('impossible');
   });
 
   it('Löschen eines Profils entfernt seine Antworten und Schnappschüsse', async () => {
-    const a = await store.createProfile('A', 'fuchs');
-    const b = await store.createProfile('B', 'eule');
+    const a = await store.createProfile('g', 'A', 'fuchs');
+    const b = await store.createProfile('g', 'B', 'eule');
     await store.saveAnswer(a.id, 'c', 't', answer('fits'));
     await store.saveAnswer(b.id, 'c', 't', answer('fits'));
     await store.addSnapshot({ profileId: a.id, motifId: 'haus', scene: initialScene(), image: 'data:' });
@@ -82,8 +143,8 @@ describe('Antworten', () => {
 
 describe('Antworten zu einer Herausforderung verwerfen', () => {
   it('betrifft alle Profile, aber nur diese Herausforderung', async () => {
-    const a = await store.createProfile('A', 'fuchs');
-    const b = await store.createProfile('B', 'eule');
+    const a = await store.createProfile('g', 'A', 'fuchs');
+    const b = await store.createProfile('g', 'B', 'eule');
     await store.saveAnswer(a.id, 'haus-1', 't1', answer('fits'));
     await store.saveAnswer(b.id, 'haus-1', 't1', answer('fits'));
     await store.saveAnswer(a.id, 'fisch-1', 't1', answer('fits'));
@@ -95,7 +156,7 @@ describe('Antworten zu einer Herausforderung verwerfen', () => {
 
 describe('Schnappschüsse', () => {
   it('neueste zuerst, pro Profil, löschbar', async () => {
-    const a = await store.createProfile('A', 'fuchs');
+    const a = await store.createProfile('g', 'A', 'fuchs');
     const s1 = await store.addSnapshot({ profileId: a.id, motifId: 'haus', scene: initialScene(), image: 'x1' });
     await new Promise((r) => setTimeout(r, 2));
     const s2 = await store.addSnapshot({ profileId: a.id, motifId: 'fisch', scene: initialScene(), image: 'x2' });
@@ -130,7 +191,7 @@ describe('Herausforderungen', () => {
   });
 
   it('Löschen entfernt auch die Antworten', async () => {
-    const p = await store.createProfile('A', 'fuchs');
+    const p = await store.createProfile('g', 'A', 'fuchs');
     await store.saveChallenge({ id: 'x', name: 'x', motifId: 'haus', targets: [], viewSize: 1 }, false, 9);
     await store.saveAnswer(p.id, 'x', 't', answer('fits'));
     await store.deleteChallenge('x');

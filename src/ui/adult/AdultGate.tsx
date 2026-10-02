@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { isCorrect, LONG_PRESS_MS, makeQuestion, type Question } from '../../adult/gate';
+import { useState } from 'react';
+import { isCorrect, makeQuestion, type Question } from '../../adult/gate';
+import { useLongPress } from '../useLongPress';
 import { BackIcon, GearIcon } from '../icons';
 
 /**
@@ -7,44 +8,15 @@ import { BackIcon, GearIcon } from '../icons';
  * Einmaleins-Aufgabe lösen.
  */
 export function AdultGateButton({ onOpen }: { onOpen: () => void }) {
-  const [progress, setProgress] = useState(0);
   const [question, setQuestion] = useState<Question | null>(null);
-  const start = useRef(0);
-  const raf = useRef(0);
-
-  const stop = () => {
-    cancelAnimationFrame(raf.current);
-    setProgress(0);
-  };
-
-  const begin = (e: React.PointerEvent) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    start.current = performance.now();
-    const tick = () => {
-      const p = (performance.now() - start.current) / LONG_PRESS_MS;
-      if (p >= 1) {
-        setProgress(0);
-        setQuestion(makeQuestion());
-        return;
-      }
-      setProgress(p);
-      raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-  };
-
-  useEffect(() => () => cancelAnimationFrame(raf.current), []);
+  const { progress, handlers } = useLongPress(() => setQuestion(makeQuestion()));
 
   return (
     <>
       <button
         className="gate-btn"
         aria-label="Erwachsenenbereich (3 Sekunden gedrückt halten)"
-        onPointerDown={begin}
-        onPointerUp={stop}
-        onPointerCancel={stop}
-        onPointerLeave={stop}
-        onContextMenu={(e) => e.preventDefault()}
+        {...handlers}
       >
         <svg className="gate-ring" viewBox="0 0 40 40" aria-hidden="true">
           <circle cx="20" cy="20" r="17" pathLength={1} strokeDasharray={`${progress} 1`} opacity={progress > 0 ? 1 : 0} />
