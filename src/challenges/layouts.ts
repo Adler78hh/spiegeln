@@ -379,8 +379,9 @@ export const HASEN_LAYOUT: PlannedTarget[] = [
   { ...keeping(0, -0.12, 0, BACK_RIGHT_FOOT, 90, LEFT), ownScale: true },
   // Senkrecht durch den hinteren Hasen, rechts bleibt: nur der hintere.
   keeping(0, -0.1, 0, BACK_BUNNY, 90, RIGHT),
-  // Waagrecht durch die Bauchmitte des hinteren Hasen, unten bleibt.
-  keeping(0, 0, 0.05, [100, 142], 0, BELOW),
+  // 45° durch das Ohr des hinteren Hasen: ein zweites Hasenpaar balanciert
+  // schräg auf dem Ohr.
+  { ...keeping(0, -0.12, 0.14, [144, 46], 45, [160, 200]), ownScale: true },
   // Wie Nr. 1 (nur der vordere Hase), aber ohne Broschen.
   { ...keeping(0, 0.1, 0, FRONT_BUNNY, 90, LEFT, 'error', 0), variantBoth: true },
   // Senkrecht durch den vorderen Hasen, rechts bleibt: hinterer Hase zweimal.
@@ -391,6 +392,7 @@ export const HASEN_LAYOUT: PlannedTarget[] = [
   { ...keeping(0, -0.05, 0, BACK_BUNNY, 90, LEFT, 'error', 0), variantBoth: true },
   // Senkrecht durch den hinteren Hasen, links bleibt: vorderer Hase zweimal.
   keeping(0, -0.05, 0, BACK_BUNNY, 90, LEFT),
-  // Waagrecht durch die Füße des vorderen Hasen, oben bleibt.
-  keeping(0, 0, -0.15, [100, 178], 0, ABOVE),
+  // 30° durch den linken Fuß des vorderen Hasen: ein zweites Hasenpaar
+  // purzelt schräg nach unten weg.
+  { ...keeping(0, 0.12, -0.14, [41, 178], 30, [150, 20]), ownScale: true },
 ];
