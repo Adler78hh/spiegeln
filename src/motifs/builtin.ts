@@ -264,19 +264,20 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     id: 'tetraktys',
     name: 'Tetraktys',
     // Zehn Kreise im gleichseitigen Dreieck (Reihen zu 1, 2, 3, 4),
-    // Mittelpunktabstand 44, Radius 14.
+    // Mittelpunktabstand 56, Radius 10: weit genug auseinander, dass sich
+    // durch Spiegeln jede Anzahl von 1 bis 20 ganzer Kreise legen lässt.
     svg: svg(`
       <g stroke="${INK}" stroke-width="4">
-        <circle cx="100.0" cy="42.8" r="14" fill="#1e6f73"/>
-        <circle cx="78.0" cy="80.9" r="14" fill="#1e6f73"/>
-        <circle cx="122.0" cy="80.9" r="14" fill="#1e6f73"/>
-        <circle cx="56.0" cy="119.1" r="14" fill="#1e6f73"/>
-        <circle cx="100.0" cy="119.1" r="14" fill="#1e6f73"/>
-        <circle cx="144.0" cy="119.1" r="14" fill="#1e6f73"/>
-        <circle cx="34.0" cy="157.2" r="14" fill="#1e6f73"/>
-        <circle cx="78.0" cy="157.2" r="14" fill="#1e6f73"/>
-        <circle cx="122.0" cy="157.2" r="14" fill="#1e6f73"/>
-        <circle cx="166.0" cy="157.2" r="14" fill="#1e6f73"/>
+        <circle cx="100.00" cy="27.25" r="10" fill="#1e6f73"/>
+        <circle cx="72.00" cy="75.75" r="10" fill="#1e6f73"/>
+        <circle cx="128.00" cy="75.75" r="10" fill="#1e6f73"/>
+        <circle cx="44.00" cy="124.25" r="10" fill="#1e6f73"/>
+        <circle cx="100.00" cy="124.25" r="10" fill="#1e6f73"/>
+        <circle cx="156.00" cy="124.25" r="10" fill="#1e6f73"/>
+        <circle cx="16.00" cy="172.75" r="10" fill="#1e6f73"/>
+        <circle cx="72.00" cy="172.75" r="10" fill="#1e6f73"/>
+        <circle cx="128.00" cy="172.75" r="10" fill="#1e6f73"/>
+        <circle cx="184.00" cy="172.75" r="10" fill="#1e6f73"/>
       </g>`),
     errorVariants: [],
     swapVariants: [],

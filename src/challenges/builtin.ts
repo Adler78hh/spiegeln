@@ -29,7 +29,7 @@ import {
   sampleFigure,
 } from '../render/composite';
 import { allOnOriginalSide, boundsCenter, candidateScenes, shuffle, solvableFirst, viewSizeFor, type CandidateOptions } from './generate';
-import { AUTO_LAYOUT, BOOT_LAYOUT, EICHHOERNCHEN_LAYOUT, FISCH_LAYOUT, FORMEN_LAYOUT, HAUS_LAYOUT, SCHNECKE_LAYOUT } from './layouts';
+import { AUTO_LAYOUT, BOOT_LAYOUT, EICHHOERNCHEN_LAYOUT, TETRAKTYS_LAYOUT, FISCH_LAYOUT, FORMEN_LAYOUT, HAUS_LAYOUT, SCHNECKE_LAYOUT } from './layouts';
 import type { Store } from '../storage/store';
 import type { Challenge, Target, TargetKind } from './types';
 
@@ -82,6 +82,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'boot-1', name: 'Segelboot', motifId: 'boot', version: 5, seed: 505, total: 12, unsolvable: ['swap', 'error', 'swap'], layout: BOOT_LAYOUT },
   { id: 'auto-1', name: 'Auto', motifId: 'auto', version: 5, seed: 606, total: 12, unsolvable: ['swap', 'error', 'error'], layout: AUTO_LAYOUT },
   { id: 'eichhoernchen-1', name: 'Eichhörnchen', motifId: 'eichhoernchen', version: 4, seed: 707, total: 12, unsolvable: ['error', 'error', 'error'], layout: EICHHOERNCHEN_LAYOUT },
+  { id: 'tetraktys-1', name: 'Tetraktys', motifId: 'tetraktys', version: 1, seed: 808, total: 20, unsolvable: [], layout: TETRAKTYS_LAYOUT },
 ];
 
 /** Auflösung, in der die Zielfiguren berechnet werden. */

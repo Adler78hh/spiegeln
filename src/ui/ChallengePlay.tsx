@@ -110,13 +110,16 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
 
         <div className="target-area">
           <div className="hint-row">
-            <div className="unsolvable-hint" aria-label={`${unsolvable} Figuren gehen nicht`}>
-              <span className="hint-icon">
-                <CrossIcon size={22} />
-              </span>
-              <span className="hint-count">{unsolvable}</span>
-              <span className="hint-text">gehen nicht</span>
-            </div>
+            {/* Ohne unlösbare Figuren (z. B. Tetraktys) entfällt der Hinweis. */}
+            {unsolvable > 0 && (
+              <div className="unsolvable-hint" aria-label={`${unsolvable} Figuren gehen nicht`}>
+                <span className="hint-icon">
+                  <CrossIcon size={22} />
+                </span>
+                <span className="hint-count">{unsolvable}</span>
+                <span className="hint-text">gehen nicht</span>
+              </div>
+            )}
             {checkCurrent && check && (
               <div className="check-summary" role="status">
                 <ThumbsUpIcon size={22} />
