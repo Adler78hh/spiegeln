@@ -165,20 +165,23 @@ interface PageProps {
   resultCell: { profileId: string; challengeId: string } | null;
   onResultCell: (c: { profileId: string; challengeId: string } | null) => void;
   onBack: () => void;
+  /** Gratisversion: eine feste Klasse, kein Umbenennen oder Löschen der Gruppe. */
+  limited?: boolean;
 }
 
 export type GroupTab = 'kids' | 'results';
 
 /** Eine Gruppe: Name, Farbe, Löschen; Reiter „Kinder“ und „Ergebnisse“. */
 export function GroupPage(props: PageProps) {
-  const { store, group, groups, profiles, onProfilesChange, onRename, onDelete, challenges, motifs, tab, onTabChange, onBack } = props;
+  const { store, group, groups, profiles, onProfilesChange, onRename, onDelete, challenges, motifs, tab, onTabChange, onBack, limited } = props;
   const [confirm, setConfirm] = useState(false);
   const color = findColor(group.color);
   const kids = profiles.filter((p) => p.groupId === group.id);
   const isLast = groups.length <= 1;
 
   return (
-    <AdultPage title={`Gruppe ${group.name}`} onBack={onBack}>
+    <AdultPage title={limited ? 'Klasse' : `Gruppe ${group.name}`} onBack={onBack}>
+      {!limited && (
       <div className="group-head">
         <span className="group-swatch" style={{ background: color.hex }} aria-hidden="true" />
         <label className="name-field" htmlFor="group-name">
@@ -213,6 +216,7 @@ export function GroupPage(props: PageProps) {
           />
         )}
       </div>
+      )}
 
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === 'kids'} className={`tab ${tab === 'kids' ? 'active' : ''}`} onClick={() => onTabChange('kids')}>
@@ -225,7 +229,7 @@ export function GroupPage(props: PageProps) {
 
       <div className="tab-panel" role="tabpanel">
         {tab === 'kids' ? (
-          <ProfileManager store={store} group={group} profiles={kids} onChange={onProfilesChange} />
+          <ProfileManager store={store} group={group} profiles={kids} onChange={onProfilesChange} fixed={limited} />
         ) : (
           <Results
             store={store}

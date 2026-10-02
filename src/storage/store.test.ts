@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { initialScene } from '../geometry';
 import type { Challenge } from '../challenges/types';
 import { openDB } from 'idb';
+import { ANIMAL_ORDER } from '../profiles/animals';
 import { Store } from './store';
 
 let store: Store;
@@ -151,6 +152,26 @@ describe('Antworten zu einer Herausforderung verwerfen', () => {
     await store.deleteAnswersForChallenge('haus-1');
     expect(Object.keys(await store.getAnswers(a.id))).toEqual(['fisch-1']);
     expect(await store.getAnswers(b.id)).toEqual({});
+  });
+});
+
+describe('Gratisversion', () => {
+  it('legt eine Klasse mit allen Tieren an', async () => {
+    const { groups, profiles } = await store.ensureDefaults(ANIMAL_ORDER);
+    expect(groups).toHaveLength(1);
+    expect(profiles.map((p) => p.animal)).toEqual(ANIMAL_ORDER.map((a) => a.id));
+  });
+
+  it('Zurücksetzen löscht Antworten und gibt den Tiernamen zurück, das Profil bleibt', async () => {
+    const a = await store.createProfile('g', 'Lena', 'fuchs');
+    const b = await store.createProfile('g', 'Tom', 'eule');
+    await store.saveAnswer(a.id, 'haus-1', 't1', answer('fits'));
+    await store.saveAnswer(b.id, 'haus-1', 't1', answer('fits'));
+    await store.resetProfile(a.id);
+    const all = await store.listProfiles();
+    expect(all.map((p) => p.name)).toEqual(['Fuchs', 'Tom']);
+    expect(await store.getAnswers(a.id)).toEqual({});
+    expect(Object.keys(await store.getAnswers(b.id))).toEqual(['haus-1']);
   });
 });
 

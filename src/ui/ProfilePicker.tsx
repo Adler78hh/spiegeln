@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ANIMALS } from '../profiles/animals';
 import { findColor, textOn, tintOf } from '../profiles/colors';
 import type { Group, Profile } from '../storage/store';
+import { FULL_VERSION_URL, GRATIS } from '../edition';
 import { AdultGateButton } from './adult/AdultGate';
 import { ProfileImage } from './Avatar';
 import { BackIcon } from './icons';
@@ -39,8 +40,17 @@ export function ProfilePicker({ groups, group, profiles, onPick, onGroupChange, 
 
   return (
     <div className="picker-screen">
+      {GRATIS && (
+        <p className="full-version-hint">
+          <strong>Spiegeln gratis</strong> – freies Spiegeln, eigene Herausforderungen und mehrere Klassen gibt es in der{' '}
+          <a href={FULL_VERSION_URL} target="_blank" rel="noopener">
+            Vollversion
+          </a>
+          .
+        </p>
+      )}
       <div className="gate-corner">
-        <GroupOval group={group} onLongPress={() => setChoosing(true)} />
+        {!GRATIS && <GroupOval group={group} onLongPress={() => setChoosing(true)} />}
         <AdultGateButton onOpen={onAdult} />
       </div>
       <div className="profile-grid" role="list">

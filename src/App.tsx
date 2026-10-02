@@ -10,10 +10,12 @@ import { Home } from './ui/Home';
 import { MotifCreator } from './ui/MotifCreator';
 import { MotifPicker } from './ui/MotifPicker';
 import { AdultArea } from './ui/adult/AdultArea';
+import { GRATIS } from './edition';
+import { ANIMAL_ORDER } from './profiles/animals';
 import { ProfilePicker } from './ui/ProfilePicker';
 
 /** Zuletzt gewählte Gruppe, nur auf diesem Gerät. */
-const GROUP_KEY = 'spiegeln.gruppe';
+const GROUP_KEY = GRATIS ? 'spiegeln-gratis.gruppe' : 'spiegeln.gruppe';
 function loadGroupId(): string | null {
   try {
     return localStorage.getItem(GROUP_KEY);
@@ -62,7 +64,8 @@ export default function App() {
       .then(async (s) => {
         if (!alive) return;
         setStore(s);
-        const data = await s.ensureDefaults();
+        // Gratisversion: eine Klasse mit allen Tieren.
+        const data = await s.ensureDefaults(GRATIS ? ANIMAL_ORDER : undefined);
         setGroups(data.groups);
         setProfiles(data.profiles);
         setCustomMotifs(await s.listMotifs());
@@ -92,7 +95,8 @@ export default function App() {
     setProfile(p);
     setAnswers(await store.getAnswers(p.id));
     setSnapshots(await store.listSnapshots(p.id));
-    setScreen({ name: 'home' });
+    // Gratisversion ohne freies Spiegeln: gleich zu den Herausforderungen.
+    setScreen(GRATIS ? { name: 'challenges' } : { name: 'home' });
   };
 
   const switchProfile = async () => {
@@ -209,7 +213,7 @@ export default function App() {
           motifs={motifs}
           answers={answers}
           onOpen={(id) => setScreen({ name: 'challenge', id })}
-          onBack={() => setScreen({ name: 'home' })}
+          onBack={GRATIS ? switchProfile : () => setScreen({ name: 'home' })}
         />
       );
     case 'challenge': {

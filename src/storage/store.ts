@@ -8,11 +8,12 @@
  * - snapshots:  gemerkte Figuren aus dem freien Spiegeln, pro Profil
  * - challenges: Herausforderungen (vorinstalliert und selbst erstellt)
  */
+import { GRATIS } from '../edition';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Answer, Challenge, ChallengeAnswers } from '../challenges/types';
 import type { Scene } from '../geometry';
 import type { InvertMode } from '../render/composite';
-import { ANIMAL_ORDER, ANIMALS, DEFAULT_ANIMALS, type AnimalId } from '../profiles/animals';
+import { ANIMAL_ORDER, ANIMALS, DEFAULT_ANIMALS, type Animal, type AnimalId } from '../profiles/animals';
 import { findColor } from '../profiles/colors';
 
 export interface ToolPrefs {
@@ -90,7 +91,8 @@ interface SpiegelnSchema extends DBSchema {
   motifs: { key: string; value: CustomMotif };
 }
 
-export const DB_NAME = 'spiegeln';
+/** Eigene Datenbank je Ausgabe: Gratis- und Vollversion teilen sich keine Daten. */
+export const DB_NAME = GRATIS ? 'spiegeln-gratis' : 'spiegeln';
 const DB_VERSION = 3;
 
 export function newId(): string {
@@ -142,10 +144,11 @@ export class Store {
   }
 
   /**
-   * Beim ersten Start: Gruppe „Weiß“ mit den 10 Tierprofilen. Profile aus
-   * älteren Versionen (noch ohne Gruppe) kommen in die erste Gruppe.
+   * Beim ersten Start: Gruppe „Weiß“ mit den ersten Tierprofilen (10, in der
+   * Gratisversion alle). Profile aus älteren Versionen (noch ohne Gruppe)
+   * kommen in die erste Gruppe.
    */
-  async ensureDefaults(): Promise<{ groups: Group[]; profiles: Profile[] }> {
+  async ensureDefaults(animals: Animal[] = DEFAULT_ANIMALS): Promise<{ groups: Group[]; profiles: Profile[] }> {
     let groups = await this.listGroups();
     if (groups.length === 0) {
       const weiss = findColor('weiss');
@@ -153,7 +156,7 @@ export class Store {
       await this.db.put('groups', group);
       groups = [group];
       if ((await this.db.count('profiles')) === 0) {
-        await this.addProfiles(group.id, DEFAULT_ANIMALS.map((a) => a.id), 0);
+        await this.addProfiles(group.id, animals.map((a) => a.id), 0);
       }
     }
     const tx = this.db.transaction('profiles', 'readwrite');
@@ -228,8 +231,22 @@ export class Store {
 
   /** Löscht ein Profil mit allen Antworten und Schnappschüssen. */
   async deleteProfile(id: string): Promise<void> {
+    await this.clearProfile(id, true);
+  }
+
+  /**
+   * Setzt ein Profil zurück: Antworten und Schnappschüsse weg, der Name
+   * wieder der Tiername (Gratisversion: Profile bleiben immer erhalten).
+   */
+  async resetProfile(id: string): Promise<void> {
+    await this.clearProfile(id, false);
+    const p = await this.db.get('profiles', id);
+    if (p?.animal) await this.db.put('profiles', { ...p, name: ANIMALS[p.animal].name });
+  }
+
+  private async clearProfile(id: string, removeProfile: boolean): Promise<void> {
     const tx = this.db.transaction(['profiles', 'answers', 'snapshots'], 'readwrite');
-    await tx.objectStore('profiles').delete(id);
+    if (removeProfile) await tx.objectStore('profiles').delete(id);
     for (const store of ['answers', 'snapshots'] as const) {
       const index = tx.objectStore(store).index('byProfile');
       let cursor = await index.openCursor(IDBKeyRange.only(id));

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { GRATIS } from '../../edition';
 import { BUILTIN_CHALLENGES, loadChallenges } from '../../challenges/builtin';
 import { newDraft, type Draft } from '../../challenges/draft';
 import type { Challenge } from '../../challenges/types';
@@ -64,6 +65,32 @@ export function AdultArea(props: Props) {
   };
 
   const reloadChallenges = async () => onChallengesChange(await loadChallenges(store));
+
+  // Gratisversion: nur die eine Klasse mit Namen und Ergebnissen.
+  if (GRATIS && groups[0]) {
+    return (
+      <GroupPage
+        store={store}
+        group={groups[0]}
+        groups={groups}
+        profiles={profiles}
+        onProfilesChange={onProfilesChange}
+        onRename={async () => {}}
+        onDelete={async () => {}}
+        challenges={challenges}
+        motifs={motifs}
+        tab={groupTab}
+        onTabChange={(t) => {
+          setGroupTab(t);
+          setResultCell(null);
+        }}
+        resultCell={resultCell}
+        onResultCell={setResultCell}
+        onBack={onExit}
+        limited
+      />
+    );
+  }
 
   if (creatingMotif) {
     return (

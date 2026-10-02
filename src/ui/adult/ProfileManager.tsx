@@ -12,10 +12,16 @@ interface Props {
   /** Kinder dieser Gruppe. */
   profiles: Profile[];
   onChange: (all: Profile[]) => void;
+  /**
+   * Gratisversion: feste Tierprofile. Nur der Name lässt sich ändern;
+   * statt Löschen gibt es Zurücksetzen (Antworten weg, Name wieder Tiername).
+   */
+  fixed?: boolean;
 }
 
 /** Kinder einer Gruppe: umbenennen, Tier ändern, neu anlegen, löschen. */
-export function ProfileManager({ store, group, profiles, onChange }: Props) {
+export function ProfileManager({ store, group, profiles, onChange, fixed }: Props) {
+  const [confirmAll, setConfirmAll] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [animalFor, setAnimalFor] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
@@ -85,33 +91,68 @@ export function ProfileManager({ store, group, profiles, onChange }: Props) {
   };
 
   const remove = async (id: string) => {
-    await store.deleteProfile(id);
+    if (fixed) await store.resetProfile(id);
+    else await store.deleteProfile(id);
     setConfirmId(null);
+    await reload();
+  };
+
+  const resetAll = async () => {
+    for (const p of profiles) await store.resetProfile(p.id);
+    setConfirmAll(false);
     await reload();
   };
 
   return (
     <>
       <div className="tab-toolbar">
-        <p className="hint">
-          Den Namen des Kindes ins Feld schreiben, dann erscheint er unter dem Tier. Antippen des Bildes wählt ein anderes Tier oder „Kein Tier“
-          (dann erscheinen die ersten beiden Buchstaben des Namens).
-        </p>
-        <button className={`text-btn primary add-profile ${flash ? 'flash' : ''}`} onClick={add} disabled={!nextAnimal}>
-          <PlusIcon size={22} /> Neues Profil
-        </button>
+        {fixed ? (
+          <>
+            <p className="hint">
+              Den Namen des Kindes ins Feld schreiben, dann erscheint er unter dem Tier. Zurücksetzen löscht die Antworten und gibt dem Profil
+              wieder den Tiernamen, z. B. zum neuen Schuljahr.
+            </p>
+            <button className="text-btn" onClick={() => setConfirmAll(true)}>
+              <TrashIcon /> Alle zurücksetzen
+            </button>
+            {confirmAll && (
+              <ConfirmRow
+                text="Alle Kinder zurücksetzen? Alle Namen und Antworten werden gelöscht."
+                confirmLabel="Zurücksetzen"
+                onConfirm={resetAll}
+                onCancel={() => setConfirmAll(false)}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <p className="hint">
+              Den Namen des Kindes ins Feld schreiben, dann erscheint er unter dem Tier. Antippen des Bildes wählt ein anderes Tier oder „Kein Tier“
+              (dann erscheinen die ersten beiden Buchstaben des Namens).
+            </p>
+            <button className={`text-btn primary add-profile ${flash ? 'flash' : ''}`} onClick={add} disabled={!nextAnimal}>
+              <PlusIcon size={22} /> Neues Profil
+            </button>
+          </>
+        )}
       </div>
       <ul className="manage-list" ref={listRef}>
         {profiles.map((p) => (
           <li key={p.id} className={`manage-row ${p.id === newId ? 'is-new' : ''}`}>
-            <button
-              className="avatar-pick"
-              style={{ background: tint }}
-              aria-label={`Bild für ${p.name} ändern`}
-              onClick={() => setAnimalFor(animalFor === p.id ? null : p.id)}
-            >
-              <ProfileImage profile={p} />
-            </button>
+            {fixed ? (
+              <span className="avatar-pick" style={{ background: tint }}>
+                <ProfileImage profile={p} />
+              </span>
+            ) : (
+              <button
+                className="avatar-pick"
+                style={{ background: tint }}
+                aria-label={`Bild für ${p.name} ändern`}
+                onClick={() => setAnimalFor(animalFor === p.id ? null : p.id)}
+              >
+                <ProfileImage profile={p} />
+              </button>
+            )}
             <label className="name-field" htmlFor={`profile-name-${p.id}`}>
               <span>Name des Kindes{p.animal ? ` (${ANIMALS[p.animal].name})` : ''}</span>
               <input
@@ -125,7 +166,7 @@ export function ProfileManager({ store, group, profiles, onChange }: Props) {
                 onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
               />
             </label>
-            <button className="tool-btn" aria-label={`${p.name} löschen`} onClick={() => setConfirmId(p.id)}>
+            <button className="tool-btn" aria-label={fixed ? `${p.name} zurücksetzen` : `${p.name} löschen`} onClick={() => setConfirmId(p.id)}>
               <TrashIcon />
             </button>
             {animalFor === p.id && (
@@ -156,8 +197,8 @@ export function ProfileManager({ store, group, profiles, onChange }: Props) {
             )}
             {confirmId === p.id && (
               <ConfirmRow
-                text={`„${p.name}“ mit allen Antworten und gemerkten Figuren löschen?`}
-                confirmLabel="Löschen"
+                text={fixed ? `„${p.name}“ zurücksetzen? Name und alle Antworten werden gelöscht.` : `„${p.name}“ mit allen Antworten und gemerkten Figuren löschen?`}
+                confirmLabel={fixed ? 'Zurücksetzen' : 'Löschen'}
                 onConfirm={() => remove(p.id)}
                 onCancel={() => setConfirmId(null)}
               />
@@ -165,7 +206,7 @@ export function ProfileManager({ store, group, profiles, onChange }: Props) {
           </li>
         ))}
       </ul>
-      {!nextAnimal && <p className="hint">Alle 30 Tiere sind in dieser Gruppe vergeben.</p>}
+      {!fixed && !nextAnimal && <p className="hint">Alle {ANIMAL_ORDER.length} Tiere sind in dieser Gruppe vergeben.</p>}
     </>
   );
 }
