@@ -129,7 +129,17 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <circle cx="44" cy="104" r="4" fill="${INK}" stroke="none"/>
         <path d="M38,120 Q46,127 54,120" fill="none"/>
       </g>`),
-    errorVariants: [[['fill="#f4a259"', 'fill="#8fb8de"']], [['fill="#b9d98c"', 'fill="#f3a6c8"']]],
+    errorVariants: [
+      [['fill="#f4a259"', 'fill="#8fb8de"']],
+      [['fill="#b9d98c"', 'fill="#f3a6c8"']],
+      // Ohne Fühler.
+      [
+        ['<line x1="40" y1="90" x2="30" y2="60"/>', ''],
+        ['<line x1="58" y1="90" x2="66" y2="58"/>', ''],
+        [`<circle cx="30" cy="57" r="5" fill="${INK}"/>`, ''],
+        [`<circle cx="66" cy="55" r="5" fill="${INK}"/>`, ''],
+      ],
+    ],
     swapVariants: [
       {
         // Farben von Haus und Körper vertauscht.
