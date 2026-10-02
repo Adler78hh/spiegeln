@@ -40,15 +40,11 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
   const unsolvable = unsolvableCount(challenge);
   const allDone = useMemo(() => targets.every((t) => answers[t.id]), [targets, answers]);
 
-  // Selbstkontrolle: erst wenn alles bearbeitet ist. Markierungen gelten nur
-  // für Antworten, die seit dem Prüfen nicht mehr geändert wurden.
+  // Selbstkontrolle: erst wenn alles bearbeitet ist. Angezeigt wird nur die
+  // Anzahl richtiger Entscheidungen, nicht welche Figuren falsch sind. Ändert
+  // das Kind danach eine Antwort, verschwindet die Anzeige wieder.
   const [checkedAt, setCheckedAt] = useState<number | null>(null);
   const check = useMemo(() => (checkedAt === null ? null : checkAnswers(challenge, answers)), [checkedAt, challenge, answers]);
-  const markOf = (id: string): boolean | undefined => {
-    const a = answers[id];
-    if (!check || !a || checkedAt === null || a.updatedAt > checkedAt) return undefined;
-    return check.perTarget[id];
-  };
   const checkCurrent = check !== null && checkedAt !== null && targets.every((t) => (answers[t.id]?.updatedAt ?? Infinity) <= checkedAt);
 
   const select = (id: string) => {
@@ -122,39 +118,31 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
               <span className="hint-text">gehen nicht</span>
             </div>
             {checkCurrent && check && (
-              <div className="check-summary" role="status" aria-label={`${check.correct} von ${check.total} richtig`}>
+              <div className="check-summary" role="status">
                 <ThumbsUpIcon size={22} />
-                <span className="hint-count">
-                  {check.correct} / {check.total}
+                <span className="hint-text">
+                  <span className="hint-count">{check.correct}</span> von <span className="hint-count">{check.total}</span>{' '}
+                  richtig
                 </span>
-                <span className="hint-text">richtig</span>
               </div>
             )}
           </div>
           <div className="target-grid" role="listbox" aria-label="Zielfiguren">
             {targets.map((t, i) => {
               const a = answers[t.id];
-              const mark = markOf(t.id);
               return (
                 <button
                   key={t.id}
                   role="option"
                   aria-selected={t.id === selected.id}
                   aria-label={`Figur ${i + 1}${a ? (a.decision === 'fits' ? ', passt' : ', geht nicht') : ''}`}
-                  className={`target-thumb ${t.id === selected.id ? 'selected' : ''} ${
-                    mark === true ? 'result-ok' : mark === false ? 'result-wrong' : ''
-                  }`}
+                  className={`target-thumb ${t.id === selected.id ? 'selected' : ''}`}
                   onClick={() => select(t.id)}
                 >
                   <img src={t.image} alt="" />
                   {a && (
                     <span className={`badge ${a.decision}`}>
                       {a.decision === 'fits' ? <CheckIcon size={16} /> : <CrossIcon size={16} />}
-                    </span>
-                  )}
-                  {mark !== undefined && (
-                    <span className={`result-mark ${mark ? 'ok' : 'wrong'}`} aria-label={mark ? 'richtig' : 'falsch'}>
-                      {mark ? <CheckIcon size={18} /> : <CrossIcon size={18} />}
                     </span>
                   )}
                 </button>

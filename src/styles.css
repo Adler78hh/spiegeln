@@ -1694,13 +1694,6 @@ button:disabled {
 
 /* ---------- Selbstkontrolle (Daumen hoch) ---------- */
 
-:root {
-  --right: #2f8f4e;
-  --right-soft: #d9f0df;
-  --wrong: #d0463e;
-  --wrong-soft: #f9dcda;
-}
-
 .check-btn {
   width: 100%;
   min-height: 64px;
@@ -1745,33 +1738,3 @@ button:disabled {
   font-weight: 700;
 }
 
-.target-thumb.result-ok {
-  border-color: var(--right);
-  background: var(--right-soft);
-}
-
-.target-thumb.result-wrong {
-  border-color: var(--wrong);
-  background: var(--wrong-soft);
-}
-
-.result-mark {
-  position: absolute;
-  bottom: -8px;
-  left: -8px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  border: 2px solid var(--panel);
-}
-
-.result-mark.ok {
-  background: var(--right);
-}
-
-.result-mark.wrong {
-  background: var(--wrong);
-}
