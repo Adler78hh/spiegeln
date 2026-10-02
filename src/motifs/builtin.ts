@@ -312,7 +312,12 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
           <circle cx="-19" cy="25" r="5" fill="#f2c14e"/>
         </g>
       </g>`),
-    errorVariants: [],
+    errorVariants: [
+      // Ohne Brosche.
+      [['<circle cx="-19" cy="25" r="5" fill="#f2c14e"/>', '']],
+      // Der hintere Hase trägt auch eine Weste (ohne Brosche).
+      [['</g>\n        <g transform="translate(70 116)">', '<path d="M-28,10 Q-18,4 -9,6 L-8,44 Q-20,50 -32,42 Q-36,26 -28,10 Z" fill="#8fb8de"/><path d="M28,10 Q18,4 9,6 L8,44 Q20,50 32,42 Q36,26 28,10 Z" fill="#8fb8de"/></g>\n        <g transform="translate(70 116)">']],
+    ],
     swapVariants: [],
   },
   {

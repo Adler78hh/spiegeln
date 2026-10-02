@@ -361,3 +361,36 @@ export const TETRAKTYS_LAYOUT: PlannedTarget[] = [
   // 12 Kreise: 0 auf der Achse, 6 ganz auf einer Seite
   tetra(60.0, [42.2, -24.36], [-217.6, 125.6], [121.0, 112.12]),
 ];
+
+/** Stoffhasen: Mitte des vorderen und des hinteren Hasen, rechter Fuß des hinteren (Motivkoordinaten). */
+const FRONT_BUNNY: [number, number] = [70, 120];
+const BACK_BUNNY: [number, number] = [130, 120];
+const BACK_RIGHT_FOOT: [number, number] = [159, 166];
+
+export const HASEN_LAYOUT: PlannedTarget[] = [
+  // Senkrecht durch den vorderen Hasen, links bleibt: nur der vordere, mit zwei Broschen.
+  keeping(0, 0.1, 0, FRONT_BUNNY, 90, LEFT),
+  // Waagrecht durch die Bauchmitte des vorderen Hasen, oben bleibt.
+  keeping(0, 0, -0.1, [100, 154], 0, ABOVE),
+  // Wie Nr. 5 (nur der hintere Hase), aber mit Weste.
+  { ...keeping(0, -0.1, 0, BACK_BUNNY, 90, RIGHT, 'error', 1), variantBoth: true },
+  // Senkrecht durch den rechten Fuß des hinteren Hasen: vier Hasen, die
+  // hinteren teilen sich einen Fuß (sehr breit, daher eigener Maßstab).
+  { ...keeping(0, -0.12, 0, BACK_RIGHT_FOOT, 90, LEFT), ownScale: true },
+  // Senkrecht durch den hinteren Hasen, rechts bleibt: nur der hintere.
+  keeping(0, -0.1, 0, BACK_BUNNY, 90, RIGHT),
+  // Waagrecht durch die Bauchmitte des hinteren Hasen, unten bleibt.
+  keeping(0, 0, 0.05, [100, 142], 0, BELOW),
+  // Wie Nr. 1 (nur der vordere Hase), aber ohne Broschen.
+  { ...keeping(0, 0.1, 0, FRONT_BUNNY, 90, LEFT, 'error', 0), variantBoth: true },
+  // Senkrecht durch den vorderen Hasen, rechts bleibt: hinterer Hase zweimal.
+  keeping(0, 0.05, 0, FRONT_BUNNY, 90, RIGHT),
+  // Waagrecht am Halsansatz des vorderen Hasen, unten bleibt.
+  keeping(0, 0, 0.05, [100, 128], 0, BELOW),
+  // Wie Nr. 11 (zwei vordere Hasen um den hinteren), aber ohne Broschen.
+  { ...keeping(0, -0.05, 0, BACK_BUNNY, 90, LEFT, 'error', 0), variantBoth: true },
+  // Senkrecht durch den hinteren Hasen, links bleibt: vorderer Hase zweimal.
+  keeping(0, -0.05, 0, BACK_BUNNY, 90, LEFT),
+  // Waagrecht durch die Füße des vorderen Hasen, oben bleibt.
+  keeping(0, 0, -0.15, [100, 178], 0, ABOVE),
+];
