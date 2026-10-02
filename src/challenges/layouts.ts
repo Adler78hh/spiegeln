@@ -137,7 +137,8 @@ export const FORMEN_LAYOUT: PlannedTarget[] = [
   keeping(0, 0, -0.05, CIRCLE_CENTER, 90, TRIANGLE),
   // Achse durch die Mitte des Quadrats: das Blaue bleibt ein Quadrat.
   keeping(270, -0.0198, 0.0495, SQUARE_CENTER, 90, TRIANGLE),
-  t('mirror', 45, 0.0103, -0.0476, 105, 0.437, 0.5, -1),
+  // Dreieck andersherum; Achse durch die Kreismitte wie bei Nr. 1.
+  keeping(60, -0.0076, 0.0863, CIRCLE_CENTER, 90, TRIANGLE, 'swap', 1),
   // Spiegelung an den Diagonalen des Quadrats.
   keeping(330, 0.0023, -0.0284, SQUARE_CENTER, 45, TRIANGLE),
   keeping(345, -0.0254, 0.0275, SQUARE_CENTER, 135, CIRCLE_CENTER),
@@ -145,10 +146,10 @@ export const FORMEN_LAYOUT: PlannedTarget[] = [
   // Drehung um 180° wie bei einer Spielkarte.
   keeping(0, 0, -0.08, [100, 128], 0, SQUARE_CENTER, 'rotate'),
   t('mirror', 225, 0.0867, -0.0968, 75, 0.6032, 0.5, 1),
-  // Dreieck andersherum; Achse durch die Kreismitte wie bei Nr. 1.
-  keeping(60, -0.0076, 0.0863, CIRCLE_CENTER, 90, TRIANGLE, 'swap', 1),
-  // Blaues Quadrat zur Hälfte rot.
-  t('error', 120, -0.0439, -0.0519, 120, 0.4122, 0.5, -1, 0),
+  t('mirror', 45, 0.0103, -0.0476, 105, 0.437, 0.5, -1),
+  // Nur das große grüne Quadrat aus zwei Dreiecken: Mit dem Original kämen
+  // Quadrat und Kreis beim Spiegeln immer mit.
+  { ...keeping(0, 0, 0.02, TRIANGLE_TOP, 45, TRIANGLE, 'error', 2), variantBoth: true },
   t('mirror', 270, -0.0093, -0.0846, 150, 0.5, 0.4716, -1),
   // Achse auf der langen Dreieckseite: zwei Dreiecke ergeben ein großes grünes Quadrat.
   keeping(90, 0, 0, TRIANGLE_TOP, 45, SQUARE_CENTER),

@@ -92,7 +92,15 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <polygon points="108,128 108,58 178,128" fill="#8cc68a"/>
         <circle cx="72" cy="154" r="20" fill="#ffd166"/>
       </g>`),
-    errorVariants: [[['fill="#6fa8dc"', 'fill="#e0675f"']], [['fill="#8cc68a"', 'fill="#ffd166"']]],
+    errorVariants: [
+      [['fill="#6fa8dc"', 'fill="#e0675f"']],
+      [['fill="#8cc68a"', 'fill="#ffd166"']],
+      // Nur das Dreieck (Quadrat und Kreis fehlen).
+      [
+        ['<rect x="38" y="58" width="70" height="70" fill="#6fa8dc"/>', ''],
+        ['<circle cx="72" cy="154" r="20" fill="#ffd166"/>', ''],
+      ],
+    ],
     swapVariants: [
       {
         // Kreis wandert unter das Dreieck.
