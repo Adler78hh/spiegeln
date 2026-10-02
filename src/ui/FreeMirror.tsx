@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { boundsCenter } from '../challenges/generate';
-import { initialScene, mirrorTransform, type Scene } from '../geometry';
+import { flipSide, mirrorTransform, type Scene } from '../geometry';
 import type { MotifInfo } from '../motifs/library';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite, renderInvertedComposite, type InvertMode } from '../render/composite';
 import type { Snapshot, ToolPrefs } from '../storage/store';
@@ -8,6 +8,7 @@ import { BackIcon, CameraIcon } from './icons';
 import { MirrorCanvas } from './MirrorCanvas';
 import { MirrorTools } from './MirrorTools';
 import { useMotifImage } from './useMotifImage';
+import { useStartScene } from './useStartScene';
 
 const RENDER_PX = 768;
 const SNAPSHOT_PX = 256;
@@ -39,7 +40,17 @@ export function FreeMirror(props: Props) {
   const { motifs, motifId, prefs, onPrefsChange, snapshots, onSnapshot, onBack } = props;
   const motif = motifs.find((m) => m.id === motifId) ?? motifs[0];
   const image = useMotifImage(motif);
-  const [scene, setScene] = useState<Scene>(initialScene);
+  const startScene = useStartScene(image, motif.aspect);
+  const [scene, setScene] = useState<Scene>(startScene);
+  // Spiegel neben die Figur setzen, sobald das Bild geladen ist.
+  const touched = useRef(false);
+  useEffect(() => {
+    if (image && !touched.current) setScene(startScene());
+  }, [image]);
+  const changeScene = (s: Scene) => {
+    touched.current = true;
+    setScene(s);
+  };
   const [flash, setFlash] = useState(false);
   const flashTimer = useRef(0);
 
@@ -53,7 +64,7 @@ export function FreeMirror(props: Props) {
 
   // Nur die gemerkten Figuren zu diesem Motiv.
   const own = snapshots.filter((s) => s.motifId === motif.id);
-  const restore = (s: Snapshot) => setScene(s.scene);
+  const restore = (s: Snapshot) => changeScene(s.scene);
 
   return (
     <div className="screen">
@@ -62,7 +73,7 @@ export function FreeMirror(props: Props) {
           image={image}
           imageSize={{ width: motif.aspect, height: 1 }}
           scene={scene}
-          onSceneChange={setScene}
+          onSceneChange={changeScene}
           snap={prefs.snap}
           showOutline={prefs.showOutline}
           hideLine={prefs.hideLine}
@@ -90,7 +101,7 @@ export function FreeMirror(props: Props) {
         ) : (
           <div className="gallery-space" />
         )}
-        <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(initialScene())} withInvert />
+        <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(startScene())} onFlip={() => setScene(flipSide)} withInvert />
       </aside>
     </div>
   );

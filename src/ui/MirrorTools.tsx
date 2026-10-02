@@ -1,22 +1,25 @@
 import { INVERT_PALETTE } from '../render/composite';
 import type { ToolPrefs } from '../storage/store';
-import { HideLineIcon, InvertNegativeIcon, InvertTwoToneIcon, OutlineIcon, ResetIcon, SnapIcon } from './icons';
+import { FlipIcon, HideLineIcon, InvertNegativeIcon, InvertTwoToneIcon, OutlineIcon, ResetIcon, SnapIcon } from './icons';
 
 interface Props {
   prefs: ToolPrefs;
   onPrefsChange: (p: ToolPrefs) => void;
   onReset: () => void;
+  /** Spiegel umdrehen: die andere Seite wird gespiegelt. */
+  onFlip: () => void;
   /** Knöpfe für die Farbumkehr anbieten (nur freies Spiegeln). */
   withInvert?: boolean;
 }
 
 /**
  * Werkzeugknöpfe in festen Blöcken: Winkel, Spiegelachse, Umriss; darunter
- * (nur frei) die beiden Farbumkehr-Knöpfe; Zurücksetzen für sich. Die
+ * (nur frei) die beiden Farbumkehr-Knöpfe; dann Spiegel umdrehen und
+ * Zurücksetzen. Die
  * Farbauswahl hat einen festen Platz, damit beim Ein- und Ausschalten kein
  * Knopf springt.
  */
-export function MirrorTools({ prefs, onPrefsChange, onReset, withInvert }: Props) {
+export function MirrorTools({ prefs, onPrefsChange, onReset, onFlip, withInvert }: Props) {
   const invert = prefs.invert ?? 'none';
   const toggleInvert = (mode: 'silhouette' | 'negative') => onPrefsChange({ ...prefs, invert: invert === mode ? 'none' : mode });
   const colorsShown = invert === 'silhouette';
@@ -68,9 +71,14 @@ export function MirrorTools({ prefs, onPrefsChange, onReset, withInvert }: Props
           </button>
         </div>
       )}
-      <button className="tool-btn tool-reset" aria-label="Zurücksetzen" onClick={onReset}>
-        <ResetIcon />
-      </button>
+      <div className="tool-group tool-group-actions">
+        <button className="tool-btn" aria-label="Spiegel umdrehen" onClick={onFlip}>
+          <FlipIcon />
+        </button>
+        <button className="tool-btn" aria-label="Zurücksetzen" onClick={onReset}>
+          <ResetIcon />
+        </button>
+      </div>
       {withInvert && (
         <div
           className={`invert-colors ${colorsShown ? '' : 'is-hidden'}`}

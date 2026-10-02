@@ -3,7 +3,7 @@ import { apply } from './affine';
 import { sideOf } from './line';
 import { createMirror, lineOf } from './mirror';
 import { UNIT_RECT } from './rect';
-import { initialScene, originalHalfExtent, otherSideTransform } from './scene';
+import { besideScene, flipSide, initialScene, originalHalfExtent, otherSideTransform, START_GAP } from './scene';
 import { expectVec } from './testUtils';
 
 const R = UNIT_RECT;
@@ -40,5 +40,24 @@ describe('zweite Hälfte', () => {
       const m = otherSideTransform(mode, s, pts);
       for (const p of pts) expect(sideOf(apply(m, p), lineOf(s.mirror), 1e-9)).not.toBe(-1);
     }
+  });
+});
+
+describe('Startlage und Umdrehen', () => {
+  it('Spiegel senkrecht knapp rechts neben der Figur, die Figur ist Original', () => {
+    const s = besideScene(0.7);
+    expect(s.mirror.a.x).toBeCloseTo(0.7 + START_GAP);
+    expect(s.mirror.b.x).toBeCloseTo(0.7 + START_GAP);
+    expect(s.mirror.originalSide).toBe(initialScene().mirror.originalSide);
+  });
+
+  it('bleibt bei sehr breiten Figuren in der Arbeitsfläche', () => {
+    expect(besideScene(0.99).mirror.a.x).toBeLessThan(1);
+  });
+
+  it('Umdrehen tauscht die Originalseite, zweimal ergibt das Ausgangsbild', () => {
+    const s = initialScene();
+    expect(flipSide(s).mirror.originalSide).toBe(-s.mirror.originalSide);
+    expect(flipSide(flipSide(s))).toEqual(s);
   });
 });

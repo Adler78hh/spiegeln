@@ -16,6 +16,25 @@ export interface Scene {
 
 export const initialScene = (): Scene => ({ mirror: createMirror(UNIT_RECT), figure: INITIAL_FIGURE });
 
+/** Abstand des Start-Spiegels zum rechten Rand der Figur (Anteil der Fläche). */
+export const START_GAP = 0.025;
+
+/**
+ * Startlage für die Kinder: Spiegel senkrecht knapp rechts neben der Figur,
+ * die ganze Figur liegt auf der Originalseite. So ist die Mitte der Figur
+ * nicht schon vorgegeben. `rightEdge` = rechter Rand der Figur (0…1).
+ */
+export const besideScene = (rightEdge: number): Scene => ({
+  mirror: createMirror(UNIT_RECT, 90, { x: Math.min(rightEdge + START_GAP, 0.98), y: 0.5 }, 1),
+  figure: INITIAL_FIGURE,
+});
+
+/** Spiegel umdrehen: die bisher gespiegelte Seite wird zur Originalseite. */
+export const flipSide = (scene: Scene): Scene => ({
+  ...scene,
+  mirror: { ...scene.mirror, originalSide: scene.mirror.originalSide === 1 ? -1 : 1 },
+});
+
 /**
  * Wie entsteht die zweite Hälfte?
  * - mirror: Achsenspiegelung (lösbar)

@@ -44,6 +44,18 @@ export const HideLineIcon = () => (
   </Icon>
 );
 
+/** Spiegelachse mit Doppelpfeil: Spiegel umdrehen (andere Seite spiegeln). */
+export const FlipIcon = () => (
+  <Icon>
+    <path d="M12 3v18" stroke="#e0322b" />
+    <path d="M4.5 9.5c2-3 5-3 7.5-3s5.5 0 7.5 3" />
+    <path d="M4 6.5v3.5h3.5" />
+    <path d="M20 6.5v3.5h-3.5" />
+    <path d="M6 17h-2" />
+    <path d="M20 17h-2" />
+  </Icon>
+);
+
 export const ResetIcon = () => (
   <Icon>
     <path d="M4 12a8 8 0 1 0 2.4-5.7" />

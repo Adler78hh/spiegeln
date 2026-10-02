@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { initialScene, mirrorTransform, type Scene } from '../geometry';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { flipSide, mirrorTransform, type Scene } from '../geometry';
 import { unsolvableCount, type Answer, type Challenge, type ChallengeAnswers, type Decision } from '../challenges/types';
 import { boundsCenter } from '../challenges/generate';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite } from '../render/composite';
@@ -9,6 +9,7 @@ import { MirrorCanvas } from './MirrorCanvas';
 import type { ToolPrefs } from '../storage/store';
 import { MirrorTools } from './MirrorTools';
 import { useMotifImage } from './useMotifImage';
+import { useStartScene } from './useStartScene';
 import type { MotifInfo } from '../motifs/library';
 
 /** Auflösung, in der das Spiegelergebnis berechnet wird. */
@@ -33,7 +34,18 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
   const targets = challenge.targets;
   const firstOpen = targets.find((t) => !answers[t.id]) ?? targets[0];
   const [selectedId, setSelectedId] = useState(firstOpen.id);
-  const [scene, setScene] = useState<Scene>(() => answers[firstOpen.id]?.scene ?? initialScene());
+  const startScene = useStartScene(image, aspect);
+  const [scene, setScene] = useState<Scene>(() => answers[firstOpen.id]?.scene ?? startScene());
+  // Ist das Bild erst nach dem Öffnen geladen, den Spiegel neben die Figur setzen
+  // (solange das Kind noch nichts verändert hat).
+  const touched = useRef(false);
+  useEffect(() => {
+    if (image && !touched.current && !answers[selectedId]?.scene) setScene(startScene());
+  }, [image]);
+  const changeScene = (s: Scene) => {
+    touched.current = true;
+    setScene(s);
+  };
   const figureRef = useRef<{ image: HTMLImageElement; buffer: HTMLCanvasElement } | null>(null);
 
   const selected = targets.find((t) => t.id === selectedId) ?? targets[0];
@@ -49,7 +61,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
 
   const select = (id: string) => {
     setSelectedId(id);
-    setScene(answers[id]?.scene ?? initialScene());
+    setScene(answers[id]?.scene ?? startScene());
   };
 
   const snapshot = (s: Scene): string | undefined => {
@@ -90,7 +102,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
           image={image}
           imageSize={{ width: aspect, height: 1 }}
           scene={scene}
-          onSceneChange={setScene}
+          onSceneChange={changeScene}
           snap={prefs.snap}
           showOutline={prefs.showOutline}
           hideLine={prefs.hideLine}
@@ -101,7 +113,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
           <button className="tool-btn" aria-label="Zurück" onClick={onBack}>
             <BackIcon />
           </button>
-          <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(initialScene())} />
+          <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(startScene())} onFlip={() => setScene(flipSide)} />
         </div>
 
         <div className="target-big">

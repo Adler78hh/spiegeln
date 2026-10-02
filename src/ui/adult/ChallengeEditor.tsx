@@ -12,7 +12,7 @@ import {
 } from '../../challenges/draft';
 import { canvasFromImage, differsFromMirror, finalizeTargets, renderMirror, renderRaw, type FigureSource } from '../../challenges/render';
 import type { Challenge, TargetKind } from '../../challenges/types';
-import { initialScene, type Scene } from '../../geometry';
+import { flipSide, initialScene, type Scene } from '../../geometry';
 import { applyVariant, findBuiltinMotif, svgToImage } from '../../motifs/builtin';
 import { loadImage, type MotifInfo } from '../../motifs/library';
 import { DEFAULT_PREFS, newId, type ToolPrefs } from '../../storage/store';
@@ -301,7 +301,7 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
         {mismatch && <p className="hint">Die Anzahl weicht von der Vorgabe ab. Speichern ist trotzdem möglich.</p>}
 
         <div className="editor-footer">
-          <MirrorTools prefs={prefs} onPrefsChange={setPrefs} onReset={() => setScene(initialScene())} />
+          <MirrorTools prefs={prefs} onPrefsChange={setPrefs} onReset={() => setScene(initialScene())} onFlip={() => setScene(flipSide)} />
           <button className="text-btn primary wide" disabled={busy || !draft.targets.length} onClick={save}>
             {busy ? 'Speichert …' : 'Herausforderung speichern'}
           </button>

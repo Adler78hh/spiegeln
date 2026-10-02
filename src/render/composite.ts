@@ -51,6 +51,24 @@ export function createFigureBuffer(image: CanvasImageSource, aspect: number, px:
   return c;
 }
 
+/**
+ * Rechter Rand der deckenden Pixel einer Figur in Startlage (0…1). Ohne
+ * Pixelzugriff: rechter Rand des Bildrechtecks.
+ */
+export function figureRightEdge(image: CanvasImageSource, aspect: number): number {
+  const n = 256;
+  try {
+    const buf = createFigureBuffer(image, aspect, n);
+    const data = buf.getContext('2d', { willReadFrequently: true })!.getImageData(0, 0, n, n).data;
+    for (let x = n - 1; x >= 0; x--) {
+      for (let y = 0; y < n; y++) if (data[(y * n + x) * 4 + 3] > 32) return (x + 1) / n;
+    }
+  } catch {
+    // weiter mit der Näherung
+  }
+  return 0.5 + figureSize(aspect).w / 2;
+}
+
 /** Größe des Bildes in der Figur relativ zur Fläche (für Näherungen). */
 export function figureSize(aspect: number): { w: number; h: number } {
   const k = FIGURE_DIAMETER / Math.hypot(aspect, 1);
