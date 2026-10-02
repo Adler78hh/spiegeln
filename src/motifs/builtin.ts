@@ -160,12 +160,13 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
   {
     id: 'boot',
     name: 'Segelboot',
+    // Beide Segel sind gleichschenklig-rechtwinklige Dreiecke.
     svg: svg(`
       <g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-        <line x1="100" y1="28" x2="100" y2="140"/>
-        <polygon points="100,28 100,46 76,37" fill="#e0675f"/>
-        <polygon points="106,40 106,130 166,130" fill="#fff6e0"/>
-        <polygon points="94,64 94,130 52,130" fill="#f6c983"/>
+        <line x1="100" y1="24" x2="100" y2="140"/>
+        <polygon points="100,24 100,40 80,32" fill="#e0675f"/>
+        <polygon points="106,66 106,130 170,130" fill="#fff6e0"/>
+        <polygon points="94,82 94,130 46,130" fill="#f6c983"/>
         <path d="M28,140 L172,140 L150,172 L50,172 Z" fill="#c98a5a"/>
         <circle cx="72" cy="156" r="6" fill="#d7eef9"/>
         <circle cx="100" cy="156" r="6" fill="#d7eef9"/>
@@ -175,8 +176,8 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [
       {
         // Fahne zeigt in die andere Richtung, das große Segel bleibt rechts.
-        replacements: [['points="100,28 100,46 76,37"', 'points="100,28 100,46 124,37"']],
-        markers: [[112, 37], [130, 105], [78, 112]],
+        replacements: [['points="100,24 100,40 80,32"', 'points="100,24 100,40 120,32"']],
+        markers: [[110, 32], [127, 109], [78, 114]],
       },
     ],
   },
