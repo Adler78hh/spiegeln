@@ -379,6 +379,29 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [],
   },
   {
+    id: 'gesicht',
+    name: 'Gesicht',
+    // Senkrecht gespiegelt wird der Mund fröhlich oder traurig, waagrecht
+    // gespiegelt wird die Locke zum Mund. Die runde Nase sitzt genau in der Mitte.
+    svg: svg(`
+      <circle cx="100" cy="100" r="80" fill="#ffd84d" stroke="${INK}" stroke-width="6"/>
+      <g fill="${INK}">
+        <circle cx="50" cy="56" r="3.5"/>
+        <circle cx="68" cy="45" r="3.5"/>
+        <circle cx="145" cy="57" r="3.5"/>
+        <circle cx="157" cy="67" r="3.5"/>
+        <circle cx="68" cy="78" r="8"/>
+        <circle cx="132" cy="80" r="8"/>
+      </g>
+      <g fill="none" stroke="${INK}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M95,58 L92,50 L101,45 C114,41 126,45 131,58"/>
+        <path d="M68,116 C68,130 82,133 100,133 C118,133 130,138 132,155"/>
+      </g>
+      <circle cx="100" cy="100" r="10" fill="#ef7f5a" stroke="${INK}" stroke-width="4"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
     id: 'tetraktys',
     name: 'Tetraktys',
     // Zehn Kreise im gleichseitigen Dreieck (Reihen zu 1, 2, 3, 4),
