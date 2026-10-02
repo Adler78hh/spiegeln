@@ -4,6 +4,7 @@
  */
 
 export type AnimalId =
+  | 'mathewaschbaer'
   | 'fuchs'
   | 'eule'
   | 'igel'
@@ -33,7 +34,8 @@ export type AnimalId =
   | 'ente'
   | 'marienkaefer'
   | 'biene'
-  | 'schildkroete';
+  | 'schildkroete'
+  | 'regenbogendrache';
 
 export interface Animal {
   id: AnimalId;
@@ -56,6 +58,23 @@ const smile = (y: number, w = 7) =>
   `<path d="M${50 - w},${y} Q50,${y + 6} ${50 + w},${y}" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`;
 
 export const ANIMALS: Record<AnimalId, Animal> = {
+  // Wie der Mathe-Waschbär aus dem Arbeitsheft: mit Matrosen-Strickmütze.
+  mathewaschbaer: {
+    id: 'mathewaschbaer',
+    name: 'Mathe-Waschbär',
+    svg: svg(`
+      <path d="M18,42 L20,16 L40,28 Z" fill="#7d838b"/><path d="M82,42 L80,16 L60,28 Z" fill="#7d838b"/>
+      <path d="M23,34 L24,23 L33,29 Z" fill="#fff"/><path d="M77,34 L76,23 L67,29 Z" fill="#fff"/>
+      <ellipse cx="50" cy="56" rx="36" ry="30" fill="#9aa0a8"/>
+      <path d="M30,42 Q50,34 70,42 Q50,40 30,42 Z" fill="#fff"/>
+      <path d="M16,56 Q30,42 46,52 L50,57 L54,52 Q70,42 84,56 Q70,66 54,60 L50,62 L46,60 Q30,66 16,56 Z" fill="#3c4250"/>
+      <circle cx="35" cy="54" r="5" fill="#fff"/><circle cx="65" cy="54" r="5" fill="#fff"/>
+      <circle cx="35.5" cy="54.5" r="2.8" fill="${INK}"/><circle cx="65.5" cy="54.5" r="2.8" fill="${INK}"/>
+      <ellipse cx="50" cy="73" rx="14" ry="10" fill="#fff"/><ellipse cx="50" cy="68" rx="5" ry="3.5" fill="${INK}"/><path d="M46,75 Q50,81 54,75" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/><path d="M32,30 Q31,9 50,8 Q69,9 68,30 Z" fill="#1f3a6b"/>
+      <g stroke="#2d4f8a" stroke-width="1.8" stroke-linecap="round"><line x1="34" y1="18" x2="34" y2="27"/><line x1="39" y1="14" x2="39" y2="27"/><line x1="44" y1="14" x2="44" y2="27"/><line x1="49" y1="14" x2="49" y2="27"/><line x1="54" y1="14" x2="54" y2="27"/><line x1="59" y1="14" x2="59" y2="27"/><line x1="64" y1="18" x2="64" y2="27"/></g>
+      <rect x="28" y="26" width="44" height="11" rx="5" fill="#28488a"/>
+      <g stroke="#1f3a6b" stroke-width="1.4"><line x1="31" y1="28.5" x2="31" y2="35.5"/><line x1="34" y1="28.5" x2="34" y2="35.5"/><line x1="37" y1="28.5" x2="37" y2="35.5"/><line x1="40" y1="28.5" x2="40" y2="35.5"/><line x1="43" y1="28.5" x2="43" y2="35.5"/><line x1="46" y1="28.5" x2="46" y2="35.5"/><line x1="49" y1="28.5" x2="49" y2="35.5"/><line x1="52" y1="28.5" x2="52" y2="35.5"/><line x1="55" y1="28.5" x2="55" y2="35.5"/><line x1="58" y1="28.5" x2="58" y2="35.5"/><line x1="61" y1="28.5" x2="61" y2="35.5"/><line x1="64" y1="28.5" x2="64" y2="35.5"/><line x1="67" y1="28.5" x2="67" y2="35.5"/><line x1="70" y1="28.5" x2="70" y2="35.5"/></g>`),
+  },
   fuchs: {
     id: 'fuchs',
     name: 'Fuchs',
@@ -499,10 +518,27 @@ export const ANIMALS: Record<AnimalId, Animal> = {
       <circle cx="32" cy="70" r="4.5" fill="#f3b3c3" opacity=".6"/>
       <circle cx="68" cy="70" r="4.5" fill="#f3b3c3" opacity=".6"/>`),
   },
+  // Längsstreifen in Regenbogenfarben, die oben in Hörner und Stacheln auslaufen.
+  regenbogendrache: {
+    id: 'regenbogendrache',
+    name: 'Regenbogendrache',
+    svg: svg(`
+      <defs><clipPath id="dh"><ellipse cx="50" cy="56" rx="34" ry="30"/></clipPath></defs>
+      <path d="M18,44 Q12,22 22,10 Q24,26 30,32 Z" fill="#e53935"/><path d="M82,44 Q88,22 78,10 Q76,26 70,32 Z" fill="#8e24aa"/><path d="M27.33,34 L33.00,14 L38.67,34 Z" fill="#fb8c00"/><path d="M38.67,34 L44.33,8 L50.00,34 Z" fill="#fdd835"/><path d="M50.00,34 L55.67,8 L61.33,34 Z" fill="#43a047"/><path d="M61.33,34 L67.00,14 L72.67,34 Z" fill="#1e88e5"/><g clip-path="url(#dh)"><rect x="16.00" y="0" width="11.63" height="100" fill="#e53935"/><rect x="27.33" y="0" width="11.63" height="100" fill="#fb8c00"/><rect x="38.67" y="0" width="11.63" height="100" fill="#fdd835"/><rect x="50.00" y="0" width="11.63" height="100" fill="#43a047"/><rect x="61.33" y="0" width="11.63" height="100" fill="#1e88e5"/><rect x="72.67" y="0" width="11.63" height="100" fill="#8e24aa"/></g>
+      <ellipse cx="50" cy="73" rx="21" ry="13" fill="#fff" opacity=".9"/>
+      <circle cx="37" cy="50" r="7" fill="#fff"/><circle cx="63" cy="50" r="7" fill="#fff"/><circle cx="37" cy="50" r="4" fill="${INK}"/><circle cx="63" cy="50" r="4" fill="${INK}"/><circle cx="38.5" cy="48.5" r="1.4" fill="#fff"/><circle cx="64.5" cy="48.5" r="1.4" fill="#fff"/>
+      <circle cx="44" cy="70" r="2" fill="${INK}"/><circle cx="56" cy="70" r="2" fill="${INK}"/><path d="M43,76 Q50,82 57,76" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`),
+  },
 };
 
 /** Feste Reihenfolge aller Tiere: neue Gruppen bekommen die ersten N. */
-export const ANIMAL_ORDER: Animal[] = Object.values(ANIMALS);
+const FIRST: AnimalId[] = ['mathewaschbaer', 'igel', 'pinguin', 'fuchs'];
+const LAST: AnimalId[] = ['regenbogendrache'];
+export const ANIMAL_ORDER: Animal[] = [
+  ...FIRST.map((id) => ANIMALS[id]),
+  ...Object.values(ANIMALS).filter((a) => !FIRST.includes(a.id) && !LAST.includes(a.id)),
+  ...LAST.map((id) => ANIMALS[id]),
+];
 
 /** Vorinstallierte Profile der ersten Gruppe. */
 export const DEFAULT_ANIMALS: Animal[] = ANIMAL_ORDER.slice(0, 10);

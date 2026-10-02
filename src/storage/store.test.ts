@@ -20,7 +20,7 @@ describe('Profile', () => {
     const first = await store.ensureDefaults();
     expect(first.groups.map((g) => [g.name, g.color])).toEqual([['Weiß', 'weiss']]);
     expect(first.profiles.map((p) => p.name)).toEqual([
-      'Fuchs', 'Eule', 'Igel', 'Bär', 'Hase', 'Katze', 'Frosch', 'Pinguin', 'Löwe', 'Maus',
+      'Mathe-Waschbär', 'Igel', 'Pinguin', 'Fuchs', 'Eule', 'Bär', 'Hase', 'Katze', 'Frosch', 'Löwe',
     ]);
     expect(first.profiles.every((p) => p.groupId === first.groups[0].id)).toBe(true);
     const again = await store.ensureDefaults();
@@ -53,7 +53,7 @@ describe('Gruppen', () => {
     const g = await store.createGroup('Gelb', 'gelb', 12);
     const kids = (await store.listProfiles()).filter((p) => p.groupId === g.id);
     expect(kids.map((p) => p.animal)).toEqual([
-      'fuchs', 'eule', 'igel', 'baer', 'hase', 'katze', 'frosch', 'pinguin', 'loewe', 'maus', 'hund', 'schwein',
+      'mathewaschbaer', 'igel', 'pinguin', 'fuchs', 'eule', 'baer', 'hase', 'katze', 'frosch', 'loewe', 'maus', 'hund',
     ]);
     expect((await store.listGroups()).map((x) => x.name)).toEqual(['Weiß', 'Gelb']);
   });
