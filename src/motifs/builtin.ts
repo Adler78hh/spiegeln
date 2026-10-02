@@ -139,6 +139,11 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         [`<circle cx="30" cy="57" r="5" fill="${INK}"/>`, ''],
         [`<circle cx="66" cy="55" r="5" fill="${INK}"/>`, ''],
       ],
+      // Spirale dreht andersherum, Auge rechts im Kopf statt links.
+      [
+        ['M112,100 a6,6 0 1,1 12,0 a14,14 0 1,1 -28,0 a22,22 0 1,1 44,0 a30,30 0 1,1 -60,0', 'M124,100 a6,6 0 1,0 -12,0 a14,14 0 1,0 28,0 a22,22 0 1,0 -44,0 a30,30 0 1,0 60,0'],
+        ['<circle cx="44" cy="104" r="4"', '<circle cx="54" cy="104" r="4"'],
+      ],
     ],
     swapVariants: [
       {

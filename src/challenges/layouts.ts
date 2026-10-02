@@ -159,7 +159,6 @@ export const FORMEN_LAYOUT: PlannedTarget[] = [
 /** Schnecke: Kopf-, Haus- und Körpermitte, Punkte links/rechts/oben/unten (Motivkoordinaten). */
 const SHELL_CENTER: [number, number] = [118, 100];
 const SHELL_UPPER_RIGHT: [number, number] = [150, 70];
-const SNAIL_CENTER: [number, number] = [104, 110];
 const HEAD_CENTER: [number, number] = [49, 120];
 const FOOT_CENTER: [number, number] = [118, 152.5];
 const LEFT: [number, number] = [10, 120];
@@ -180,8 +179,8 @@ export const SCHNECKE_LAYOUT: PlannedTarget[] = [
   // Ohne Drehung, waagrecht durch die Mitte des Körpers, obere Seite bleibt.
   keeping(0, 0, -0.1, FOOT_CENTER, 0, ABOVE),
   t('mirror', 270, -0.087, -0.0136, 90, 0.4163, 0.5, -1),
-  // Zwei ganze Schnecken übereinander.
-  wholeBeside(0, 0, -0.19, 0, [0.5, 0.53], SNAIL_CENTER),
+  // Wie Nr. 5, aber die Spirale dreht andersherum und das Auge sitzt rechts.
+  { ...keeping(0, 0, -0.1, FOOT_CENTER, 0, ABOVE, 'error', 3), variantBoth: true },
   t('mirror', 90, 0.0504, -0.0779, 75, 0.5078, 0.5, -1),
   // Wie Nr. 1, aber Farben von Haus und Körper vertauscht.
   keeping(0, 0.05, 0, SHELL_CENTER, 90, LEFT, 'swap'),
