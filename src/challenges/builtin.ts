@@ -63,7 +63,7 @@ interface ChallengeSpec {
 }
 
 export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
-  { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 5, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
+  { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 6, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
   { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', version: 2, seed: 202, total: 12, unsolvable: ['swap', 'error'] },
   { id: 'formen-1', name: 'Formen', motifId: 'formen', version: 2, seed: 303, total: 12, unsolvable: ['translate', 'error'] },
   { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', version: 2, seed: 404, total: 12, unsolvable: ['swap', 'translate'] },
