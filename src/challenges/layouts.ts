@@ -209,9 +209,11 @@ export const BOOT_LAYOUT: PlannedTarget[] = [
   keeping(0, 0.04, 0, MAST, 90, LEFT, 'error', 1),
   t('mirror', 180, -0.0141, 0.0074, 90, 0.4392, 0.5, 1),
   t('mirror', 315, 0.0491, -0.0343, 30, 0.51, 0.3913, 1),
+  // Wie Nr. 9 (zwei große Segel), aber mit Fahne: Am echten Boot sitzt die
+  // Fahne auf der Seite des kleinen Segels.
+  keeping(0, -0.04, 0, MAST, 90, RIGHT, 'swap', 0),
   // Ohne Drehung, senkrecht durch den Mast, rechte Seite bleibt.
   keeping(0, -0.04, 0, MAST, 90, RIGHT),
-  t('rotate', 270, -0.0503, 0.0697, 30, 0.5, 0.6048, -1),
   // An der langen Seite des kleinen Segels: zwei Segel ergeben ein Quadrat.
   keeping(0, 0.08, -0.05, SMALL_SAIL_TOP, 135, HULL),
   t('mirror', 330, 0.0693, 0.0027, 0, 0.5, 0.6014, -1),
