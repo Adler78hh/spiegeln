@@ -25,14 +25,14 @@ interface Props {
 }
 
 /** Bild der aktuellen Figur, auf den Inhalt zugeschnitten. */
-function renderSnapshot(image: HTMLImageElement, aspect: number, scene: Scene, invert: InvertMode): string {
+function renderSnapshot(image: HTMLImageElement, aspect: number, scene: Scene, invert: InvertMode, color: string): string {
   const fig = createFigureBuffer(image, aspect, RENDER_PX);
   const full = renderComposite(RENDER_PX, scene, fig, fig, mirrorTransform(scene.mirror));
   const b = contentBounds(full);
   const size = b ? Math.min(1, Math.max(b.maxX - b.minX, b.maxY - b.minY) * 1.15) : 1;
   // Mit Farbumkehr wird das Bild so gemerkt, wie es zu sehen ist (samt Hintergrund),
   // aber mit demselben Ausschnitt wie ohne.
-  const shown = invert === 'none' ? full : renderInvertedComposite(RENDER_PX, scene, fig, invert);
+  const shown = invert === 'none' ? full : renderInvertedComposite(RENDER_PX, scene, fig, invert, color);
   return cropSquare(shown, boundsCenter(b), size, SNAPSHOT_PX).toDataURL('image/png');
 }
 
@@ -47,7 +47,7 @@ export function FreeMirror(props: Props) {
 
   const remember = () => {
     if (!image) return;
-    onSnapshot({ motifId: motif.id, scene, image: renderSnapshot(image, motif.aspect, scene, prefs.invert ?? 'none') });
+    onSnapshot({ motifId: motif.id, scene, image: renderSnapshot(image, motif.aspect, scene, prefs.invert ?? 'none', prefs.invertColor) });
     setFlash(true);
     clearTimeout(flashTimer.current);
     flashTimer.current = window.setTimeout(() => setFlash(false), 250);
@@ -71,6 +71,7 @@ export function FreeMirror(props: Props) {
           showOutline={prefs.showOutline}
           hideLine={prefs.hideLine}
           invert={prefs.invert ?? 'none'}
+          invertColor={prefs.invertColor}
         />
       </main>
       <aside className="side free-side">

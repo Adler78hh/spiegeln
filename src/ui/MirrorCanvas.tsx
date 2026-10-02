@@ -44,6 +44,8 @@ export interface MirrorCanvasProps {
   hideLine?: boolean;
   /** Farbumkehr im Spiegelbild. */
   invert?: InvertMode;
+  /** Farbe der zweifarbigen Umkehr. */
+  invertColor?: string;
 }
 
 type Gesture =
@@ -88,6 +90,7 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
         showOutline: propsRef.current.showOutline,
         hideLine: propsRef.current.hideLine,
         invert: propsRef.current.invert,
+        invertColor: propsRef.current.invertColor,
       });
     });
   };
@@ -121,7 +124,7 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
   useEffect(() => {
     if (!gestureRef.current) sceneRef.current = props.scene;
     requestDraw();
-  }, [props.scene, props.showOutline, props.hideLine, props.invert]);
+  }, [props.scene, props.showOutline, props.hideLine, props.invert, props.invertColor]);
 
   const local = (e: React.PointerEvent): { css: Vec2; norm: Vec2 } => {
     const rect = canvasRef.current!.getBoundingClientRect();

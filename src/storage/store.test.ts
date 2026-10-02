@@ -41,9 +41,9 @@ describe('Profile', () => {
 
   it('Einstellungen werden pro Profil gespeichert', async () => {
     const p = await store.createProfile('g', 'Ben', 'baer');
-    await store.updateProfile(p.id, { prefs: { snap: true, showOutline: true, hideLine: true, invert: 'negative' } });
+    await store.updateProfile(p.id, { prefs: { snap: true, showOutline: true, hideLine: true, invert: 'negative', invertColor: '#2e9bd6' } });
     const [loaded] = await store.listProfiles();
-    expect(loaded.prefs).toEqual({ snap: true, showOutline: true, hideLine: true, invert: 'negative' });
+    expect(loaded.prefs).toEqual({ snap: true, showOutline: true, hideLine: true, invert: 'negative', invertColor: '#2e9bd6' });
   });
 });
 

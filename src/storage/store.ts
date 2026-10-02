@@ -22,9 +22,11 @@ export interface ToolPrefs {
   hideLine: boolean;
   /** Farbumkehr im freien Spiegeln. */
   invert: InvertMode;
+  /** Farbe der zweifarbigen Umkehr (neben Schwarz). */
+  invertColor: string;
 }
 
-export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false, invert: 'none' };
+export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false, invert: 'none', invertColor: '#f28c28' };
 
 export interface Group {
   id: string;

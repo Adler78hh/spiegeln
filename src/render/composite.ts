@@ -145,14 +145,27 @@ export function drawComposite(
 
 /**
  * Farbumkehr beim Spiegeln:
- * - 'silhouette': zweifarbig – Originalhälfte schwarze Figur auf Orange,
- *   Spiegelhälfte orange Figur auf Schwarz (Figur und Grund tauschen).
+ * - 'silhouette': zweifarbig – Originalhälfte schwarze Figur auf Farbe,
+ *   Spiegelhälfte farbige Figur auf Schwarz (Figur und Grund tauschen).
  * - 'negative': Originalhälfte unverändert, Spiegelhälfte als Negativ
  *   (alle Farben umgekehrt, dunkler Grund).
  */
 export type InvertMode = 'none' | 'silhouette' | 'negative';
 
 export const INVERT_COLORS = { light: '#f28c28', dark: '#1d1b19', negativeGround: '#2d2a26' };
+
+/** Farben zur Wahl für die zweifarbige Umkehr (zusammen mit Schwarz). */
+export const INVERT_PALETTE: Array<{ name: string; hex: string }> = [
+  { name: 'Orange', hex: '#f28c28' },
+  { name: 'Rot', hex: '#e8331e' },
+  { name: 'Gelb', hex: '#ffd600' },
+  { name: 'Hellgrün', hex: '#8dc63f' },
+  { name: 'Grün', hex: '#3fb34f' },
+  { name: 'Türkis', hex: '#1fc8e0' },
+  { name: 'Blau', hex: '#2e9bd6' },
+  { name: 'Rosa', hex: '#ee5fa7' },
+  { name: 'Magenta', hex: '#d1007a' },
+];
 
 /** Figur einfarbig (nur ihre Form). */
 export function silhouetteOf(fig: HTMLCanvasElement, color: string, out = document.createElement('canvas')): HTMLCanvasElement {
@@ -194,13 +207,16 @@ export function negativeOf(fig: HTMLCanvasElement, out = document.createElement(
 export interface InvertBuffers {
   dark: HTMLCanvasElement;
   light: HTMLCanvasElement;
+  /** Farbe der hellen Fassung. */
+  color: string;
   negative: HTMLCanvasElement;
 }
 
-export function invertBuffers(fig: HTMLCanvasElement): InvertBuffers {
+export function invertBuffers(fig: HTMLCanvasElement, color = INVERT_COLORS.light): InvertBuffers {
   return {
     dark: silhouetteOf(fig, INVERT_COLORS.dark),
-    light: silhouetteOf(fig, INVERT_COLORS.light),
+    light: silhouetteOf(fig, color),
+    color,
     negative: negativeOf(fig),
   };
 }
@@ -224,7 +240,7 @@ export function drawInvertedComposite(
     return drawComposite(ctx, scene, fig, fig, t);
   }
   const [groundOriginal, groundMirror] =
-    mode === 'silhouette' ? [INVERT_COLORS.light, INVERT_COLORS.dark] : [AREA_COLOR, INVERT_COLORS.negativeGround];
+    mode === 'silhouette' ? [buffers.color, INVERT_COLORS.dark] : [AREA_COLOR, INVERT_COLORS.negativeGround];
   ctx.fillStyle = groundOriginal;
   pathPolygon(ctx, parts.original);
   ctx.fill();
@@ -255,13 +271,19 @@ export function renderComposite(
 }
 
 /** Wie `renderComposite`, aber mit Farbumkehr (Hintergrund gehört dazu). */
-export function renderInvertedComposite(px: number, scene: Scene, fig: HTMLCanvasElement, mode: InvertMode): HTMLCanvasElement {
+export function renderInvertedComposite(
+  px: number,
+  scene: Scene,
+  fig: HTMLCanvasElement,
+  mode: InvertMode,
+  color = INVERT_COLORS.light,
+): HTMLCanvasElement {
   const c = document.createElement('canvas');
   c.width = px;
   c.height = px;
   const ctx = c.getContext('2d')!;
   ctx.setTransform(px, 0, 0, px, 0, 0);
-  drawInvertedComposite(ctx, scene, fig, mode, mode === 'none' ? null : invertBuffers(fig));
+  drawInvertedComposite(ctx, scene, fig, mode, mode === 'none' ? null : invertBuffers(fig, color));
   return c;
 }
 

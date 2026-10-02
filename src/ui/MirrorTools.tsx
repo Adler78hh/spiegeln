@@ -1,3 +1,4 @@
+import { INVERT_PALETTE } from '../render/composite';
 import type { ToolPrefs } from '../storage/store';
 import { HideLineIcon, InvertNegativeIcon, InvertTwoToneIcon, OutlineIcon, ResetIcon, SnapIcon } from './icons';
 
@@ -58,6 +59,21 @@ export function MirrorTools({ prefs, onPrefsChange, onReset, withInvert }: Props
             <InvertNegativeIcon />
           </button>
         </>
+      )}
+      {withInvert && invert === 'silhouette' && (
+        <div className="invert-colors" role="radiogroup" aria-label="Farbe der Umkehr">
+          {INVERT_PALETTE.map((c) => (
+            <button
+              key={c.hex}
+              role="radio"
+              aria-checked={prefs.invertColor === c.hex}
+              aria-label={c.name}
+              className={`invert-swatch ${prefs.invertColor === c.hex ? 'selected' : ''}`}
+              style={{ background: c.hex }}
+              onClick={() => onPrefsChange({ ...prefs, invertColor: c.hex })}
+            />
+          ))}
+        </div>
       )}
       <button className="tool-btn" aria-label="Zurücksetzen" onClick={onReset}>
         <ResetIcon />

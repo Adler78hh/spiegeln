@@ -2093,3 +2093,25 @@ button:disabled {
   margin: 0;
   font-size: 1.2rem;
 }
+
+/* Farbauswahl für die zweifarbige Umkehr */
+.invert-colors {
+  grid-column: 1 / -1;
+  flex-basis: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  gap: 8px;
+  justify-content: center;
+}
+
+.invert-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid #1d1b19;
+}
+
+.invert-swatch.selected {
+  outline: 4px solid var(--accent);
+  outline-offset: 2px;
+}

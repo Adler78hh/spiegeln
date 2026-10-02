@@ -15,7 +15,7 @@ import {
   type MirrorState,
   type Vec2,
 } from '../geometry';
-import { AREA_COLOR, createFigureBuffer, drawInvertedComposite, invertBuffers, pathPolygon, type InvertBuffers, type InvertMode } from './composite';
+import { AREA_COLOR, createFigureBuffer, drawInvertedComposite, INVERT_COLORS, invertBuffers, pathPolygon, type InvertBuffers, type InvertMode } from './composite';
 
 export const COLORS = {
   area: AREA_COLOR,
@@ -40,6 +40,8 @@ export interface RenderInput {
   hideLine?: boolean;
   /** Farbumkehr im Spiegelbild (nur freies Spiegeln). */
   invert?: InvertMode;
+  /** Farbe der zweifarbigen Umkehr (neben Schwarz). */
+  invertColor?: string;
 }
 
 export interface Layout {
@@ -143,7 +145,8 @@ export class MirrorRenderer {
     const px = 1 / area; // ein CSS-Pixel in normierten Einheiten
 
     const invert = input.invert ?? 'none';
-    if (invert !== 'none' && !this.inverted) this.inverted = invertBuffers(this.figure);
+    const color = input.invertColor ?? INVERT_COLORS.light;
+    if (invert !== 'none' && this.inverted?.color !== color) this.inverted = invertBuffers(this.figure, color);
     const { mirror } = drawInvertedComposite(ctx, input, this.figure, invert, this.inverted);
 
     // Dezenter "Glas"-Saum auf der Spiegelseite entlang der Geraden
