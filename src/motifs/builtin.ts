@@ -29,16 +29,19 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
   {
     id: 'haus',
     name: 'Haus',
+    // Dach: gleichschenklig-rechtwinkliges Dreieck; Wand: Quadrat mit der
+    // Dachbreite als Seite; Fenster: Quadrat aus vier Teilquadraten; Tür:
+    // zwei Fensterquadrate übereinander.
     svg: svg(`
       <g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-        <rect x="120" y="42" width="18" height="40" fill="#a1887f"/>
-        <rect x="42" y="92" width="112" height="82" fill="#f6c983"/>
-        <polygon points="30,96 98,34 166,96" fill="#e0675f"/>
-        <rect x="56" y="118" width="32" height="56" rx="4" fill="#7fa6d6"/>
-        <circle cx="80" cy="147" r="3" fill="${INK}"/>
-        <rect x="106" y="112" width="34" height="30" fill="#d7eef9"/>
-        <line x1="123" y1="112" x2="123" y2="142"/>
-        <line x1="106" y1="127" x2="140" y2="127"/>
+        <rect x="124" y="26" width="16" height="34" fill="#a1887f"/>
+        <rect x="44" y="72" width="112" height="112" fill="#f6c983"/>
+        <polygon points="44,72 100,16 156,72" fill="#e0675f"/>
+        <rect x="57" y="112" width="36" height="72" fill="#7fa6d6"/>
+        <circle cx="86" cy="150" r="3" fill="${INK}"/>
+        <rect x="107" y="112" width="36" height="36" fill="#d7eef9"/>
+        <line x1="125" y1="112" x2="125" y2="148"/>
+        <line x1="107" y1="130" x2="143" y2="130"/>
       </g>`),
     errorVariants: [[['fill="#e0675f"', 'fill="#8cc68a"']], [['fill="#7fa6d6"', 'fill="#ffd166"']]],
     swapVariants: [
@@ -46,13 +49,13 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         // Tür und Fenster tauschen die Plätze; der Schornstein unterscheidet
         // das Ergebnis vom Spiegelbild des Originals.
         replacements: [
-          ['<rect x="56" y="118" width="32" height="56" rx="4"', '<rect x="108" y="118" width="32" height="56" rx="4"'],
-          ['<circle cx="80" cy="147"', '<circle cx="132" cy="147"'],
-          ['<rect x="106" y="112" width="34" height="30"', '<rect x="58" y="112" width="34" height="30"'],
-          ['<line x1="123" y1="112" x2="123" y2="142"/>', '<line x1="75" y1="112" x2="75" y2="142"/>'],
-          ['<line x1="106" y1="127" x2="140" y2="127"/>', '<line x1="58" y1="127" x2="92" y2="127"/>'],
+          ['<rect x="57" y="112" width="36" height="72"', '<rect x="107" y="112" width="36" height="72"'],
+          ['<circle cx="86" cy="150"', '<circle cx="136" cy="150"'],
+          ['<rect x="107" y="112" width="36" height="36"', '<rect x="57" y="112" width="36" height="36"'],
+          ['<line x1="125" y1="112" x2="125" y2="148"/>', '<line x1="75" y1="112" x2="75" y2="148"/>'],
+          ['<line x1="107" y1="130" x2="143" y2="130"/>', '<line x1="57" y1="130" x2="93" y2="130"/>'],
         ],
-        markers: [[124, 146], [75, 127], [129, 60]],
+        markers: [[125, 160], [75, 130], [132, 40]],
       },
     ],
   },

@@ -34,13 +34,14 @@ function motifPoint(figure: FigureState, mx: number, my: number): Vec2 {
 }
 
 /**
- * Spiegelachse entlang der Hochachse der Figur durch einen Motivpunkt (z. B.
- * die Dachspitze): Das Ergebnis ist wieder eine ganze, symmetrische Figur.
+ * Spiegelachse durch einen Motivpunkt, Winkel im Motiv gemessen (90° = entlang
+ * der Hochachse der Figur). Durch die Dachspitze entsteht so wieder ein
+ * ganzes, symmetrisches Haus.
  */
-function throughPoint(kind: Kind, rotDeg: number, ox: number, oy: number, mx: number, my: number, side: Side): PlannedTarget {
+function throughPoint(kind: Kind, rotDeg: number, ox: number, oy: number, mx: number, my: number, side: Side, motifLineDeg = 90): PlannedTarget {
   const figure: FigureState = { rotation: rotDeg * DEG, offset: { x: ox, y: oy } };
   const p = motifPoint(figure, mx, my);
-  return { kind, scene: { figure, mirror: createMirror(UNIT_RECT, 90 + rotDeg, p, side) } };
+  return { kind, scene: { figure, mirror: createMirror(UNIT_RECT, motifLineDeg + rotDeg, p, side) } };
 }
 
 /**
@@ -51,12 +52,13 @@ function throughPoint(kind: Kind, rotDeg: number, ox: number, oy: number, mx: nu
 function sideBySide(rotDeg: number, ox: number, oy: number, lineX: number): PlannedTarget {
   const figure: FigureState = { rotation: rotDeg * DEG, offset: { x: ox, y: oy } };
   const probe = createMirror(UNIT_RECT, 90, { x: lineX, y: 0.5 }, 1);
-  const side = sideOf(motifPoint(figure, 98, 104), lineOf(probe), 0) as Side;
-  return { kind: 'translate', scene: { figure, mirror: { ...probe, originalSide: side } } };
+  const side = sideOf(motifPoint(figure, 100, 100), lineOf(probe), 0) as Side;
+  return { kind: 'translate', scene: { figure, mirror: { ...probe, originalSide: side } }, ownScale: true };
 }
 
-/** Dachspitze des Hauses (Motivkoordinaten). */
-const ROOF_TOP: [number, number] = [98, 34];
+/** Dachspitze und rechte untere Wandecke des Hauses (Motivkoordinaten). */
+const ROOF_TOP: [number, number] = [100, 16];
+const WALL_CORNER: [number, number] = [156, 184];
 
 export const HAUS_LAYOUT: PlannedTarget[] = [
   t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
@@ -65,12 +67,14 @@ export const HAUS_LAYOUT: PlannedTarget[] = [
   // Achse durch die Dachspitze: ganzes Haus mit dreieckigem Dach.
   throughPoint('mirror', 45, 0.0286, -0.0232, ...ROOF_TOP, -1),
   t('mirror', 75, -0.0712, -0.0443, 75, 0.419, 0.5, -1),
-  t('mirror', 225, 0.0753, -0.0267, 90, 0.6314, 0.5, 1),
+  // Achse senkrecht zur Dachkante durch die Wandecke: gerade Unterkante,
+  // die gelben Wände bilden zusammen ein Quadrat.
+  throughPoint('mirror', 225, 0.0753, -0.0267, ...WALL_CORNER, -1, 45),
   throughPoint('mirror', 15, -0.0129, 0.072, ...ROOF_TOP, 1),
   t('rotate', 225, 0.015, 0.0863, 15, 0.5, 0.5265, 1),
   t('mirror', 300, 0.0114, -0.0609, 105, 0.5261, 0.5, -1),
   t('mirror', 180, -0.0755, -0.0653, 0, 0.5, 0.3429, -1),
-  // Ganzes Haus neben dem ganzen Haus.
-  sideBySide(0, -0.21, 0, 0.51),
+  // Ganzes Haus neben dem ganzen Haus (eigener, kleinerer Maßstab).
+  sideBySide(0, -0.2, 0, 0.51),
   t('mirror', 210, -0.0845, -0.0229, 165, 0.5, 0.3936, 1),
 ];

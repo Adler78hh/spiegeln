@@ -38,6 +38,11 @@ export interface PlannedTarget {
   scene: Scene;
   /** Bei „Fehler eingebaut“: welche Fehlervariante des Motivs. */
   variant?: number;
+  /**
+   * Eigener, kleinerer Maßstab (z. B. zwei ganze Figuren nebeneinander),
+   * damit nicht alle anderen Zielfiguren mit verkleinert werden.
+   */
+  ownScale?: boolean;
 }
 
 interface ChallengeSpec {
@@ -58,7 +63,7 @@ interface ChallengeSpec {
 }
 
 export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
-  { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 3, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
+  { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 4, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
   { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', version: 2, seed: 202, total: 12, unsolvable: ['swap', 'error'] },
   { id: 'formen-1', name: 'Formen', motifId: 'formen', version: 2, seed: 303, total: 12, unsolvable: ['translate', 'error'] },
   { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', version: 2, seed: 404, total: 12, unsolvable: ['swap', 'translate'] },
@@ -192,12 +197,13 @@ async function buildChallenge(spec: ChallengeSpec): Promise<Challenge> {
   const plan = spec.layout ?? (await planRandom(spec, ctx));
   const raw = await Promise.all(plan.map((p) => renderPlanned(p, ctx)));
 
-  // Gemeinsamer Ausschnitt: alle Ziele gleich stark vergrößert.
+  // Gemeinsamer Ausschnitt: alle Ziele gleich stark vergrößert (außer mit eigenem Maßstab).
   const bounds = raw.map((r) => contentBounds(r.canvas));
-  const viewSize = viewSizeFor(bounds.filter((b): b is NonNullable<typeof b> => b !== null));
+  const present = <T,>(b: T | null): b is T => b !== null;
+  const viewSize = viewSizeFor(bounds.filter((_b, i) => !plan[i].ownScale).filter(present));
   const targets: Target[] = raw.map((r, i) => ({
     id: `${spec.id}-${i + 1}`,
-    image: cropSquare(r.canvas, boundsCenter(bounds[i]), viewSize, TARGET_PX).toDataURL('image/png'),
+    image: cropSquare(r.canvas, boundsCenter(bounds[i]), plan[i].ownScale ? Math.max(viewSize, viewSizeFor([bounds[i]].filter(present))) : viewSize, TARGET_PX).toDataURL('image/png'),
     solvable: r.solvable,
     kind: r.kind,
     scene: r.scene,
