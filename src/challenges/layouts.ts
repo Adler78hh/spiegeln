@@ -224,7 +224,7 @@ export const BOOT_LAYOUT: PlannedTarget[] = [
 const FRONT_AXLE: [number, number] = [58, 146];
 const REAR_AXLE: [number, number] = [146, 146];
 const CAR_CENTER: [number, number] = [100, 122];
-const FRONT_SQUARE: [number, number] = [82, 92];
+const WHEEL_LINE: [number, number] = [100, 146];
 const REAR_SQUARE: [number, number] = [112, 92];
 const FRONT_SLOPE: [number, number] = [58, 92];
 const REAR_SLOPE: [number, number] = [142, 92];
@@ -240,8 +240,8 @@ export const AUTO_LAYOUT: PlannedTarget[] = [
   keeping(0, 0.12, 0, FRONT_AXLE, 90, RIGHT),
   // An der Diagonale des hinteren Quadrats.
   keeping(0, 0.05, 0.05, REAR_SQUARE, 135, [124, 104]),
-  // Waagrecht durch die Wagenmitte, obere Hälfte bleibt, gespiegelte Fenster gelb.
-  keeping(0, 0, 0, CAR_CENTER, 0, ABOVE, 'error', 0),
+  // Waagrecht durch die Wagenmitte, obere Hälfte bleibt, alle Fenster gelb.
+  { ...keeping(0, 0, 0, CAR_CENTER, 0, ABOVE, 'error', 0), variantBoth: true },
   // Waagrecht durch die Wagenmitte, untere Hälfte bleibt: Räder oben und unten.
   keeping(0, 0, 0, CAR_CENTER, 0, BELOW),
   // An der schrägen Kante des hinteren Dreiecks.
@@ -250,8 +250,8 @@ export const AUTO_LAYOUT: PlannedTarget[] = [
   keeping(0, 0, 0, CAR_CENTER, 90, RIGHT),
   // Zwei ganze Autos übereinander.
   wholeBeside(0, 0, -0.15, 0, [0.5, 0.52], CAR_CENTER),
-  // An der Diagonale des vorderen Quadrats.
-  keeping(0, 0.05, 0.05, FRONT_SQUARE, 135, [94, 104]),
+  // Waagrecht unter dem Auto durch die Radmitten: Die Räder bleiben ganze Kreise.
+  keeping(0, 0, -0.1, WHEEL_LINE, 0, ABOVE),
   // Senkrecht durch die Hinterachse, vorderer Teil bleibt: lange Limousine.
   keeping(0, -0.12, 0, REAR_AXLE, 90, LEFT),
 ];
