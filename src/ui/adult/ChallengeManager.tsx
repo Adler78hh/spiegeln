@@ -31,7 +31,7 @@ export function ChallengeManager(props: Props) {
   const motifOf = (id: string) => motifs.find((m) => m.id === id);
   // Eigene Motive zuerst, das neueste vorne.
   const custom = motifs.filter((m) => !m.builtin).reverse();
-  const builtin = motifs.filter((m) => m.builtin);
+  const builtin = motifs.filter((m) => m.builtin && !m.hidden);
 
   if (picking) {
     return (

@@ -18,6 +18,11 @@ export interface BuiltinMotif {
    * damit die Figur nicht doch durch Spiegeln des Originals entstehen kann.
    */
   swapVariants: Array<{ replacements: Array<[from: string, to: string]>; markers: Array<[number, number]> }>;
+  /**
+   * Nicht mehr zur Auswahl angeboten (bleibt nur für schon gespeicherte
+   * eigene Herausforderungen und gemerkte Figuren erhalten).
+   */
+  hidden?: boolean;
 }
 
 const svg = (body: string) =>
@@ -436,8 +441,63 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [],
   },
   {
+    id: 'quadrat',
+    name: 'Quadrat',
+    // Seitenlänge 110.
+    svg: svg(`
+      <rect x="45" y="45" width="110" height="110" fill="#6fa8dc" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
+    id: 'rechteck',
+    name: 'Rechteck',
+    // Seitenverhältnis 1 : 2.
+    svg: svg(`
+      <rect x="30" y="65" width="140" height="70" fill="#f4a261" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
+    id: 'trapez',
+    name: 'Trapez',
+    // Quadrat (Seite 60) mit zwei gleichschenklig-rechtwinkligen Dreiecken links und rechts.
+    svg: svg(`
+      <polygon points="70,70 130,70 190,130 10,130" fill="#e0675f" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
+    id: 'parallelogramm',
+    name: 'Parallelogramm',
+    // Quadrat (Seite 60) mit je einem gleichschenklig-rechtwinkligen Dreieck links unten und rechts oben.
+    svg: svg(`
+      <polygon points="70,70 190,70 130,130 10,130" fill="#b39ddb" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
+    id: 'kreis',
+    name: 'Kreis',
+    // Radius 60.
+    svg: svg(`
+      <circle cx="100" cy="100" r="60" fill="#ffd166" stroke="${INK}" stroke-width="4"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
+    id: 'gleichseitiges-dreieck',
+    name: 'Gleichseitiges Dreieck',
+    // Seitenlänge 140.
+    svg: svg(`
+      <polygon points="30,160.6 170,160.6 100,39.4" fill="#4fb3a9" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
     id: 'l-form',
     name: 'L-Form',
+    hidden: true,
     svg: svg(`
       <path d="M50,30 L90,30 L90,130 L150,130 L150,170 L50,170 Z" fill="#6fa8dc" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`),
     errorVariants: [],
@@ -446,6 +506,7 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
   {
     id: 'viertelkreis',
     name: 'Viertelkreis',
+    hidden: true,
     svg: svg(`
       <path d="M50,160 L50,50 A110,110 0 0,1 160,160 Z" fill="#ffd166" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
       <circle cx="80" cy="130" r="10" fill="#e0675f" stroke="${INK}" stroke-width="4"/>`),

@@ -12,6 +12,8 @@ export interface MotifInfo {
   /** Seitenverhältnis Breite / Höhe. */
   aspect: number;
   builtin: boolean;
+  /** Nicht mehr zur Auswahl angeboten (siehe BuiltinMotif.hidden). */
+  hidden?: boolean;
 }
 
 export const BUILTIN_MOTIF_INFOS: MotifInfo[] = BUILTIN_MOTIFS.map((m) => ({
@@ -20,6 +22,7 @@ export const BUILTIN_MOTIF_INFOS: MotifInfo[] = BUILTIN_MOTIFS.map((m) => ({
   src: svgDataUrl(m.svg),
   aspect: 1,
   builtin: true,
+  hidden: m.hidden,
 }));
 
 export function customMotifInfo(m: CustomMotif): MotifInfo {

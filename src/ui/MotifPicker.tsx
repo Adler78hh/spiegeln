@@ -22,7 +22,7 @@ export function MotifPicker({ motifs, onPick, onCreateMotif, onBack }: Props) {
           <PlusIcon size={56} />
           <span>Eigenes Bild</span>
         </button>
-        {motifs.map((m) => (
+        {motifs.filter((m) => !m.hidden).map((m) => (
           <button key={m.id} className="motif-tile" role="listitem" aria-label={m.name} onClick={() => onPick(m.id)}>
             <img src={m.src} alt="" />
           </button>
