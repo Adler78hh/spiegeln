@@ -57,14 +57,15 @@ function keeping(rotDeg: number, ox: number, oy: number, through: [number, numbe
 /**
  * Ganze Figur neben der ganzen Figur (Verschiebung, unlösbar): Achse mit dem
  * Winkel durch den Punkt knapp neben der Figur, die Figur bleibt vollständig
- * auf der Originalseite. Eigener Maßstab, damit die anderen Zielfiguren
+ * auf der Originalseite; die Kopie steht mit etwas Abstand ganz auf der
+ * anderen Seite. Eigener Maßstab, damit die anderen Zielfiguren
  * nicht mit verkleinert werden.
  */
 function wholeBeside(rotDeg: number, ox: number, oy: number, lineDeg: number, through: [number, number], center: [number, number]): PlannedTarget {
   const figure: FigureState = { rotation: rotDeg * DEG, offset: { x: ox, y: oy } };
   const probe = createMirror(UNIT_RECT, lineDeg, { x: through[0], y: through[1] }, 1);
   const side = sideOf(motifPoint(figure, ...center), lineOf(probe), 0) as Side;
-  return { kind: 'translate', scene: { figure, mirror: { ...probe, originalSide: side } }, ownScale: true };
+  return { kind: 'translate', scene: { figure, mirror: { ...probe, originalSide: side } }, ownScale: true, gap: 0.04 };
 }
 
 /** Dachspitze und rechte untere Wandecke des Hauses (Motivkoordinaten). */

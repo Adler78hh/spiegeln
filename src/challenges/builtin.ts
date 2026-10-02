@@ -8,7 +8,9 @@ import {
   figureTransform,
   lineOf,
   mirrorTransform,
+  originalHalfExtent,
   otherSideTransform,
+  translationAcrossLine,
   sideOf,
   UNIT_RECT,
   type ComposeMode,
@@ -43,6 +45,11 @@ export interface PlannedTarget {
    * damit nicht alle anderen Zielfiguren mit verkleinert werden.
    */
   ownScale?: boolean;
+  /**
+   * Nur bei Verschiebung: zusätzlicher Abstand der Kopie hinter der Achse,
+   * damit die Kopie ganz zu sehen ist und nicht an der Achse abgeschnitten wird.
+   */
+  gap?: number;
 }
 
 interface ChallengeSpec {
@@ -63,8 +70,8 @@ interface ChallengeSpec {
 }
 
 export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
-  { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 6, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
-  { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', version: 3, seed: 202, total: 12, unsolvable: ['error', 'translate', 'swap'], layout: FISCH_LAYOUT },
+  { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 7, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
+  { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', version: 4, seed: 202, total: 12, unsolvable: ['error', 'translate', 'swap'], layout: FISCH_LAYOUT },
   { id: 'formen-1', name: 'Formen', motifId: 'formen', version: 2, seed: 303, total: 12, unsolvable: ['translate', 'error'] },
   { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', version: 2, seed: 404, total: 12, unsolvable: ['swap', 'translate'] },
   { id: 'boot-1', name: 'Segelboot', motifId: 'boot', version: 2, seed: 505, total: 12, unsolvable: ['swap', 'rotate'] },
@@ -128,7 +135,11 @@ async function renderPlanned(p: PlannedTarget, ctx: Context): Promise<Raw> {
   const place = figureTransform(scene.figure, UNIT_RECT);
   const line = lineOf(scene.mirror);
   const placed = ctx.samples.map((s) => apply(place, s)).filter((q) => sideOf(q, line, 0) === scene.mirror.originalSide);
-  return { canvas: renderComposite(RENDER_PX, scene, first, other, otherSideTransform(mode, scene, placed)), solvable: false, kind: p.kind };
+  const transform =
+    p.kind === 'translate' && p.gap
+      ? translationAcrossLine(line, scene.mirror.originalSide, originalHalfExtent(placed, scene.mirror) + p.gap)
+      : otherSideTransform(mode, scene, placed);
+  return { canvas: renderComposite(RENDER_PX, scene, first, other, transform), solvable: false, kind: p.kind };
 }
 
 /** Zufällige, reproduzierbare Auswahl der Zielfiguren (über den Seed). */
