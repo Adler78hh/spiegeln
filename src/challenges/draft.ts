@@ -1,7 +1,7 @@
 /**
  * Entwurf einer eigenen Herausforderung im Editor (rein, ohne DOM).
  */
-import { shuffle } from './generate';
+import { shuffle, solvableFirst } from './generate';
 import type { Target, TargetKind } from './types';
 
 export interface DraftTarget extends Target {
@@ -20,7 +20,7 @@ export interface Draft {
 }
 
 export const DEFAULT_TOTAL = 12;
-export const DEFAULT_UNSOLVABLE = 2;
+export const DEFAULT_UNSOLVABLE = 3;
 
 export function newDraft(id: string, motifId: string, name: string): Draft {
   return { id, name, motifId, plannedTotal: DEFAULT_TOTAL, plannedUnsolvable: DEFAULT_UNSOLVABLE, targets: [] };
@@ -40,7 +40,7 @@ export function toggleSolvable(d: Draft, id: string): Draft {
 }
 
 export function shuffleTargets(d: Draft, seed: number): Draft {
-  return { ...d, targets: shuffle(d.targets, seed) };
+  return { ...d, targets: solvableFirst(shuffle(d.targets, seed), (t) => t.solvable) };
 }
 
 /** Vorgabe setzen; unlösbar ist nie größer als insgesamt. */

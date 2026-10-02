@@ -1,6 +1,7 @@
 /**
  * Vorinstallierte Herausforderungen. Die Zielfiguren werden beim Start aus
- * den eigenen Motiven erzeugt (reproduzierbar über den Seed).
+ * den eigenen Motiven erzeugt: zufällig, aber reproduzierbar über den Seed,
+ * oder fest vorgegeben (siehe layouts.ts).
  */
 import {
   apply,
@@ -14,7 +15,7 @@ import {
   type Scene,
   type Vec2,
 } from '../geometry';
-import { applyVariant, findBuiltinMotif, svgToImage } from '../motifs/builtin';
+import { applyVariant, findBuiltinMotif, svgToImage, type BuiltinMotif } from '../motifs/builtin';
 import {
   contentBounds,
   createFigureBuffer,
@@ -24,36 +25,46 @@ import {
   renderComposite,
   sampleFigure,
 } from '../render/composite';
-import { allOnOriginalSide, boundsCenter, candidateScenes, shuffle, viewSizeFor, type CandidateOptions } from './generate';
+import { allOnOriginalSide, boundsCenter, candidateScenes, shuffle, solvableFirst, viewSizeFor, type CandidateOptions } from './generate';
+import { HAUS_LAYOUT } from './layouts';
 import type { Store } from '../storage/store';
 import type { Challenge, Target, TargetKind } from './types';
 
 type UnsolvableKind = Exclude<TargetKind, 'mirror' | 'upload'>;
 
+/** Eine Zielfigur, festgelegt durch ihre Art und Szene. */
+export interface PlannedTarget {
+  kind: Exclude<TargetKind, 'upload'>;
+  scene: Scene;
+  /** Bei „Fehler eingebaut“: welche Fehlervariante des Motivs. */
+  variant?: number;
+}
+
 interface ChallengeSpec {
   id: string;
   name: string;
   motifId: string;
+  /**
+   * Version dieser Herausforderung. Erhöhen, wenn sich ihre Zielfiguren
+   * ändern: sie wird dann neu erzeugt und alte Antworten dazu verworfen
+   * (sie würden nicht mehr passen).
+   */
+  version: number;
   seed: number;
   total: number;
   unsolvable: UnsolvableKind[];
+  /** Fest vorgegebene Zielfiguren in dieser Reihenfolge (statt Zufall). */
+  layout?: PlannedTarget[];
 }
 
 export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
-  { id: 'haus-1', name: 'Haus', motifId: 'haus', seed: 101, total: 12, unsolvable: ['swap', 'rotate'] },
-  { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', seed: 202, total: 12, unsolvable: ['swap', 'error'] },
-  { id: 'formen-1', name: 'Formen', motifId: 'formen', seed: 303, total: 12, unsolvable: ['translate', 'error'] },
-  { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', seed: 404, total: 12, unsolvable: ['swap', 'translate'] },
-  { id: 'boot-1', name: 'Segelboot', motifId: 'boot', seed: 505, total: 12, unsolvable: ['swap', 'rotate'] },
-  { id: 'auto-1', name: 'Auto', motifId: 'auto', seed: 606, total: 12, unsolvable: ['error', 'swap'] },
+  { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 3, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
+  { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', version: 2, seed: 202, total: 12, unsolvable: ['swap', 'error'] },
+  { id: 'formen-1', name: 'Formen', motifId: 'formen', version: 2, seed: 303, total: 12, unsolvable: ['translate', 'error'] },
+  { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', version: 2, seed: 404, total: 12, unsolvable: ['swap', 'translate'] },
+  { id: 'boot-1', name: 'Segelboot', motifId: 'boot', version: 2, seed: 505, total: 12, unsolvable: ['swap', 'rotate'] },
+  { id: 'auto-1', name: 'Auto', motifId: 'auto', version: 2, seed: 606, total: 12, unsolvable: ['error', 'swap'] },
 ];
-
-/**
- * Version der vorinstallierten Herausforderungen. Erhöhen, wenn sich die
- * Zielfiguren ändern: gespeicherte Herausforderungen werden dann neu erzeugt
- * und alte Antworten dazu verworfen (sie würden nicht mehr passen).
- */
-export const BUILTIN_VERSION = 2;
 
 /** Auflösung, in der die Zielfiguren berechnet werden. */
 const RENDER_PX = 768;
@@ -69,36 +80,73 @@ interface Raw {
   scene?: Scene;
 }
 
-async function buildChallenge(spec: ChallengeSpec): Promise<Challenge> {
-  const motif = findBuiltinMotif(spec.motifId);
-  if (!motif) throw new Error(`Unbekanntes Motiv ${spec.motifId}`);
-  const image = await svgToImage(motif.svg);
-  const figure = createFigureBuffer(image, 1, RENDER_PX);
-  const samples = sampleFigure(figure, 1);
+interface Context {
+  motif: BuiltinMotif;
+  figure: HTMLCanvasElement;
+  samples: Vec2[];
+  buffers: Map<string, Promise<HTMLCanvasElement>>;
+}
+
+async function contextFor(motifId: string): Promise<Context> {
+  const motif = findBuiltinMotif(motifId);
+  if (!motif) throw new Error(`Unbekanntes Motiv ${motifId}`);
+  const figure = createFigureBuffer(await svgToImage(motif.svg), 1, RENDER_PX);
+  return { motif, figure, samples: sampleFigure(figure, 1), buffers: new Map() };
+}
+
+/** Figurpuffer einer abgewandelten Fassung des Motivs (zwischengespeichert). */
+function variantBuffer(ctx: Context, key: string, replacements: Array<[string, string]>): Promise<HTMLCanvasElement> {
+  let b = ctx.buffers.get(key);
+  if (!b) {
+    b = svgToImage(applyVariant(ctx.motif.svg, replacements)).then((img) => createFigureBuffer(img, 1, RENDER_PX));
+    ctx.buffers.set(key, b);
+  }
+  return b;
+}
+
+/** Zeichnet eine geplante Zielfigur (volle Arbeitsfläche). */
+async function renderPlanned(p: PlannedTarget, ctx: Context): Promise<Raw> {
+  const { scene } = p;
+  if (p.kind === 'mirror') {
+    return { canvas: renderComposite(RENDER_PX, scene, ctx.figure, ctx.figure, mirrorTransform(scene.mirror)), solvable: true, kind: 'mirror', scene };
+  }
+  const mode: ComposeMode = p.kind === 'error' || p.kind === 'swap' ? 'mirror' : p.kind;
+  // Figur der Originalhälfte und der zweiten Hälfte.
+  let first = ctx.figure;
+  let other = ctx.figure;
+  if (p.kind === 'error') {
+    const n = (p.variant ?? 0) % ctx.motif.errorVariants.length;
+    other = await variantBuffer(ctx, `error-${n}`, ctx.motif.errorVariants[n]);
+  } else if (p.kind === 'swap') {
+    first = other = await variantBuffer(ctx, 'swap', ctx.motif.swapVariants[0].replacements);
+  }
+  const place = figureTransform(scene.figure, UNIT_RECT);
+  const line = lineOf(scene.mirror);
+  const placed = ctx.samples.map((s) => apply(place, s)).filter((q) => sideOf(q, line, 0) === scene.mirror.originalSide);
+  return { canvas: renderComposite(RENDER_PX, scene, first, other, otherSideTransform(mode, scene, placed)), solvable: false, kind: p.kind };
+}
+
+/** Zufällige, reproduzierbare Auswahl der Zielfiguren (über den Seed). */
+async function planRandom(spec: ChallengeSpec, ctx: Context): Promise<PlannedTarget[]> {
+  const { motif, figure, samples } = ctx;
   const used = new Set<string>();
-  const raw: Raw[] = [];
+  const plan: PlannedTarget[] = [];
 
   const solvable = candidateScenes(samples, spec.seed, used);
   for (let i = 0; i < spec.total - spec.unsolvable.length; i++) {
     const scene = solvable.next().value as Scene | undefined;
     if (!scene) break;
-    raw.push({ canvas: renderComposite(RENDER_PX, scene, figure, figure, mirrorTransform(scene.mirror)), solvable: true, kind: 'mirror', scene });
+    plan.push({ kind: 'mirror', scene });
   }
 
   let variantIndex = 0;
-  const makeUnsolvable = async (kind: UnsolvableKind, seed: number): Promise<Raw | null> => {
+  const makeUnsolvable = async (kind: UnsolvableKind, seed: number): Promise<PlannedTarget | null> => {
     const mode: ComposeMode = kind === 'error' || kind === 'swap' ? 'mirror' : kind;
-    // Figur der Originalhälfte und der zweiten Hälfte.
-    let first = figure;
-    let other = figure;
+    const variant = kind === 'error' ? variantIndex++ : undefined;
     let markers: Vec2[] = [];
-    if (kind === 'error') {
-      const variant = motif.errorVariants[variantIndex++ % motif.errorVariants.length];
-      other = createFigureBuffer(await svgToImage(applyVariant(motif.svg, variant)), 1, RENDER_PX);
-    } else if (kind === 'swap') {
+    if (kind === 'swap') {
       const swap = motif.swapVariants[0];
       if (!swap) return null;
-      first = other = createFigureBuffer(await svgToImage(applyVariant(motif.svg, swap.replacements)), 1, RENDER_PX);
       markers = swap.markers.map(([x, y]) => motifToFigurePoint({ x: x / 200, y: y / 200 }, 1));
     }
     // Vertauschte Teile brauchen alle Merkmale im Bild, daher auch größere Ausschnitte.
@@ -108,13 +156,11 @@ async function buildChallenge(spec: ChallengeSpec): Promise<Challenge> {
       const scene = gen.next().value as Scene | undefined;
       if (!scene) return null;
       if (markers.length && !allOnOriginalSide(markers, scene)) continue;
-      const place = figureTransform(scene.figure, UNIT_RECT);
-      const line = lineOf(scene.mirror);
-      const placed = samples.map((s) => apply(place, s)).filter((p) => sideOf(p, line, 0) === scene.mirror.originalSide);
-      const candidate = renderComposite(RENDER_PX, scene, first, other, otherSideTransform(mode, scene, placed));
+      const planned: PlannedTarget = { kind, scene, variant };
+      const candidate = (await renderPlanned(planned, ctx)).canvas;
       const reference = renderComposite(RENDER_PX, scene, figure, figure, mirrorTransform(scene.mirror));
       // Unlösbar nur, wenn sich das Ergebnis sichtbar vom Spiegelbild unterscheidet.
-      if (differenceRatio(candidate, reference) >= MIN_DIFFERENCE) return { canvas: candidate, solvable: false, kind };
+      if (differenceRatio(candidate, reference) >= MIN_DIFFERENCE) return planned;
     }
     return null;
   };
@@ -125,25 +171,38 @@ async function buildChallenge(spec: ChallengeSpec): Promise<Challenge> {
     for (const k of [kind, ...kinds.filter((x) => x !== kind)]) {
       const r = await makeUnsolvable(k, spec.seed + 1000 * (i + 1));
       if (r) {
-        raw.push(r);
+        plan.push(r);
         break;
       }
     }
   }
 
+  return solvableFirst(shuffle(plan, spec.seed), (t) => t.kind === 'mirror');
+}
+
+/** Zielfiguren einer vorinstallierten Herausforderung in ihrer Reihenfolge. */
+export async function planChallenge(id: string): Promise<PlannedTarget[]> {
+  const spec = BUILTIN_CHALLENGES.find((s) => s.id === id);
+  if (!spec) throw new Error(`Unbekannte Herausforderung ${id}`);
+  return spec.layout ?? planRandom(spec, await contextFor(spec.motifId));
+}
+
+async function buildChallenge(spec: ChallengeSpec): Promise<Challenge> {
+  const ctx = await contextFor(spec.motifId);
+  const plan = spec.layout ?? (await planRandom(spec, ctx));
+  const raw = await Promise.all(plan.map((p) => renderPlanned(p, ctx)));
+
   // Gemeinsamer Ausschnitt: alle Ziele gleich stark vergrößert.
   const bounds = raw.map((r) => contentBounds(r.canvas));
   const viewSize = viewSizeFor(bounds.filter((b): b is NonNullable<typeof b> => b !== null));
   const targets: Target[] = raw.map((r, i) => ({
-    id: '',
+    id: `${spec.id}-${i + 1}`,
     image: cropSquare(r.canvas, boundsCenter(bounds[i]), viewSize, TARGET_PX).toDataURL('image/png'),
     solvable: r.solvable,
     kind: r.kind,
     scene: r.scene,
   }));
-
-  const mixed = shuffle(targets, spec.seed).map((t, i) => ({ ...t, id: `${spec.id}-${i + 1}` }));
-  return { id: spec.id, name: spec.name, motifId: spec.motifId, targets: mixed, viewSize };
+  return { id: spec.id, name: spec.name, motifId: spec.motifId, targets, viewSize };
 }
 
 /**
@@ -153,15 +212,16 @@ async function buildChallenge(spec: ChallengeSpec): Promise<Challenge> {
  */
 export async function loadChallenges(store: Store): Promise<Challenge[]> {
   const stored = await store.listChallenges();
-  const current = new Set(stored.filter((c) => c.builtin && c.version === BUILTIN_VERSION).map((c) => c.id));
-  const outdated = new Set(stored.filter((c) => c.builtin && c.version !== BUILTIN_VERSION).map((c) => c.id));
+  const versionOf = (id: string) => BUILTIN_CHALLENGES.find((s) => s.id === id)?.version;
+  const current = new Set(stored.filter((c) => c.builtin && c.version === versionOf(c.id)).map((c) => c.id));
+  const outdated = new Set(stored.filter((c) => c.builtin && c.version !== versionOf(c.id)).map((c) => c.id));
   const missing = BUILTIN_CHALLENGES.filter((spec) => !current.has(spec.id));
   if (missing.length) {
     const built = await Promise.all(missing.map(buildChallenge));
     for (const c of built) {
       if (outdated.has(c.id)) await store.deleteAnswersForChallenge(c.id);
       await store.saveChallenge(
-        { ...c, version: BUILTIN_VERSION },
+        { ...c, version: versionOf(c.id) },
         true,
         BUILTIN_CHALLENGES.findIndex((s) => s.id === c.id),
       );

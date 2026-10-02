@@ -45,6 +45,19 @@ export function shuffle<T>(items: readonly T[], seed: number): T[] {
   return out;
 }
 
+/**
+ * Die erste Zielfigur soll immer lösbar sein: Ist sie es nicht, tauscht sie
+ * den Platz mit der ersten lösbaren.
+ */
+export function solvableFirst<T>(items: readonly T[], isSolvable: (t: T) => boolean): T[] {
+  const out = [...items];
+  if (out.length && !isSolvable(out[0])) {
+    const j = out.findIndex(isSolvable);
+    if (j > 0) [out[0], out[j]] = [out[j], out[0]];
+  }
+  return out;
+}
+
 export interface Evaluation {
   /** Anteil der Figur auf der Originalseite. */
   fraction: number;

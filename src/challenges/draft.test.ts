@@ -10,11 +10,11 @@ const t = (id: string, solvable: boolean): DraftTarget => ({
 });
 
 describe('Entwurf einer Herausforderung', () => {
-  it('Standardvorgabe 12 / 2', () => {
+  it('Standardvorgabe 12 / 3', () => {
     const d = newDraft('c', 'haus', 'Haus');
     expect(d.plannedTotal).toBe(12);
-    expect(d.plannedUnsolvable).toBe(2);
-    expect(counts(d)).toEqual({ solvable: 0, unsolvable: 0, missingSolvable: 10, missingUnsolvable: 2, matchesPlan: false });
+    expect(d.plannedUnsolvable).toBe(3);
+    expect(counts(d)).toEqual({ solvable: 0, unsolvable: 0, missingSolvable: 9, missingUnsolvable: 3, matchesPlan: false });
   });
 
   it('zählt gegen die Vorgabe', () => {
@@ -45,5 +45,11 @@ describe('Entwurf einer Herausforderung', () => {
     const mixed = shuffleTargets(d, 3);
     expect(mixed.targets.map((x) => x.id).sort()).toEqual(d.targets.map((x) => x.id).sort());
     expect(mixed.targets.map((x) => x.id)).not.toEqual(d.targets.map((x) => x.id));
+  });
+
+  it('nach dem Mischen ist die erste Zielfigur immer lösbar', () => {
+    let d = newDraft('c', 'haus', 'Haus');
+    for (let i = 0; i < 6; i++) d = addTarget(d, t(`t${i}`, i >= 3));
+    for (let seed = 0; seed < 50; seed++) expect(shuffleTargets(d, seed).targets[0].solvable).toBe(true);
   });
 });

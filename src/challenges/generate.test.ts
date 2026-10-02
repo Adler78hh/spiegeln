@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { lineOf, sideOf } from '../geometry';
-import { candidateScenes, evaluateScene, rng, shapeKey, shuffle } from './generate';
+import { candidateScenes, evaluateScene, rng, shapeKey, shuffle, solvableFirst } from './generate';
 
 // Asymmetrische Figur: ein "L" aus Stichproben um die Mitte
 const samples = [
@@ -21,6 +21,14 @@ describe('Zufall und Mischen', () => {
     expect([...s].sort((x, y) => x - y)).toEqual(items);
     expect(shuffle(items, 7)).toEqual(s);
     expect(shuffle(items, 8)).not.toEqual(s);
+  });
+});
+
+describe('Lösbare Figur zuerst', () => {
+  it('tauscht eine unlösbare erste Figur mit der ersten lösbaren', () => {
+    expect(solvableFirst(['x', 'y', 'a', 'b'], (s) => s < 'n')).toEqual(['a', 'y', 'x', 'b']);
+    expect(solvableFirst(['a', 'x'], (s) => s < 'n')).toEqual(['a', 'x']);
+    expect(solvableFirst(['x', 'y'], (s) => s < 'n')).toEqual(['x', 'y']);
   });
 });
 
