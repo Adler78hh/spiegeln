@@ -356,6 +356,23 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [],
   },
   {
+    id: 'stifte',
+    name: 'Buntstifte',
+    // Fünf gleiche Buntstifte (in sich symmetrisch) auf den Kanten zweier
+    // gleichseitiger Dreiecke (Seitenlänge 106); an den Ecken bleibt Platz
+    // für eine Spiegelachse. Sie unterscheiden sich nur in Farbe und Lage.
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="2.5" stroke-linejoin="round">
+        <g transform="translate(73.50 145.90) rotate(0.00)"><path d="M-36,-6.5 L22,-6.5 L22,6.5 L-36,6.5 Z" fill="#8b4a1f"/><path d="M22,-6.5 L36,0 L22,6.5 Z" fill="#f4d3ad"/><path d="M31.5,-2.09 L36,0 L31.5,2.09 Z" fill="#8b4a1f"/></g>
+        <g transform="translate(47.00 100.00) rotate(120.00)"><path d="M-36,-6.5 L22,-6.5 L22,6.5 L-36,6.5 Z" fill="#2fa84f"/><path d="M22,-6.5 L36,0 L22,6.5 Z" fill="#f4d3ad"/><path d="M31.5,-2.09 L36,0 L31.5,2.09 Z" fill="#2fa84f"/></g>
+        <g transform="translate(100.00 100.00) rotate(60.00)"><path d="M-36,-6.5 L22,-6.5 L22,6.5 L-36,6.5 Z" fill="#1e7fe0"/><path d="M22,-6.5 L36,0 L22,6.5 Z" fill="#f4d3ad"/><path d="M31.5,-2.09 L36,0 L31.5,2.09 Z" fill="#1e7fe0"/></g>
+        <g transform="translate(126.50 54.10) rotate(180.00)"><path d="M-36,-6.5 L22,-6.5 L22,6.5 L-36,6.5 Z" fill="#e2231a"/><path d="M22,-6.5 L36,0 L22,6.5 Z" fill="#f4d3ad"/><path d="M31.5,-2.09 L36,0 L31.5,2.09 Z" fill="#e2231a"/></g>
+        <g transform="translate(153.00 100.00) rotate(-60.00)"><path d="M-36,-6.5 L22,-6.5 L22,6.5 L-36,6.5 Z" fill="#ffd600"/><path d="M22,-6.5 L36,0 L22,6.5 Z" fill="#f4d3ad"/><path d="M31.5,-2.09 L36,0 L31.5,2.09 Z" fill="#ffd600"/></g>
+      </g>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
     id: 'tetraktys',
     name: 'Tetraktys',
     // Zehn Kreise im gleichseitigen Dreieck (Reihen zu 1, 2, 3, 4),
