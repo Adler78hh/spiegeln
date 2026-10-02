@@ -854,6 +854,8 @@ button:disabled {
   place-items: center;
   touch-action: none;
   -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .gate-ring {
@@ -1758,6 +1760,7 @@ button:disabled {
   place-items: center;
   touch-action: none;
   -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
   box-shadow: 0 2px 8px rgba(74, 59, 47, 0.1);
 }
