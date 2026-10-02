@@ -261,6 +261,60 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [],
   },
   {
+    id: 'hasen',
+    name: 'Stoffhasen',
+    // Zwei Stoffhasen gleicher Form, jeder in sich symmetrisch: hinten
+    // magenta, vorne rosa mit Weste und goldener Brosche auf der linken
+    // Westenhälfte. Der vordere reicht nicht über die Mittelachse des hinteren.
+    svg: svg(`<g stroke="${INK}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+        <g transform="translate(126 108)">
+    <ellipse cx="-13" cy="-62" rx="9" ry="26" fill="#c8007f"/>
+    <ellipse cx="13" cy="-62" rx="9" ry="26" fill="#c8007f"/>
+    <ellipse cx="-13" cy="-60" rx="4.5" ry="18" fill="#e982bd" stroke="none"/>
+    <ellipse cx="13" cy="-60" rx="4.5" ry="18" fill="#e982bd" stroke="none"/>
+    <ellipse cx="0" cy="32" rx="27" ry="31" fill="#c8007f"/>
+    <ellipse cx="0" cy="36" rx="15" ry="19" fill="#e982bd"/>
+    <ellipse cx="-27" cy="22" rx="8" ry="17" fill="#c8007f" transform="rotate(18 -27 22)"/>
+    <ellipse cx="27" cy="22" rx="8" ry="17" fill="#c8007f" transform="rotate(-18 27 22)"/>
+    <ellipse cx="-21" cy="62" rx="14" ry="10" fill="#c8007f"/>
+    <ellipse cx="21" cy="62" rx="14" ry="10" fill="#c8007f"/>
+    <ellipse cx="-21" cy="63" rx="8" ry="5.5" fill="#e982bd"/>
+    <ellipse cx="21" cy="63" rx="8" ry="5.5" fill="#e982bd"/>
+    <circle cx="0" cy="-20" r="26" fill="#c8007f"/>
+    <ellipse cx="0" cy="-10" rx="12" ry="9" fill="#e982bd"/>
+    <circle cx="-9" cy="-24" r="3" fill="${INK}" stroke="none"/>
+    <circle cx="9" cy="-24" r="3" fill="${INK}" stroke="none"/>
+    <path d="M-4,-14 L4,-14 L0,-10 Z" fill="${INK}"/>
+    <path d="M0,-10 L0,-6 M0,-6 Q-4,-2 -7,-5 M0,-6 Q4,-2 7,-5" fill="none"/>
+        </g>
+        <g transform="translate(76 120)">
+    <ellipse cx="-13" cy="-62" rx="9" ry="26" fill="#f7a8c4"/>
+    <ellipse cx="13" cy="-62" rx="9" ry="26" fill="#f7a8c4"/>
+    <ellipse cx="-13" cy="-60" rx="4.5" ry="18" fill="#fde0ea" stroke="none"/>
+    <ellipse cx="13" cy="-60" rx="4.5" ry="18" fill="#fde0ea" stroke="none"/>
+    <ellipse cx="0" cy="32" rx="27" ry="31" fill="#f7a8c4"/>
+    <ellipse cx="0" cy="36" rx="15" ry="19" fill="#fde0ea"/>
+    <ellipse cx="-27" cy="22" rx="8" ry="17" fill="#f7a8c4" transform="rotate(18 -27 22)"/>
+    <ellipse cx="27" cy="22" rx="8" ry="17" fill="#f7a8c4" transform="rotate(-18 27 22)"/>
+    <ellipse cx="-21" cy="62" rx="14" ry="10" fill="#f7a8c4"/>
+    <ellipse cx="21" cy="62" rx="14" ry="10" fill="#f7a8c4"/>
+    <ellipse cx="-21" cy="63" rx="8" ry="5.5" fill="#fde0ea"/>
+    <ellipse cx="21" cy="63" rx="8" ry="5.5" fill="#fde0ea"/>
+    <circle cx="0" cy="-20" r="26" fill="#f7a8c4"/>
+    <ellipse cx="0" cy="-10" rx="12" ry="9" fill="#fde0ea"/>
+    <circle cx="-9" cy="-24" r="3" fill="${INK}" stroke="none"/>
+    <circle cx="9" cy="-24" r="3" fill="${INK}" stroke="none"/>
+    <path d="M-4,-14 L4,-14 L0,-10 Z" fill="${INK}"/>
+    <path d="M0,-10 L0,-6 M0,-6 Q-4,-2 -7,-5 M0,-6 Q4,-2 7,-5" fill="none"/>
+    <path d="M-24,6 Q-16,2 -8,4 L-6,44 Q-16,48 -26,42 Q-29,24 -24,6 Z" fill="#8fb8de"/>
+    <path d="M24,6 Q16,2 8,4 L6,44 Q16,48 26,42 Q29,24 24,6 Z" fill="#8fb8de"/>
+    <circle cx="-16" cy="24" r="4.5" fill="#f2c14e"/>
+        </g></g>
+`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
     id: 'tetraktys',
     name: 'Tetraktys',
     // Zehn Kreise im gleichseitigen Dreieck (Reihen zu 1, 2, 3, 4),
