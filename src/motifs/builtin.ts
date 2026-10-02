@@ -76,10 +76,10 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     errorVariants: [[['fill="#f59a4a"', 'fill="#7fa6d6"']], [['fill="#ffc46b"', 'fill="#f3a6c8"']]],
     swapVariants: [
       {
-        // Rückenflosse sitzt am Bauch; Auge und Maul unterscheiden das
-        // Ergebnis vom an der Längsachse gespiegelten Original.
-        replacements: [['M84,66 Q100,48 120,68', 'M84,134 Q100,152 120,132']],
-        markers: [[102, 140], [62, 92], [46, 110]],
+        // Die Schwanzflosse sitzt am Bauch statt hinten; Auge und Maul
+        // unterscheiden das Ergebnis vom gespiegelten Original.
+        replacements: [['M140,100 L178,68 L170,100 L178,132 Z', 'M88,126 L120,164 L88,156 L56,164 Z']],
+        markers: [[88, 152], [62, 92], [46, 110]],
       },
     ],
   },

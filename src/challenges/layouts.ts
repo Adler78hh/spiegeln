@@ -45,14 +45,25 @@ function throughPoint(kind: Kind, rotDeg: number, ox: number, oy: number, mx: nu
 }
 
 /**
- * Ganze Figur neben der ganzen Figur (Verschiebung, unlösbar): Achse
- * senkrecht knapp rechts neben der Figur, die Figur bleibt vollständig auf
- * der Originalseite.
+ * Spiegelachse durch einen Motivpunkt (Winkel im Motiv gemessen); sichtbar
+ * bleibt die Hälfte, in der der Motivpunkt `keep` liegt.
  */
-function sideBySide(rotDeg: number, ox: number, oy: number, lineX: number): PlannedTarget {
+function keeping(rotDeg: number, ox: number, oy: number, through: [number, number], motifLineDeg: number, keep: [number, number]): PlannedTarget {
+  const target = throughPoint('mirror', rotDeg, ox, oy, ...through, 1, motifLineDeg);
+  const side = sideOf(motifPoint(target.scene.figure, ...keep), lineOf(target.scene.mirror), 0) as Side;
+  return { ...target, scene: { ...target.scene, mirror: { ...target.scene.mirror, originalSide: side } } };
+}
+
+/**
+ * Ganze Figur neben der ganzen Figur (Verschiebung, unlösbar): Achse mit dem
+ * Winkel durch den Punkt knapp neben der Figur, die Figur bleibt vollständig
+ * auf der Originalseite. Eigener Maßstab, damit die anderen Zielfiguren
+ * nicht mit verkleinert werden.
+ */
+function wholeBeside(rotDeg: number, ox: number, oy: number, lineDeg: number, through: [number, number], center: [number, number]): PlannedTarget {
   const figure: FigureState = { rotation: rotDeg * DEG, offset: { x: ox, y: oy } };
-  const probe = createMirror(UNIT_RECT, 90, { x: lineX, y: 0.5 }, 1);
-  const side = sideOf(motifPoint(figure, 100, 100), lineOf(probe), 0) as Side;
+  const probe = createMirror(UNIT_RECT, lineDeg, { x: through[0], y: through[1] }, 1);
+  const side = sideOf(motifPoint(figure, ...center), lineOf(probe), 0) as Side;
   return { kind: 'translate', scene: { figure, mirror: { ...probe, originalSide: side } }, ownScale: true };
 }
 
@@ -78,6 +89,29 @@ export const HAUS_LAYOUT: PlannedTarget[] = [
   // Achse durch die waagrechte Fensterstrebe, untere Haushälfte ohne Dach: das Fenster erscheint ganz.
   throughPoint('mirror', 180, -0.0755, -0.0653, ...WINDOW_CENTER, 1, 0),
   // Ganzes Haus neben dem ganzen Haus (eigener, kleinerer Maßstab).
-  sideBySide(0, -0.2, 0, 0.51),
+  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
   t('mirror', 210, -0.0845, -0.0229, 165, 0.5, 0.3936, 1),
+];
+
+/** Fisch: Mitte der Längsachse, Auge, Maul (Motivkoordinaten). */
+const FISH_AXIS: [number, number] = [88, 100];
+const FISH_EYE: [number, number] = [62, 92];
+const FISH_MOUTH: [number, number] = [40, 108];
+
+export const FISCH_LAYOUT: PlannedTarget[] = [
+  t('mirror', 45, 0.0943, -0.0773, 90, 0.6336, 0.5, 1),
+  t('mirror', 45, 0.0886, 0.019, 135, 0.571, 0.571, 1),
+  t('mirror', 45, -0.001, -0.0272, 165, 0.5, 0.5148, 1),
+  // Waagrecht an der Längsachse: Fisch mit zwei Augen.
+  keeping(0, 0, 0.02, FISH_AXIS, 0, FISH_EYE),
+  t('error', 240, -0.0016, -0.0283, 165, 0.5, 0.4616, 1, 0),
+  t('mirror', 210, 0.0335, 0.0741, 135, 0.5198, 0.5198, -1),
+  // Waagrecht an der Längsachse: Fisch ohne Augen.
+  keeping(180, 0.03, -0.02, FISH_AXIS, 0, FISH_MOUTH),
+  t('mirror', 30, 0.0854, 0.087, 90, 0.6142, 0.5, -1),
+  // Zwei ganze Fische übereinander.
+  wholeBeside(0, 0, -0.18, 0, [0.5, 0.43], FISH_AXIS),
+  t('mirror', 120, -0.08, -0.0044, 30, 0.5, 0.5307, -1),
+  t('swap', 240, -0.0659, 0.0751, 120, 0.3788, 0.5, -1),
+  t('mirror', 165, -0.0784, -0.0602, 60, 0.4174, 0.5, 1),
 ];

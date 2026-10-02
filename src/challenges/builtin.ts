@@ -26,7 +26,7 @@ import {
   sampleFigure,
 } from '../render/composite';
 import { allOnOriginalSide, boundsCenter, candidateScenes, shuffle, solvableFirst, viewSizeFor, type CandidateOptions } from './generate';
-import { HAUS_LAYOUT } from './layouts';
+import { FISCH_LAYOUT, HAUS_LAYOUT } from './layouts';
 import type { Store } from '../storage/store';
 import type { Challenge, Target, TargetKind } from './types';
 
@@ -64,7 +64,7 @@ interface ChallengeSpec {
 
 export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'haus-1', name: 'Haus', motifId: 'haus', version: 6, seed: 101, total: 12, unsolvable: ['swap', 'rotate', 'translate'], layout: HAUS_LAYOUT },
-  { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', version: 2, seed: 202, total: 12, unsolvable: ['swap', 'error'] },
+  { id: 'fisch-1', name: 'Fisch', motifId: 'fisch', version: 3, seed: 202, total: 12, unsolvable: ['error', 'translate', 'swap'], layout: FISCH_LAYOUT },
   { id: 'formen-1', name: 'Formen', motifId: 'formen', version: 2, seed: 303, total: 12, unsolvable: ['translate', 'error'] },
   { id: 'schnecke-1', name: 'Schnecke', motifId: 'schnecke', version: 2, seed: 404, total: 12, unsolvable: ['swap', 'translate'] },
   { id: 'boot-1', name: 'Segelboot', motifId: 'boot', version: 2, seed: 505, total: 12, unsolvable: ['swap', 'rotate'] },
