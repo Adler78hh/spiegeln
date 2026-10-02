@@ -18,7 +18,7 @@ export const GROUP_COLORS: GroupColor[] = [
   { id: 'gold', name: 'Gold', hex: '#d4a72c' },
   { id: 'orange', name: 'Orange', hex: '#f28c28' },
   { id: 'feuer', name: 'Feuer', hex: '#e8461e' },
-  // Rot, Grün und Blau sind die reinen RGB-Grundfarben.
+  // Rot und Blau sind die reinen RGB-Grundfarben, Grün ist etwas abgeschwächt.
   { id: 'rot', name: 'Rot', hex: '#ff0000' },
   { id: 'rubin', name: 'Rubin', hex: '#9b111e' },
   { id: 'rosa', name: 'Rosa', hex: '#f7a8c4' },
@@ -37,7 +37,7 @@ export const GROUP_COLORS: GroupColor[] = [
   { id: 'mint', name: 'Mint', hex: '#9ee6c4' },
   { id: 'lind', name: 'Lind', hex: '#cfe08a' },
   { id: 'limette', name: 'Limette', hex: '#9ed12e' },
-  { id: 'gruen', name: 'Grün', hex: '#00ff00' },
+  { id: 'gruen', name: 'Grün', hex: '#2ecc40' },
   { id: 'gras', name: 'Gras', hex: '#4caf50' },
   { id: 'olive', name: 'Olive', hex: '#808a2c' },
   { id: 'haselnuss', name: 'Haselnuss', hex: '#b07a46' },

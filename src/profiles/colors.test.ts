@@ -22,9 +22,9 @@ describe('Gruppenfarben', () => {
     expect(firstFreeColor([...all, 'weiss'])).toBe('beige');
   });
 
-  it('Rot, Grün und Blau sind die RGB-Grundfarben', () => {
+  it('Rot und Blau sind die RGB-Grundfarben', () => {
     const hex = (id: string) => GROUP_COLORS.find((c) => c.id === id)!.hex;
-    expect([hex('rot'), hex('gruen'), hex('blau')]).toEqual(['#ff0000', '#00ff00', '#0000ff']);
+    expect([hex('rot'), hex('blau')]).toEqual(['#ff0000', '#0000ff']);
   });
 
   it('heller Hintergrund und lesbare Schrift', () => {
