@@ -185,6 +185,11 @@ export class Store {
     if (g && name.trim()) await this.db.put('groups', { ...g, name: name.trim() });
   }
 
+  async recolorGroup(id: string, color: string, name: string): Promise<void> {
+    const g = await this.db.get('groups', id);
+    if (g) await this.db.put('groups', { ...g, color, name: name.trim() || g.name });
+  }
+
   /** Löscht eine Gruppe mit allen Kindern, Antworten und Schnappschüssen. */
   async deleteGroup(id: string): Promise<void> {
     const profiles = (await this.listProfiles()).filter((p) => p.groupId === id);

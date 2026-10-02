@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { GRATIS } from '../../edition';
+import { isColorName, suggestGroupName } from '../../profiles/colors';
 import { BUILTIN_CHALLENGES, loadChallenges } from '../../challenges/builtin';
 import { newDraft, type Draft } from '../../challenges/draft';
 import type { Challenge } from '../../challenges/types';
@@ -76,6 +77,7 @@ export function AdultArea(props: Props) {
         profiles={profiles}
         onProfilesChange={onProfilesChange}
         onRename={async () => {}}
+        onRecolor={async () => {}}
         onDelete={async () => {}}
         challenges={challenges}
         motifs={motifs}
@@ -137,6 +139,12 @@ export function AdultArea(props: Props) {
             onProfilesChange={onProfilesChange}
             onRename={async (name) => {
               await store.renameGroup(group.id, name);
+              await reloadGroups();
+            }}
+            onRecolor={async (color) => {
+              const others = groups.filter((g) => g.id !== group.id).map((g) => g.color);
+              const name = isColorName(group.name, group.color) ? suggestGroupName(color, others) : group.name;
+              await store.recolorGroup(group.id, color, name);
               await reloadGroups();
             }}
             onDelete={async () => {

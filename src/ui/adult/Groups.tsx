@@ -52,6 +52,51 @@ export function GroupList({ groups, profiles, onOpen, onNew, onBack }: ListProps
 }
 
 /** Neue Gruppe: Farbe, Name und Anzahl der Kinder wählen. */
+/** Raster der 32 Gruppenfarben; schon vergebene Farben sind gekennzeichnet. */
+function ColorGrid({ value, usedColors, onPick }: { value: string; usedColors: string[]; onPick: (id: string) => void }) {
+  return (
+    <div className="color-grid" role="radiogroup" aria-label="Farbe">
+      {GROUP_COLORS.map((c) => {
+        const uses = usedColors.filter((u) => u === c.id).length;
+        return (
+          <button
+            key={c.id}
+            role="radio"
+            aria-checked={c.id === value}
+            aria-label={uses ? `${c.name} (schon ${uses}× vergeben)` : c.name}
+            className={`color-swatch ${c.id === value ? 'selected' : ''} ${uses ? 'used' : ''}`}
+            onClick={() => onPick(c.id)}
+          >
+            <span className="swatch" style={{ background: c.hex, color: textOn(c.hex) }}>
+              {c.id === value && <CheckIcon size={22} />}
+            </span>
+            <span className="swatch-name">{c.name}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Farbe einer bestehenden Gruppe ändern. */
+function RecolorDialog(props: { group: Group; groups: Group[]; onPick: (id: string) => void; onCancel: () => void }) {
+  const { group, groups, onPick, onCancel } = props;
+  const usedColors = groups.filter((g) => g.id !== group.id).map((g) => g.color);
+  return (
+    <div className="dialog-backdrop" role="dialog" aria-modal="true" aria-label="Farbe ändern">
+      <div className="dialog new-group">
+        <h2>Farbe der Gruppe {group.name}</h2>
+        <ColorGrid value={group.color} usedColors={usedColors} onPick={onPick} />
+        <div className="dialog-actions">
+          <button className="text-btn" onClick={onCancel}>
+            Abbrechen
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function NewGroupDialog(props: { groups: Group[]; onCreate: (name: string, color: string, count: number) => void; onCancel: () => void }) {
   const { groups, onCreate, onCancel } = props;
   const usedColors = groups.map((g) => g.color);
@@ -73,27 +118,8 @@ export function NewGroupDialog(props: { groups: Group[]; onCreate: (name: string
     <div className="dialog-backdrop" role="dialog" aria-modal="true" aria-label="Neue Gruppe">
       <div className="dialog new-group">
         <h2>Neue Gruppe</h2>
-        <p className="field-label">Farbe (lässt sich später nicht ändern)</p>
-        <div className="color-grid" role="radiogroup" aria-label="Farbe">
-          {GROUP_COLORS.map((c) => {
-            const uses = usedColors.filter((u) => u === c.id).length;
-            return (
-              <button
-                key={c.id}
-                role="radio"
-                aria-checked={c.id === color}
-                aria-label={uses ? `${c.name} (schon ${uses}× vergeben)` : c.name}
-                className={`color-swatch ${c.id === color ? 'selected' : ''} ${uses ? 'used' : ''}`}
-                onClick={() => pickColor(c.id)}
-              >
-                <span className="swatch" style={{ background: c.hex, color: textOn(c.hex) }}>
-                  {c.id === color && <CheckIcon size={22} />}
-                </span>
-                <span className="swatch-name">{c.name}</span>
-              </button>
-            );
-          })}
-        </div>
+        <p className="field-label">Farbe</p>
+        <ColorGrid value={color} usedColors={usedColors} onPick={pickColor} />
         <label className="name-field">
           <span>Name der Gruppe</span>
           <input
@@ -157,6 +183,8 @@ interface PageProps {
   profiles: Profile[];
   onProfilesChange: (all: Profile[]) => void;
   onRename: (name: string) => void;
+  /** Neue Farbe (der Name wechselt mit, wenn er noch der Farbname ist). */
+  onRecolor: (color: string) => void;
   onDelete: () => void;
   challenges: Challenge[];
   motifs: MotifInfo[];
@@ -173,8 +201,9 @@ export type GroupTab = 'kids' | 'results';
 
 /** Eine Gruppe: Name, Farbe, Löschen; Reiter „Kinder“ und „Ergebnisse“. */
 export function GroupPage(props: PageProps) {
-  const { store, group, groups, profiles, onProfilesChange, onRename, onDelete, challenges, motifs, tab, onTabChange, onBack, limited } = props;
+  const { store, group, groups, profiles, onProfilesChange, onRename, onRecolor, onDelete, challenges, motifs, tab, onTabChange, onBack, limited } = props;
   const [confirm, setConfirm] = useState(false);
+  const [recolor, setRecolor] = useState(false);
   const color = findColor(group.color);
   const kids = profiles.filter((p) => p.groupId === group.id);
   const isLast = groups.length <= 1;
@@ -183,7 +212,24 @@ export function GroupPage(props: PageProps) {
     <AdultPage title={limited ? 'Klasse' : `Gruppe ${group.name}`} onBack={onBack}>
       {!limited && (
       <div className="group-head">
-        <span className="group-swatch" style={{ background: color.hex }} aria-hidden="true" />
+        <button
+          className="group-swatch"
+          style={{ background: color.hex }}
+          aria-label={`Farbe ändern (jetzt ${color.name})`}
+          title="Farbe ändern"
+          onClick={() => setRecolor(true)}
+        />
+        {recolor && (
+          <RecolorDialog
+            group={group}
+            groups={groups}
+            onPick={(id) => {
+              setRecolor(false);
+              if (id !== group.color) onRecolor(id);
+            }}
+            onCancel={() => setRecolor(false)}
+          />
+        )}
         <label className="name-field" htmlFor="group-name">
           <span>Name der Gruppe (Farbe: {color.name})</span>
           <input

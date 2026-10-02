@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { firstFreeColor, GROUP_COLORS, initialsOf, suggestGroupName, textOn, tintOf } from './colors';
+import { firstFreeColor, isColorName, GROUP_COLORS, initialsOf, suggestGroupName, textOn, tintOf } from './colors';
 
 describe('Gruppenfarben', () => {
   it('32 verschiedene Farben', () => {
@@ -42,5 +42,15 @@ describe('Anfangsbuchstaben', () => {
     expect(initialsOf('A')).toBe('A');
     expect(initialsOf('')).toBe('?');
     expect(initialsOf('J.-P.')).toBe('JP');
+  });
+});
+
+describe('isColorName', () => {
+  it('erkennt den vorgeschlagenen Farbnamen, auch mit Nummer', () => {
+    expect(isColorName('Gelb', 'gelb')).toBe(true);
+    expect(isColorName('Gelb2', 'gelb')).toBe(true);
+    expect(isColorName('Gelbe Gruppe', 'gelb')).toBe(false);
+    expect(isColorName('Klasse 1b', 'gelb')).toBe(false);
+    expect(isColorName('Rot', 'gelb')).toBe(false);
   });
 });

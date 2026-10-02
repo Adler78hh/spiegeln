@@ -82,6 +82,15 @@ export function suggestGroupName(colorId: string, usedColorIds: string[]): strin
   return n === 0 ? name : `${name}${n + 1}`;
 }
 
+/**
+ * Trägt die Gruppe noch den automatisch vorgeschlagenen Namen ihrer Farbe
+ * („Gelb“, „Gelb2“ …)? Dann wechselt der Name beim Umfärben mit.
+ */
+export function isColorName(name: string, colorId: string): boolean {
+  const base = findColor(colorId).name;
+  return name === base || (name.startsWith(base) && /^\d+$/.test(name.slice(base.length)));
+}
+
 /** Erste Farbe, die noch keine Gruppe hat (sonst die am seltensten benutzte). */
 export function firstFreeColor(usedColorIds: string[]): string {
   let best = GROUP_COLORS[0].id;
