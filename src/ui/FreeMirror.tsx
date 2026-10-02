@@ -4,7 +4,7 @@ import { initialScene, mirrorTransform, type Scene } from '../geometry';
 import type { MotifInfo } from '../motifs/library';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite, renderInvertedComposite, type InvertMode } from '../render/composite';
 import type { Snapshot, ToolPrefs } from '../storage/store';
-import { BackIcon, CameraIcon, PlusIcon } from './icons';
+import { BackIcon, CameraIcon } from './icons';
 import { MirrorCanvas } from './MirrorCanvas';
 import { MirrorTools } from './MirrorTools';
 import { useMotifImage } from './useMotifImage';
@@ -15,8 +15,6 @@ const SNAPSHOT_PX = 256;
 interface Props {
   motifs: MotifInfo[];
   motifId: string;
-  onMotifChange: (id: string) => void;
-  onCreateMotif: () => void;
   prefs: ToolPrefs;
   onPrefsChange: (p: ToolPrefs) => void;
   snapshots: Snapshot[];
@@ -36,9 +34,9 @@ function renderSnapshot(image: HTMLImageElement, aspect: number, scene: Scene, i
   return cropSquare(shown, boundsCenter(b), size, SNAPSHOT_PX).toDataURL('image/png');
 }
 
-/** Modus 1: Bild wählen, frei spiegeln und Figuren merken. */
+/** Modus 1, Schritt 2: mit dem gewählten Motiv frei spiegeln und Figuren merken. */
 export function FreeMirror(props: Props) {
-  const { motifs, motifId, onMotifChange, onCreateMotif, prefs, onPrefsChange, snapshots, onSnapshot, onBack } = props;
+  const { motifs, motifId, prefs, onPrefsChange, snapshots, onSnapshot, onBack } = props;
   const motif = motifs.find((m) => m.id === motifId) ?? motifs[0];
   const image = useMotifImage(motif);
   const [scene, setScene] = useState<Scene>(initialScene);
@@ -53,11 +51,9 @@ export function FreeMirror(props: Props) {
     flashTimer.current = window.setTimeout(() => setFlash(false), 250);
   };
 
-  const restore = (s: Snapshot) => {
-    if (!motifs.some((m) => m.id === s.motifId)) return; // Motiv wurde gelöscht
-    onMotifChange(s.motifId);
-    setScene(s.scene);
-  };
+  // Nur die gemerkten Figuren zu diesem Motiv.
+  const own = snapshots.filter((s) => s.motifId === motif.id);
+  const restore = (s: Snapshot) => setScene(s.scene);
 
   return (
     <div className="screen">
@@ -83,35 +79,16 @@ export function FreeMirror(props: Props) {
             <CameraIcon />
           </button>
         </div>
-        <div className="motif-list" role="radiogroup" aria-label="Bild wählen">
-          <button className="motif-btn add-motif" aria-label="Eigenes Motiv" onClick={onCreateMotif}>
-            <PlusIcon size={34} />
-            <span>Eigenes Bild</span>
-          </button>
-          {motifs.map((m) => (
-            <button
-              key={m.id}
-              role="radio"
-              aria-checked={m.id === motif.id}
-              aria-label={m.name}
-              className={`motif-btn ${m.id === motif.id ? 'selected' : ''}`}
-              onClick={() => {
-                onMotifChange(m.id);
-                setScene(initialScene());
-              }}
-            >
-              <img src={m.src} alt="" />
-            </button>
-          ))}
-        </div>
-        {snapshots.length > 0 && (
+        {own.length > 0 ? (
           <div className="gallery" aria-label="Gemerkte Figuren">
-            {snapshots.map((s) => (
+            {own.map((s) => (
               <button key={s.id} className="gallery-item" aria-label="Gemerkte Figur öffnen" onClick={() => restore(s)}>
                 <img src={s.image} alt="" />
               </button>
             ))}
           </div>
+        ) : (
+          <div className="gallery-space" />
         )}
         <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(initialScene())} withInvert />
       </aside>

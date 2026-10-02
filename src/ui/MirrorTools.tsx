@@ -10,38 +10,46 @@ interface Props {
   withInvert?: boolean;
 }
 
-/** Werkzeugknöpfe: 15°-Einrasten, Umriss, Achse ausblenden, Farbumkehr (frei), Zurücksetzen. */
+/**
+ * Werkzeugknöpfe in festen Blöcken: Winkel, Spiegelachse, Umriss; darunter
+ * (nur frei) die beiden Farbumkehr-Knöpfe; Zurücksetzen für sich. Die
+ * Farbauswahl hat einen festen Platz, damit beim Ein- und Ausschalten kein
+ * Knopf springt.
+ */
 export function MirrorTools({ prefs, onPrefsChange, onReset, withInvert }: Props) {
   const invert = prefs.invert ?? 'none';
   const toggleInvert = (mode: 'silhouette' | 'negative') => onPrefsChange({ ...prefs, invert: invert === mode ? 'none' : mode });
+  const colorsShown = invert === 'silhouette';
   return (
-    <div className="tools">
-      <button
-        className={`tool-btn ${prefs.snap ? 'on' : ''}`}
-        aria-pressed={prefs.snap}
-        aria-label="Einrasten auf 15 Grad"
-        onClick={() => onPrefsChange({ ...prefs, snap: !prefs.snap })}
-      >
-        <SnapIcon />
-      </button>
-      <button
-        className={`tool-btn ${prefs.showOutline ? 'on' : ''}`}
-        aria-pressed={prefs.showOutline}
-        aria-label="Umriss der Figur"
-        onClick={() => onPrefsChange({ ...prefs, showOutline: !prefs.showOutline })}
-      >
-        <OutlineIcon />
-      </button>
-      <button
-        className={`tool-btn ${prefs.hideLine ? 'on' : ''}`}
-        aria-pressed={!!prefs.hideLine}
-        aria-label="Spiegelachse ausblenden"
-        onClick={() => onPrefsChange({ ...prefs, hideLine: !prefs.hideLine })}
-      >
-        <HideLineIcon />
-      </button>
+    <div className={`tools ${withInvert ? 'tools-free' : ''}`}>
+      <div className="tool-group tool-group-view">
+        <button
+          className={`tool-btn ${prefs.snap ? 'on' : ''}`}
+          aria-pressed={prefs.snap}
+          aria-label="Einrasten auf 15 Grad"
+          onClick={() => onPrefsChange({ ...prefs, snap: !prefs.snap })}
+        >
+          <SnapIcon />
+        </button>
+        <button
+          className={`tool-btn ${prefs.hideLine ? 'on' : ''}`}
+          aria-pressed={!!prefs.hideLine}
+          aria-label="Spiegelachse ausblenden"
+          onClick={() => onPrefsChange({ ...prefs, hideLine: !prefs.hideLine })}
+        >
+          <HideLineIcon />
+        </button>
+        <button
+          className={`tool-btn ${prefs.showOutline ? 'on' : ''}`}
+          aria-pressed={prefs.showOutline}
+          aria-label="Umriss der Figur"
+          onClick={() => onPrefsChange({ ...prefs, showOutline: !prefs.showOutline })}
+        >
+          <OutlineIcon />
+        </button>
+      </div>
       {withInvert && (
-        <>
+        <div className="tool-group tool-group-invert">
           <button
             className={`tool-btn ${invert === 'silhouette' ? 'on' : ''}`}
             aria-pressed={invert === 'silhouette'}
@@ -58,16 +66,25 @@ export function MirrorTools({ prefs, onPrefsChange, onReset, withInvert }: Props
           >
             <InvertNegativeIcon />
           </button>
-        </>
+        </div>
       )}
-      {withInvert && invert === 'silhouette' && (
-        <div className="invert-colors" role="radiogroup" aria-label="Farbe der Umkehr">
+      <button className="tool-btn tool-reset" aria-label="Zurücksetzen" onClick={onReset}>
+        <ResetIcon />
+      </button>
+      {withInvert && (
+        <div
+          className={`invert-colors ${colorsShown ? '' : 'is-hidden'}`}
+          role="radiogroup"
+          aria-label="Farbe der Umkehr"
+          aria-hidden={!colorsShown}
+        >
           {INVERT_PALETTE.map((c) => (
             <button
               key={c.hex}
               role="radio"
               aria-checked={prefs.invertColor === c.hex}
               aria-label={c.name}
+              tabIndex={colorsShown ? 0 : -1}
               className={`invert-swatch ${prefs.invertColor === c.hex ? 'selected' : ''}`}
               style={{ background: c.hex }}
               onClick={() => onPrefsChange({ ...prefs, invertColor: c.hex })}
@@ -75,9 +92,6 @@ export function MirrorTools({ prefs, onPrefsChange, onReset, withInvert }: Props
           ))}
         </div>
       )}
-      <button className="tool-btn" aria-label="Zurücksetzen" onClick={onReset}>
-        <ResetIcon />
-      </button>
     </div>
   );
 }

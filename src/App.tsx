@@ -8,6 +8,7 @@ import { ChallengePlay } from './ui/ChallengePlay';
 import { FreeMirror } from './ui/FreeMirror';
 import { Home } from './ui/Home';
 import { MotifCreator } from './ui/MotifCreator';
+import { MotifPicker } from './ui/MotifPicker';
 import { AdultArea } from './ui/adult/AdultArea';
 import { ProfilePicker } from './ui/ProfilePicker';
 
@@ -32,6 +33,7 @@ type ScreenState =
   | { name: 'profiles' }
   | { name: 'adult' }
   | { name: 'home' }
+  | { name: 'free-pick' }
   | { name: 'free' }
   | { name: 'create-motif' }
   | { name: 'challenges' }
@@ -170,8 +172,20 @@ export default function App() {
           profile={profile}
           group={groups.find((g) => g.id === profile.groupId)}
           onSwitchProfile={switchProfile}
-          onFree={() => setScreen({ name: 'free' })}
+          onFree={() => setScreen({ name: 'free-pick' })}
           onChallenges={() => setScreen({ name: 'challenges' })}
+        />
+      );
+    case 'free-pick':
+      return (
+        <MotifPicker
+          motifs={motifs}
+          onPick={(id) => {
+            setFreeMotifId(id);
+            setScreen({ name: 'free' });
+          }}
+          onCreateMotif={() => setScreen({ name: 'create-motif' })}
+          onBack={() => setScreen({ name: 'home' })}
         />
       );
     case 'free':
@@ -179,17 +193,15 @@ export default function App() {
         <FreeMirror
           motifs={motifs}
           motifId={freeMotifId}
-          onMotifChange={setFreeMotifId}
-          onCreateMotif={() => setScreen({ name: 'create-motif' })}
           prefs={profile.prefs}
           onPrefsChange={setPrefs}
           snapshots={snapshots}
           onSnapshot={addSnapshot}
-          onBack={() => setScreen({ name: 'home' })}
+          onBack={() => setScreen({ name: 'free-pick' })}
         />
       );
     case 'create-motif':
-      return <MotifCreator onSave={addMotif} onCancel={() => setScreen({ name: 'free' })} />;
+      return <MotifCreator onSave={addMotif} onCancel={() => setScreen({ name: 'free-pick' })} />;
     case 'challenges':
       return (
         <ChallengeList
