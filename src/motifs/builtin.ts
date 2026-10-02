@@ -219,6 +219,41 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     ],
   },
   {
+    id: 'eichhoernchen',
+    name: 'Eichhörnchen',
+    // Gedreht um 30° und senkrecht knapp hinter der Nase gespiegelt, entsteht
+    // ein Kuhkopf: Ohren als Hörner und Kuhohren, die hellen Bäuche als Maul,
+    // die beiden Fellbögen als Nüstern.
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M114,172 C152,178 190,152 186,110 C182,74 148,76 152,52 C155,34 174,28 186,38 C178,18 142,16 132,44 C122,74 154,94 152,122 C150,148 130,154 114,150 Z" fill="#d9822b"/>
+        <ellipse cx="96" cy="136" rx="36" ry="42" fill="#e8994a"/>
+        <path d="M66,118 C60,150 72,176 98,176 C122,176 126,148 120,124 C112,100 72,100 66,118 Z" fill="#fbe2c4"/>
+        <path d="M97,138 q5,-6 10,0" fill="none" transform="rotate(-30 102 137)"/>
+        <path d="M58,24 L66,56 L80,48 Z" fill="#e8994a"/>
+        <path d="M106,22 L88,50 L102,58 Z" fill="#e8994a"/>
+        <circle cx="80" cy="78" r="27" fill="#e8994a"/>
+        <ellipse cx="58" cy="88" rx="15" ry="12" fill="#e8994a"/>
+        <circle cx="44" cy="86" r="4.5" fill="${INK}"/>
+        <circle cx="70" cy="72" r="7" fill="#fff"/>
+        <circle cx="68" cy="73" r="3.5" fill="${INK}" stroke="none"/>
+        <path d="M58,24 L54,15 M58,24 L62,14 M106,22 L104,12 M106,22 L112,14"/>
+        <ellipse cx="44" cy="122" rx="12" ry="10" fill="#b5835a"/>
+        <path d="M34,118 Q44,108 54,118" fill="#8a5a3c"/>
+        <ellipse cx="58" cy="124" rx="8" ry="6" fill="#e8994a"/>
+        <ellipse cx="74" cy="176" rx="16" ry="7" fill="#e8994a"/>
+      </g>`),
+    errorVariants: [
+      // Schwanz blau.
+      [['fill="#d9822b"', 'fill="#8fb8de"']],
+      // Ohne Fellbögen (bei der Kuh: ohne Nüstern).
+      [['<path d="M97,138 q5,-6 10,0" fill="none" transform="rotate(-30 102 137)"/>', '']],
+      // Ohne Pinsel an den Ohren.
+      [['<path d="M58,24 L54,15 M58,24 L62,14 M106,22 L104,12 M106,22 L112,14"/>', '']],
+    ],
+    swapVariants: [],
+  },
+  {
     id: 'dreieck',
     name: 'Dreieck',
     svg: svg(`

@@ -87,13 +87,13 @@ export const HAUS_LAYOUT: PlannedTarget[] = [
   t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
   t('mirror', 135, -0.078, -0.0878, 150, 0.5, 0.3862, 1),
   t('swap', 285, -0.0145, 0.0937, 45, 0.3863, 0.6137, -1),
-  // Achse durch die Dachspitze: ganzes Haus mit dreieckigem Dach.
-  throughPoint('mirror', 45, 0.0286, -0.0232, ...ROOF_TOP, -1),
+  // Ungedreht, senkrecht durch die Dachspitze: ganzes Haus mit zwei Fenstern.
+  keeping(0, 0, 0, ROOF_TOP, 90, [150, 120]),
   t('mirror', 75, -0.0712, -0.0443, 75, 0.419, 0.5, -1),
   // Achse senkrecht zur Dachkante durch die Wandecke: gerade Unterkante,
   // die gelben Wände bilden zusammen ein Quadrat.
   throughPoint('mirror', 225, 0.0753, -0.0267, ...WALL_CORNER, -1, 45),
-  throughPoint('mirror', 15, -0.0129, 0.072, ...ROOF_TOP, 1),
+  keeping(0, 0, 0, ROOF_TOP, 90, [50, 120]),
   t('rotate', 225, 0.015, 0.0863, 15, 0.5, 0.5265, 1),
   t('mirror', 300, 0.0114, -0.0609, 105, 0.5261, 0.5, -1),
   // Achse durch die waagrechte Fensterstrebe, untere Haushälfte ohne Dach: das Fenster erscheint ganz.
@@ -254,4 +254,50 @@ export const AUTO_LAYOUT: PlannedTarget[] = [
   keeping(0, 0, -0.1, WHEEL_LINE, 0, ABOVE),
   // Senkrecht durch die Hinterachse, vorderer Teil bleibt: lange Limousine.
   keeping(0, -0.12, 0, REAR_AXLE, 90, LEFT),
+];
+
+/** Eichhörnchen: Nase, Augen-, Kopf- und Körpermitte, Punkte am Rand (Motivkoordinaten). */
+const SQ_NOSE: [number, number] = [44, 86];
+const SQ_EYE: [number, number] = [70, 72];
+const SQ_HEAD: [number, number] = [80, 78];
+const SQ_BODY: [number, number] = [96, 136];
+const SQ_TAIL: [number, number] = [150, 130];
+
+/**
+ * Die „Kuh“: um 30° gedreht, Achse senkrecht durch die Nase, um `dx`
+ * (Anteil der Fläche) weiter ins Gesicht verschoben.
+ */
+function cow(dx: number, kind: Kind = 'mirror', variant?: number): PlannedTarget {
+  const figure: FigureState = { rotation: 30 * DEG, offset: { x: 0, y: 0 } };
+  const nose = motifPoint(figure, ...SQ_NOSE);
+  const mirror = createMirror(UNIT_RECT, 90, { x: nose.x + dx, y: nose.y }, 1);
+  const side = sideOf(motifPoint(figure, ...SQ_TAIL), lineOf(mirror), 0) as Side;
+  return { kind, variant, variantBoth: kind === 'error' ? true : undefined, scene: { figure, mirror: { ...mirror, originalSide: side } } };
+}
+
+export const EICHHOERNCHEN_LAYOUT: PlannedTarget[] = [
+  // Senkrecht durch die Körpermitte, vordere Hälfte bleibt: Eichhörnchen von vorne.
+  keeping(0, 0.05, 0, SQ_BODY, 90, [10, 100]),
+  // Die Kuh, Achse knapp hinter der Nase.
+  cow(0.02),
+  // Wie Nr. 7 (zwei Schwänze), aber ein Schwanz blau.
+  keeping(0, -0.05, 0, SQ_HEAD, 90, [190, 100], 'error', 0),
+  // Waagrecht durch die Bauchmitte, oben bleibt: zwei Eichhörnchen übereinander.
+  keeping(0, 0, -0.05, SQ_BODY, 0, [96, 20]),
+  // Diagonale durch die Körpermitte.
+  keeping(0, 0, 0, SQ_BODY, 45, [160, 60]),
+  // Wie die Kuh Nr. 8, aber ohne Nüstern.
+  cow(0.03, 'error', 1),
+  // Senkrecht durch die Kopfmitte, hintere Hälfte bleibt: zwei Schwänze.
+  keeping(0, -0.05, 0, SQ_HEAD, 90, [190, 100]),
+  // Die Kuh, Achse etwas weiter im Gesicht: Augen enger.
+  cow(0.03),
+  // Waagrecht zwischen Kopf und Körper, unten bleibt.
+  keeping(0, 0, -0.05, [96, 104], 0, [96, 190]),
+  // Wie Nr. 1, aber die Ohren ohne Pinsel.
+  { ...keeping(0, 0.05, 0, SQ_BODY, 90, [10, 100], 'error', 2), variantBoth: true },
+  // Diagonale durch die Kopfmitte.
+  keeping(0, 0, 0.05, SQ_HEAD, 45, [160, 20]),
+  // Senkrecht durch das Auge, Rücken bleibt: ein Auge in der Mitte.
+  keeping(0, -0.05, 0, SQ_EYE, 90, [190, 100]),
 ];
