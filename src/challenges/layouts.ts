@@ -84,22 +84,22 @@ const WALL_CORNER: [number, number] = [156, 184];
 const WINDOW_CENTER: [number, number] = [125, 130];
 
 export const HAUS_LAYOUT: PlannedTarget[] = [
-  t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
-  t('mirror', 135, -0.078, -0.0878, 150, 0.5, 0.3862, 1),
-  t('swap', 285, -0.0145, 0.0937, 45, 0.3863, 0.6137, -1),
   // Ungedreht, senkrecht durch die Dachspitze: ganzes Haus mit zwei Fenstern.
   keeping(0, 0, 0, ROOF_TOP, 90, [150, 120]),
-  t('mirror', 75, -0.0712, -0.0443, 75, 0.419, 0.5, -1),
+  keeping(0, 0, 0, ROOF_TOP, 90, [50, 120]),
   // Achse senkrecht zur Dachkante durch die Wandecke: gerade Unterkante,
   // die gelben Wände bilden zusammen ein Quadrat.
   throughPoint('mirror', 225, 0.0753, -0.0267, ...WALL_CORNER, -1, 45),
-  keeping(0, 0, 0, ROOF_TOP, 90, [50, 120]),
+  // Ganzes Haus neben dem ganzen Haus (eigener, kleinerer Maßstab).
+  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
+  t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
+  t('mirror', 135, -0.078, -0.0878, 150, 0.5, 0.3862, 1),
+  t('swap', 285, -0.0145, 0.0937, 45, 0.3863, 0.6137, -1),
+  t('mirror', 75, -0.0712, -0.0443, 75, 0.419, 0.5, -1),
   t('rotate', 225, 0.015, 0.0863, 15, 0.5, 0.5265, 1),
   t('mirror', 300, 0.0114, -0.0609, 105, 0.5261, 0.5, -1),
   // Achse durch die waagrechte Fensterstrebe, untere Haushälfte ohne Dach: das Fenster erscheint ganz.
   throughPoint('mirror', 180, -0.0755, -0.0653, ...WINDOW_CENTER, 1, 0),
-  // Ganzes Haus neben dem ganzen Haus (eigener, kleinerer Maßstab).
-  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
   t('mirror', 210, -0.0845, -0.0229, 165, 0.5, 0.3936, 1),
 ];
 
