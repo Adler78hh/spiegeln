@@ -24,7 +24,7 @@ const HANDLE_TOUCH_RADIUS = 34;
 /** Toleranz für das Greifen der Linie (CSS-Pixel beidseitig). */
 const LINE_TOUCH_TOLERANCE = 24;
 /** Rand um die Arbeitsfläche, damit die Anfasspunkte ganz sichtbar sind. */
-const PAD = 30;
+const PAD = 28;
 
 export type { Scene };
 

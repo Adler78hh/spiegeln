@@ -59,9 +59,9 @@ img {
   height: 100%;
   display: flex;
   flex-direction: row;
-  gap: 12px;
-  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
-    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  gap: 8px;
+  padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right))
+    max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
 }
 
 .work {
@@ -79,6 +79,19 @@ img {
   top: 0;
   left: 0;
   z-index: 2;
+}
+
+/* Kleiner als die Werkzeugknöpfe (aber noch gut zu treffen), damit er
+   möglichst wenig von der Arbeitsfläche verdeckt. */
+.work-top .tool-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.work-top .tool-btn svg {
+  width: 24px;
+  height: 24px;
 }
 
 .mirror-wrap {
