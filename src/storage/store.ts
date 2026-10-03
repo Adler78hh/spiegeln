@@ -8,7 +8,7 @@
  * - snapshots:  gemerkte Figuren aus dem freien Spiegeln, pro Profil
  * - challenges: Herausforderungen (vorinstalliert und selbst erstellt)
  */
-import { GRATIS } from '../edition';
+import { GRATIS, ZERLEGEN } from '../edition';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Answer, Challenge, ChallengeAnswers } from '../challenges/types';
 import type { Scene } from '../geometry';
@@ -91,8 +91,8 @@ interface SpiegelnSchema extends DBSchema {
   motifs: { key: string; value: CustomMotif };
 }
 
-/** Eigene Datenbank je Ausgabe: Gratis- und Vollversion teilen sich keine Daten. */
-export const DB_NAME = GRATIS ? 'spiegeln-gratis' : 'spiegeln';
+/** Eigene Datenbank je Ausgabe: Spiegeln, Gratisversion und Zerlegen teilen sich keine Daten. */
+export const DB_NAME = ZERLEGEN ? 'zerlegen' : GRATIS ? 'spiegeln-gratis' : 'spiegeln';
 const DB_VERSION = 3;
 
 export function newId(): string {

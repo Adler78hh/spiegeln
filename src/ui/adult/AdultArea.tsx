@@ -7,11 +7,13 @@ import type { Challenge } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
 import { newId, type CustomMotif, type Group, type Profile, type Store } from '../../storage/store';
 import { MotifCreator } from '../MotifCreator';
-import { AdultHome, type AdultSection } from './AdultHome';
+import { AdultHome } from './AdultHome';
+import { ChallengeIcon, PeopleIcon, PhotoIcon } from '../icons';
 import { ChallengeEditor } from './ChallengeEditor';
 import { ChallengeManager } from './ChallengeManager';
 import { MotifManager } from './MotifManager';
 import { GroupList, GroupPage, NewGroupDialog, type GroupTab } from './Groups';
+import { Results } from './Results';
 
 interface Props {
   store: Store;
@@ -26,6 +28,14 @@ interface Props {
   onChallengesChange: (c: Challenge[]) => void;
   onExit: () => void;
 }
+
+type AdultSection = 'groups' | 'motifs' | 'challenges';
+
+const SPIEGELN_TILES = [
+  { id: 'groups', label: 'Gruppen', icon: <PeopleIcon size={56} />, hint: 'Kinder und Ergebnisse je Gruppe' },
+  { id: 'challenges', label: 'Herausforderungen', icon: <ChallengeIcon size={56} />, hint: 'Eigene erstellen und bearbeiten' },
+  { id: 'motifs', label: 'Eigene Motive', icon: <PhotoIcon size={56} />, hint: 'Fotos und Zeichnungen verwalten' },
+] as const;
 
 const BUILTIN_IDS = new Set(BUILTIN_CHALLENGES.map((c) => c.id));
 
@@ -67,6 +77,18 @@ export function AdultArea(props: Props) {
 
   const reloadChallenges = async () => onChallengesChange(await loadChallenges(store));
 
+  const resultsOf = (group: Group) => (
+    <Results
+      store={store}
+      group={group}
+      profiles={profiles.filter((p) => p.groupId === group.id)}
+      challenges={challenges}
+      motifs={motifs}
+      open={resultCell}
+      onOpen={setResultCell}
+    />
+  );
+
   // Gratisversion: nur die eine Klasse mit Namen und Ergebnissen.
   if (GRATIS && groups[0]) {
     return (
@@ -79,15 +101,12 @@ export function AdultArea(props: Props) {
         onRename={async () => {}}
         onRecolor={async () => {}}
         onDelete={async () => {}}
-        challenges={challenges}
-        motifs={motifs}
         tab={groupTab}
         onTabChange={(t) => {
           setGroupTab(t);
           setResultCell(null);
         }}
-        resultCell={resultCell}
-        onResultCell={setResultCell}
+        results={resultsOf(groups[0])}
         onBack={onExit}
         limited
       />
@@ -152,15 +171,12 @@ export function AdultArea(props: Props) {
               openGroup(null);
               await reloadGroups();
             }}
-            challenges={challenges}
-            motifs={motifs}
             tab={groupTab}
             onTabChange={(t) => {
               setGroupTab(t);
               setResultCell(null);
             }}
-            resultCell={resultCell}
-            onResultCell={setResultCell}
+            results={resultsOf(group)}
             onBack={() => openGroup(null)}
           />
         );
@@ -221,6 +237,6 @@ export function AdultArea(props: Props) {
         />
       );
     default:
-      return <AdultHome onOpen={setSection} onExit={onExit} />;
+      return <AdultHome tiles={SPIEGELN_TILES} onOpen={setSection} onExit={onExit} />;
   }
 }

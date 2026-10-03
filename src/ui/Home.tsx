@@ -1,18 +1,23 @@
+import type { ReactNode } from 'react';
 import { findColor, tintOf } from '../profiles/colors';
 import type { Group, Profile } from '../storage/store';
 import { ProfileImage } from './Avatar';
-import { ChallengeIcon, MirrorIcon } from './icons';
+
+export interface HomeTile {
+  label: string;
+  icon: ReactNode;
+  onClick: () => void;
+}
 
 interface Props {
   profile: Profile;
   group: Group | undefined;
   onSwitchProfile: () => void;
-  onFree: () => void;
-  onChallenges: () => void;
+  tiles: HomeTile[];
 }
 
-/** Startbildschirm: zwei große Kacheln, oben das eigene Tier. */
-export function Home({ profile, group, onSwitchProfile, onFree, onChallenges }: Props) {
+/** Startbildschirm: große Kacheln, oben das eigene Tier. */
+export function Home({ profile, group, onSwitchProfile, tiles }: Props) {
   const tint = tintOf(findColor(group?.color ?? 'weiss').hex);
   return (
     <div className="home-screen">
@@ -22,15 +27,13 @@ export function Home({ profile, group, onSwitchProfile, onFree, onChallenges }: 
           <span>{profile.name}</span>
         </button>
       </div>
-      <div className="home">
-        <button className="home-tile" onClick={onFree}>
-          <MirrorIcon size={120} />
-          <span>Freies Spiegeln</span>
-        </button>
-        <button className="home-tile" onClick={onChallenges}>
-          <ChallengeIcon size={120} />
-          <span>Herausforderungen</span>
-        </button>
+      <div className={`home ${tiles.length > 2 ? 'home-many' : ''}`}>
+        {tiles.map((t) => (
+          <button key={t.label} className="home-tile" onClick={t.onClick}>
+            {t.icon}
+            <span>{t.label}</span>
+          </button>
+        ))}
       </div>
     </div>
   );

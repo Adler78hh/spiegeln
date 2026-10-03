@@ -13,23 +13,8 @@ import { AdultArea } from './ui/adult/AdultArea';
 import { GRATIS } from './edition';
 import { ANIMAL_ORDER } from './profiles/animals';
 import { ProfilePicker } from './ui/ProfilePicker';
-
-/** Zuletzt gewählte Gruppe, nur auf diesem Gerät. */
-const GROUP_KEY = GRATIS ? 'spiegeln-gratis.gruppe' : 'spiegeln.gruppe';
-function loadGroupId(): string | null {
-  try {
-    return localStorage.getItem(GROUP_KEY);
-  } catch {
-    return null;
-  }
-}
-function saveGroupId(id: string) {
-  try {
-    localStorage.setItem(GROUP_KEY, id);
-  } catch {
-    // Ohne Speicher gilt die Wahl nur bis zum Neuladen.
-  }
-}
+import { loadGroupId, saveGroupId } from './profiles/lastGroup';
+import { ChallengeIcon, MirrorIcon } from './ui/icons';
 
 type ScreenState =
   | { name: 'profiles' }
@@ -176,8 +161,10 @@ export default function App() {
           profile={profile}
           group={groups.find((g) => g.id === profile.groupId)}
           onSwitchProfile={switchProfile}
-          onFree={() => setScreen({ name: 'free-pick' })}
-          onChallenges={() => setScreen({ name: 'challenges' })}
+          tiles={[
+            { label: 'Freies Spiegeln', icon: <MirrorIcon size={120} />, onClick: () => setScreen({ name: 'free-pick' }) },
+            { label: 'Herausforderungen', icon: <ChallengeIcon size={120} />, onClick: () => setScreen({ name: 'challenges' }) },
+          ]}
         />
       );
     case 'free-pick':

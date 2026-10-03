@@ -1,20 +1,21 @@
 import type { ReactNode } from 'react';
-import { ChallengeIcon, PeopleIcon, PhotoIcon } from '../icons';
 
-export type AdultSection = 'groups' | 'motifs' | 'challenges';
+export interface AdultTile<S extends string> {
+  id: S;
+  label: string;
+  icon: ReactNode;
+  hint: string;
+}
 
-interface Props {
-  onOpen: (s: AdultSection) => void;
+interface Props<S extends string> {
+  /** Bereiche des Erwachsenenbereichs (je App verschieden). */
+  tiles: readonly AdultTile<S>[];
+  onOpen: (s: S) => void;
   onExit: () => void;
 }
 
 /** Startseite des Erwachsenenbereichs. */
-export function AdultHome({ onOpen, onExit }: Props) {
-  const tiles: Array<{ id: AdultSection; label: string; icon: ReactNode; hint: string }> = [
-    { id: 'groups', label: 'Gruppen', icon: <PeopleIcon size={56} />, hint: 'Kinder und Ergebnisse je Gruppe' },
-    { id: 'challenges', label: 'Herausforderungen', icon: <ChallengeIcon size={56} />, hint: 'Eigene erstellen und bearbeiten' },
-    { id: 'motifs', label: 'Eigene Motive', icon: <PhotoIcon size={56} />, hint: 'Fotos und Zeichnungen verwalten' },
-  ];
+export function AdultHome<S extends string>({ tiles, onOpen, onExit }: Props<S>) {
   return (
     <div className="adult-screen">
       <header className="adult-header">

@@ -1,13 +1,10 @@
-import { useState } from 'react';
-import type { Challenge } from '../../challenges/types';
-import type { MotifInfo } from '../../motifs/library';
+import { useState, type ReactNode } from 'react';
 import { ANIMAL_ORDER } from '../../profiles/animals';
 import { findColor, firstFreeColor, GROUP_COLORS, suggestGroupName, textOn } from '../../profiles/colors';
 import type { Group, Profile, Store } from '../../storage/store';
 import { CheckIcon, PlusIcon, TrashIcon } from '../icons';
 import { AdultPage, ConfirmRow } from './AdultPage';
 import { ProfileManager } from './ProfileManager';
-import { Results } from './Results';
 
 const MAX_KIDS = ANIMAL_ORDER.length;
 
@@ -186,12 +183,10 @@ interface PageProps {
   /** Neue Farbe (der Name wechselt mit, wenn er noch der Farbname ist). */
   onRecolor: (color: string) => void;
   onDelete: () => void;
-  challenges: Challenge[];
-  motifs: MotifInfo[];
   tab: GroupTab;
   onTabChange: (t: GroupTab) => void;
-  resultCell: { profileId: string; challengeId: string } | null;
-  onResultCell: (c: { profileId: string; challengeId: string } | null) => void;
+  /** Inhalt des Reiters „Ergebnisse“ (je App verschieden). */
+  results: ReactNode;
   onBack: () => void;
   /** Gratisversion: eine feste Klasse, kein Umbenennen oder Löschen der Gruppe. */
   limited?: boolean;
@@ -201,7 +196,7 @@ export type GroupTab = 'kids' | 'results';
 
 /** Eine Gruppe: Name, Farbe, Löschen; Reiter „Kinder“ und „Ergebnisse“. */
 export function GroupPage(props: PageProps) {
-  const { store, group, groups, profiles, onProfilesChange, onRename, onRecolor, onDelete, challenges, motifs, tab, onTabChange, onBack, limited } = props;
+  const { store, group, groups, profiles, onProfilesChange, onRename, onRecolor, onDelete, tab, onTabChange, results, onBack, limited } = props;
   const [confirm, setConfirm] = useState(false);
   const [recolor, setRecolor] = useState(false);
   const color = findColor(group.color);
@@ -277,15 +272,7 @@ export function GroupPage(props: PageProps) {
         {tab === 'kids' ? (
           <ProfileManager store={store} group={group} profiles={kids} onChange={onProfilesChange} fixed={limited} />
         ) : (
-          <Results
-            store={store}
-            group={group}
-            profiles={kids}
-            challenges={challenges}
-            motifs={motifs}
-            open={props.resultCell}
-            onOpen={props.onResultCell}
-          />
+          results
         )}
       </div>
     </AdultPage>

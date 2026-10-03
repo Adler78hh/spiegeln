@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host",
     "dev:gratis": "vite --host --mode gratis",
-    "build": "tsc -b && vite build && vite build --mode gratis",
+    "dev:zerlegen": "vite --host --mode zerlegen",
+    "build": "tsc -b && vite build && vite build --mode gratis && vite build --mode zerlegen",
     "preview": "vite preview --host",
     "test": "vitest run",
     "test:watch": "vitest",
