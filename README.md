@@ -2,9 +2,16 @@
 
 Lern-App zur Achsensymmetrie für Klasse 1/2 (Web-App für Tablets).
 
+Im selben Projekt entsteht die App **Zerlegen** für den Mathematikunterricht
+in der Grundschule: gleiche Profilwahl, gleiche Gruppen und gleicher
+Erwachsenenbereich, hinter jedem Profil die Bereiche *Blitzsehen*, *Zerlegen*
+und *Muster* (werden nach und nach gefüllt). Zerlegen hat eigene Daten auf dem
+Gerät und eigene App-Symbole (`public-zerlegen/`).
+
 ```bash
 npm install
 npm run dev       # Entwicklungsserver (im LAN erreichbar, z. B. fürs Tablet)
+npm run dev:zerlegen  # dasselbe für die App Zerlegen
 npm test          # Unit-Tests
 npm run build     # Produktions-Build nach dist/
 ```
@@ -20,6 +27,7 @@ npm run build     # Produktions-Build nach dist/
 - `src/render/` – Canvas-Zeichnen der Arbeitsfläche und Zielbilder
 - `src/motifs/`, `src/profiles/` – selbst gezeichnete Motive, 30 Tierbilder, Gruppenfarben
 - `src/ui/` – Oberfläche; `src/ui/adult/` – Erwachsenenbereich
+- `src/zerlegen/` – App Zerlegen (Startbildschirm, Bereiche, Erwachsenenbereich)
 
 ## Erwachsenenbereich
 
@@ -46,7 +54,8 @@ Browser keine Service Worker.
 
 Veröffentlicht wird automatisch über GitHub Pages (Workflow
 `.github/workflows/deploy.yml`, bei jedem Push auf `main`):
-https://adler78hh.github.io/spiegeln/
+https://adler78hh.github.io/spiegeln/ – Zerlegen unter
+https://adler78hh.github.io/spiegeln/zerlegen/
 
 Einmalig nötig: im Repository unter *Settings → Pages* bei *Source*
 „GitHub Actions“ wählen.

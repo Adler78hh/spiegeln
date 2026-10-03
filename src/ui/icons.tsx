@@ -240,3 +240,39 @@ export const InvertNegativeIcon = () => (
     <path d="M12 7a5 5 0 0 1 0 10z" fill="#0d73d7" />
   </svg>
 );
+
+/** Plättchen und Blitz: Blitzsehen (Anzahlen auf einen Blick erfassen). */
+export const FlashIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <circle cx="5" cy="13" r="2.4" fill="currentColor" stroke="none" />
+    <circle cx="11" cy="13" r="2.4" fill="currentColor" stroke="none" />
+    <circle cx="5" cy="19" r="2.4" fill="currentColor" stroke="none" />
+    <circle cx="11" cy="19" r="2.4" fill="currentColor" stroke="none" />
+    <path d="M18 2l-4 7h5l-4 7" stroke="#f2b705" />
+  </Icon>
+);
+
+/** Plättchen, durch einen Strich in zwei Teile getrennt: Zerlegen. */
+export const SplitIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <circle cx="4.5" cy="8" r="2.4" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="8" r="2.4" fill="currentColor" stroke="none" />
+    <circle cx="4.5" cy="16" r="2.4" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="16" r="2.4" fill="currentColor" stroke="none" />
+    <path d="M14.5 3v18" stroke="#e0322b" />
+    <circle cx="19.5" cy="8" r="1.9" />
+    <circle cx="19.5" cy="16" r="1.9" />
+  </Icon>
+);
+
+/** Abwechselnde Formen: Muster. */
+export const PatternIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <circle cx="5" cy="7" r="2.8" fill="currentColor" stroke="none" />
+    <rect x="9.4" y="4.4" width="5.2" height="5.2" rx="0.8" />
+    <circle cx="19" cy="7" r="2.8" fill="currentColor" stroke="none" />
+    <rect x="2.4" y="14.4" width="5.2" height="5.2" rx="0.8" />
+    <circle cx="12" cy="17" r="2.8" fill="currentColor" stroke="none" />
+    <rect x="16.4" y="14.4" width="5.2" height="5.2" rx="0.8" />
+  </Icon>
+);
