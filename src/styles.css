@@ -65,18 +65,20 @@ img {
 }
 
 .work {
+  position: relative;
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
-/* Leiste über der Arbeitsfläche mit dem Zurück-Knopf (oben links). */
+/* Zurück-Knopf oben links, über die Ecke gelegt: Die Arbeitsfläche behält
+   ihre volle Größe. */
 .work-top {
-  flex: 0 0 auto;
-  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
 }
 
 .mirror-wrap {
