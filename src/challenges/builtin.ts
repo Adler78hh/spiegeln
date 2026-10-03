@@ -30,7 +30,7 @@ import {
   sampleFigure,
 } from '../render/composite';
 import { allOnOriginalSide, boundsCenter, candidateScenes, shuffle, solvableFirst, viewSizeFor, type CandidateOptions } from './generate';
-import { AUTO_LAYOUT, BOOT_LAYOUT, EICHHOERNCHEN_LAYOUT, HASEN_LAYOUT, WUERFEL_LAYOUT, STIFTE_LAYOUT, GESICHT_LAYOUT, BOA_LAYOUT, TETRAKTYS_LAYOUT, FISCH_LAYOUT, FORMEN_LAYOUT, HAUS_LAYOUT, SCHNECKE_LAYOUT } from './layouts';
+import { AUTO_LAYOUT, BOOT_LAYOUT, EICHHOERNCHEN_LAYOUT, HASEN_LAYOUT, WUERFEL_LAYOUT, STIFTE_LAYOUT, GESICHT_LAYOUT, MIA_LAYOUT, TETRAKTYS_LAYOUT, FISCH_LAYOUT, FORMEN_LAYOUT, HAUS_LAYOUT, SCHNECKE_LAYOUT } from './layouts';
 import type { Store } from '../storage/store';
 import type { Challenge, Target, TargetKind } from './types';
 
@@ -92,7 +92,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'wuerfel-1', name: 'Würfel', motifId: 'wuerfel', version: 1, seed: 1010, total: 12, unsolvable: ['rotate', 'error', 'translate'], layout: WUERFEL_LAYOUT },
   { id: 'stifte-1', name: 'Buntstifte', motifId: 'stifte', version: 1, seed: 1111, total: 12, unsolvable: ['error', 'error', 'error'], layout: STIFTE_LAYOUT },
   { id: 'gesicht-1', name: 'Gesicht', motifId: 'gesicht', version: 3, seed: 1212, total: 12, unsolvable: ['error', 'rotate', 'error'], layout: GESICHT_LAYOUT },
-  { id: 'boa-1', name: 'BOA', motifId: 'boa', version: 1, seed: 1313, total: 12, unsolvable: ['error', 'translate', 'error'], layout: BOA_LAYOUT },
+  { id: 'mia-1', name: 'MIA', motifId: 'mia', version: 1, seed: 1414, total: 12, unsolvable: ['translate', 'translate', 'error'], layout: MIA_LAYOUT },
   { id: 'tetraktys-1', name: 'Tetraktys', motifId: 'tetraktys', version: 2, seed: 808, total: 22, unsolvable: ['translate'], layout: TETRAKTYS_LAYOUT },
 ];
 
@@ -273,6 +273,12 @@ export async function loadChallenges(store: Store): Promise<Challenge[]> {
   const current = new Set(stored.filter((c) => c.builtin && c.version === versionOf(c.id)).map((c) => c.id));
   const outdated = new Set(stored.filter((c) => c.builtin && c.version !== versionOf(c.id)).map((c) => c.id));
   const missing = BUILTIN_CHALLENGES.filter((spec) => !current.has(spec.id));
+  // Nicht mehr mitgelieferte Herausforderungen (z. B. BOA, ersetzt durch MIA) samt Antworten entfernen.
+  const removed = stored.filter((c) => c.builtin && versionOf(c.id) === undefined);
+  for (const c of removed) {
+    await store.deleteAnswersForChallenge(c.id);
+    await store.deleteChallenge(c.id);
+  }
   if (missing.length) {
     const built = await Promise.all(missing.map(buildChallenge));
     for (const c of built) {
@@ -284,6 +290,6 @@ export async function loadChallenges(store: Store): Promise<Challenge[]> {
       );
     }
   }
-  const all = missing.length ? await store.listChallenges() : stored;
+  const all = missing.length || removed.length ? await store.listChallenges() : stored;
   return all.map(({ builtin: _b, ...c }) => c);
 }

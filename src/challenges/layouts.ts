@@ -522,37 +522,39 @@ export const GESICHT_LAYOUT: PlannedTarget[] = [
   keeping(0, 0, 0, [82, 100], 90, LEFT),
 ];
 
-/** BOA: Mitte des O, Lücken zwischen den Buchstaben, Mitte des A (Motivkoordinaten). */
-const O_MID: [number, number] = [100, 100];
-const GAP_BO: [number, number] = [67, 100];
-const GAP_OA: [number, number] = [133, 100];
-const A_MID: [number, number] = [166, 100];
+/** MIA: Mitten der Buchstaben und Lücken dazwischen (Motivkoordinaten). */
+const I_MID: [number, number] = [102, 100];
+const GAP_MI: [number, number] = [80, 100];
+const GAP_IA: [number, number] = [125, 100];
+const A_MID_MIA: [number, number] = [160, 100];
 /** Knapp unter den Buchstaben. */
-const UNDER_WORD: [number, number] = [100, 152];
+const UNDER_MIA: [number, number] = [100, 152];
+/** Mitte des A in der Fehlervariante „MA“. */
+const A_IN_MA: [number, number] = [114, 100];
 
-export const BOA_LAYOUT: PlannedTarget[] = [
-  // Senkrecht durch das O, rechts bleibt: AOA.
-  keeping(0, 0, 0, O_MID, 90, RIGHT),
-  // Waagrecht durch die Mitte, oben bleibt: aus dem A wird eine Raute.
-  keeping(0, 0, 0, O_MID, 0, ABOVE),
-  // Senkrecht durch das O, links bleibt: BO und ein seitenverkehrtes B.
-  keeping(0, 0, 0, O_MID, 90, LEFT),
-  // „BOB“ mit zwei richtig herum geschriebenen B: Ein gespiegeltes B ist immer seitenverkehrt.
-  keeping(0, 0, 0, O_MID, 90, LEFT, 'error', 0),
-  // In der Lücke zwischen B und O, rechts bleibt: AOOA.
-  keeping(0, 0, 0, GAP_BO, 90, RIGHT),
-  // Knapp unter dem Wort, oben bleibt: darunter BO und ein A auf dem Kopf.
-  keeping(0, 0, -0.08, UNDER_WORD, 0, ABOVE),
-  // BOA über BOA (verschoben statt gespiegelt: das untere A steht nicht auf dem Kopf).
-  { ...keeping(0, 0, -0.08, UNDER_WORD, 0, ABOVE, 'translate'), gap: 0.02 },
-  // In der Lücke zwischen O und A, rechts bleibt: AA.
-  keeping(0, -0.04, 0, GAP_OA, 90, RIGHT),
-  // In der Lücke zwischen B und O, links bleibt: B und seitenverkehrtes B.
-  keeping(0, 0.04, 0, GAP_BO, 90, LEFT),
-  // Wie AA, aber einem A fehlt der Querstrich.
-  keeping(0, -0.04, 0, GAP_OA, 90, RIGHT, 'error', 1),
+export const MIA_LAYOUT: PlannedTarget[] = [
+  // Senkrecht durch das I, rechts bleibt: AIA.
+  keeping(0, 0, 0, I_MID, 90, RIGHT),
+  // Waagrecht durch die Mitte, oben bleibt.
+  keeping(0, 0, 0, I_MID, 0, ABOVE),
+  // Senkrecht durch das I, links bleibt: MIM.
+  keeping(0, 0, 0, I_MID, 90, LEFT),
+  // MIMI geht nicht (rückwärts gelesen IMIM): „MI“ verschoben statt gespiegelt.
+  { ...keeping(0, 0.06, 0, GAP_IA, 90, LEFT, 'translate'), gap: 0.0085 },
+  // In der Lücke zwischen M und I, rechts bleibt: AIIA.
+  keeping(0, 0, 0, GAP_MI, 90, RIGHT),
+  // Knapp unter dem Wort, oben bleibt: darunter MIA auf dem Kopf.
+  keeping(0, 0, -0.08, UNDER_MIA, 0, ABOVE),
+  // MIA über MIA (verschoben statt gespiegelt: unten steht nichts auf dem Kopf).
+  { ...keeping(0, 0, -0.08, UNDER_MIA, 0, ABOVE, 'translate'), gap: 0.02 },
+  // In der Lücke zwischen I und A, rechts bleibt: AA.
+  keeping(0, -0.04, 0, GAP_IA, 90, RIGHT),
+  // In der Lücke zwischen M und I, links bleibt: MM.
+  keeping(0, 0.04, 0, GAP_MI, 90, LEFT),
+  // MAM geht nicht: M und A stehen in MIA nicht nebeneinander.
+  { ...keeping(0, 0, 0, A_IN_MA, 90, LEFT, 'error', 0), variantBoth: true },
   // Waagrecht durch die Mitte, unten bleibt.
-  keeping(0, 0, 0, O_MID, 0, BELOW),
-  // Senkrecht durch das A, links bleibt: BOAOB (das zweite B seitenverkehrt).
-  { ...keeping(0, -0.14, 0, A_MID, 90, LEFT), ownScale: true },
+  keeping(0, 0, 0, I_MID, 0, BELOW),
+  // Senkrecht durch das A, links bleibt: MIAIM.
+  { ...keeping(0, -0.13, 0, A_MID_MIA, 90, LEFT), ownScale: true },
 ];

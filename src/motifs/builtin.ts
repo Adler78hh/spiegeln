@@ -413,6 +413,7 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
   {
     id: 'boa',
     name: 'BOA',
+    hidden: true,
     // Das Wort BOA in Großbuchstaben, Magenta. Jeder Buchstabe ist in sich
     // symmetrisch (B waagrecht, O beides, A senkrecht); zwischen den
     // Buchstaben ist Platz für eine Spiegelachse.
@@ -427,6 +428,23 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
       [['M20,60 L20,140 M20,60 L34,60 A20,20 0 0 1 34,100 L20,100 M20,100 L34,100 A20,20 0 0 1 34,140 L20,140', 'M54,60 L54,140 M54,60 L40,60 A20,20 0 0 0 40,100 L54,100 M54,100 L40,100 A20,20 0 0 0 40,140 L54,140']],
       [[' M151.5,118 L180.5,118"', '"']],
     ],
+    swapVariants: [],
+  },
+  {
+    id: 'mia',
+    name: 'MIA',
+    // Das Wort MIA in Großbuchstaben, Magenta. Alle drei Buchstaben sind in
+    // sich senkrecht symmetrisch (I auch waagrecht), zwischen ihnen ist Platz
+    // für eine Spiegelachse. Gespiegelt entstehen nur Wörter, die vorwärts und
+    // rückwärts gleich sind.
+    svg: svg(`
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20,140 L20,60 L43,110 L66,60 L66,140 M102,60 L102,140 M94,60 L110,60 M94,140 L110,140 M140,140 L160,60 L180,140 M145.5,118 L174.5,118" stroke="${INK}" stroke-width="18"/>
+        <path d="M20,140 L20,60 L43,110 L66,60 L66,140 M102,60 L102,140 M94,60 L110,60 M94,140 L110,140 M140,140 L160,60 L180,140 M145.5,118 L174.5,118" stroke="#e6007e" stroke-width="11"/>
+      </g>`),
+    // Fehler: [0] „MA“ (A an der Stelle des I) – gespiegelt am A ergibt MAM,
+    // das aus MIA nicht entstehen kann.
+    errorVariants: [[['M102,60 L102,140 M94,60 L110,60 M94,140 L110,140 M140,140 L160,60 L180,140 M145.5,118 L174.5,118', 'M94,140 L114,60 L134,140 M99.5,118 L128.5,118']]],
     swapVariants: [],
   },
   {
