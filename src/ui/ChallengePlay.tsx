@@ -124,12 +124,12 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
           <div className="hint-row">
             {/* Ohne unlösbare Figuren (z. B. Tetraktys) entfällt der Hinweis. */}
             {unsolvable > 0 && (
-              <div className="unsolvable-hint" aria-label={`${unsolvable} Figuren gehen nicht`}>
+              <div className="unsolvable-hint" aria-label={unsolvable === 1 ? '1 Figur geht nicht' : `${unsolvable} Figuren gehen nicht`}>
                 <span className="hint-icon">
                   <CrossIcon size={22} />
                 </span>
                 <span className="hint-count">{unsolvable}</span>
-                <span className="hint-text">gehen nicht</span>
+                <span className="hint-text">{unsolvable === 1 ? 'geht nicht' : 'gehen nicht'}</span>
               </div>
             )}
             {checkCurrent && check && (
@@ -142,7 +142,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
               </div>
             )}
           </div>
-          <div className="target-grid" role="listbox" aria-label="Zielfiguren">
+          <div className={`target-grid ${targets.length > 12 ? 'many' : ''}`} role="listbox" aria-label="Zielfiguren">
             {targets.map((t, i) => {
               const a = answers[t.id];
               return (

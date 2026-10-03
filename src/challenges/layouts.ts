@@ -318,48 +318,56 @@ function tetra(lineDeg: number, through: [number, number], keep: [number, number
   return { kind: 'mirror', scene: { figure, mirror: { ...mirror, originalSide: side } } };
 }
 
-/** 20 Zielfiguren mit 1 bis 20 ganzen Kreisen (gemischt), alle lösbar. */
+/**
+ * Tetraktys: statt Zielbildern die Zahlen 0 bis 21 der Reihe nach. Gefragt ist
+ * eine Figur mit genau so vielen ganzen Kreisen. 0 bis 20 gehen (gespeichert ist
+ * je eine Lösung), 21 geht nicht: 10 Kreise ergeben gespiegelt höchstens 20.
+ */
 export const TETRAKTYS_LAYOUT: PlannedTarget[] = [
-  // 2 Kreise: 0 auf der Achse, 1 ganz auf einer Seite
-  tetra(60.0, [-41.8, 24.13], [-301.6, 174.1], [37.0, 160.62]),
-  // 9 Kreise: 3 auf der Achse, 3 ganz auf einer Seite
-  tetra(60.0, [21.2, -12.24], [-238.6, 137.8], [100.0, 124.25]),
-  // 17 Kreise: 1 auf der Achse, 8 ganz auf einer Seite
-  tetra(90.0, [44.0, -0.0], [344.0, -0.0], [44.0, 100.0]),
-  // 20 Kreise: 0 auf der Achse, 10 ganz auf einer Seite
-  tetra(75.0, [148.77, -39.86], [-141.0, 37.8], [193.03, 83.31]),
-  // 11 Kreise: 3 auf der Achse, 4 ganz auf einer Seite
-  tetra(60.0, [21.2, -12.24], [281.0, -162.2], [100.0, 124.25]),
-  // 18 Kreise: 0 auf der Achse, 9 ganz auf einer Seite
-  tetra(60.0, [-41.8, 24.13], [218.0, -125.9], [37.0, 160.62]),
+  // 0 Kreise: Spiegel rechts neben der Figur, die leere Seite bleibt.
+  { ...t('mirror', 0, 0, 0, 90, 0.92, 0.5, -1), label: '0' },
   // 1 Kreise: 1 auf der Achse, 0 ganz auf einer Seite
-  tetra(90.0, [184.0, -0.0], [484.0, -0.0], [184.0, 172.75]),
+  { ...tetra(90.0, [184.0, -0.0], [484.0, -0.0], [184.0, 172.75]), label: '1' },
+  // 2 Kreise: 0 auf der Achse, 1 ganz auf einer Seite
+  { ...tetra(60.0, [-41.8, 24.13], [-301.6, 174.1], [37.0, 160.62]), label: '2' },
   // 3 Kreise: 1 auf der Achse, 1 ganz auf einer Seite
-  tetra(90.0, [44.0, -0.0], [-256.0, 0.0], [44.0, 148.5]),
-  // 14 Kreise: 2 auf der Achse, 6 ganz auf einer Seite
-  tetra(90.0, [128.0, -0.0], [-172.0, 0.0], [128.0, 100.0]),
-  // 8 Kreise: 0 auf der Achse, 4 ganz auf einer Seite
-  tetra(60.0, [42.2, -24.36], [302.0, -174.4], [121.0, 112.12]),
-  // 7 Kreise: 1 auf der Achse, 3 ganz auf einer Seite
-  tetra(79.0, [55.19, -10.73], [-239.3, 46.5], [88.13, 124.25]),
-  // 6 Kreise: 2 auf der Achse, 2 ganz auf einer Seite
-  tetra(90.0, [128.0, -0.0], [428.0, -0.0], [128.0, 124.25]),
+  { ...tetra(90.0, [44.0, -0.0], [-256.0, 0.0], [44.0, 148.5]), label: '3' },
   // 4 Kreise: 2 auf der Achse, 1 ganz auf einer Seite
-  tetra(60.0, [-20.8, 12.01], [-280.6, 162.0], [58.0, 148.5]),
-  // 16 Kreise: 2 auf der Achse, 7 ganz auf einer Seite
-  tetra(60.0, [-20.8, 12.01], [239.0, -138.0], [58.0, 148.5]),
-  // 13 Kreise: 1 auf der Achse, 6 ganz auf einer Seite
-  tetra(79.0, [55.19, -10.73], [349.7, -68.0], [94.25, 117.45]),
-  // 19 Kreise: 1 auf der Achse, 9 ganz auf einer Seite
-  tetra(90.0, [184.0, -0.0], [-116.0, 0.0], [184.0, 100.0]),
+  { ...tetra(60.0, [-20.8, 12.01], [-280.6, 162.0], [58.0, 148.5]), label: '4' },
   // 5 Kreise: 1 auf der Achse, 2 ganz auf einer Seite
-  tetra(79.0, [109.15, -21.22], [403.6, -78.5], [148.21, 131.21]),
+  { ...tetra(79.0, [109.15, -21.22], [403.6, -78.5], [148.21, 131.21]), label: '5' },
+  // 6 Kreise: 2 auf der Achse, 2 ganz auf einer Seite
+  { ...tetra(90.0, [128.0, -0.0], [428.0, -0.0], [128.0, 124.25]), label: '6' },
+  // 7 Kreise: 1 auf der Achse, 3 ganz auf einer Seite
+  { ...tetra(79.0, [55.19, -10.73], [-239.3, 46.5], [88.13, 124.25]), label: '7' },
+  // 8 Kreise: 0 auf der Achse, 4 ganz auf einer Seite
+  { ...tetra(60.0, [42.2, -24.36], [302.0, -174.4], [121.0, 112.12]), label: '8' },
+  // 9 Kreise: 3 auf der Achse, 3 ganz auf einer Seite
+  { ...tetra(60.0, [21.2, -12.24], [-238.6, 137.8], [100.0, 124.25]), label: '9' },
   // 10 Kreise: 2 auf der Achse, 4 ganz auf einer Seite
-  tetra(90.0, [100.0, -0.0], [-200.0, 0.0], [100.0, 100.0]),
-  // 15 Kreise: 1 auf der Achse, 7 ganz auf einer Seite
-  tetra(79.0, [109.15, -21.22], [-185.3, 36.0], [142.09, 96.52]),
+  { ...tetra(90.0, [100.0, -0.0], [-200.0, 0.0], [100.0, 100.0]), label: '10' },
+  // 11 Kreise: 3 auf der Achse, 4 ganz auf einer Seite
+  { ...tetra(60.0, [21.2, -12.24], [281.0, -162.2], [100.0, 124.25]), label: '11' },
   // 12 Kreise: 0 auf der Achse, 6 ganz auf einer Seite
-  tetra(60.0, [42.2, -24.36], [-217.6, 125.6], [121.0, 112.12]),
+  { ...tetra(60.0, [42.2, -24.36], [-217.6, 125.6], [121.0, 112.12]), label: '12' },
+  // 13 Kreise: 1 auf der Achse, 6 ganz auf einer Seite
+  { ...tetra(79.0, [55.19, -10.73], [349.7, -68.0], [94.25, 117.45]), label: '13' },
+  // 14 Kreise: 2 auf der Achse, 6 ganz auf einer Seite
+  { ...tetra(90.0, [128.0, -0.0], [-172.0, 0.0], [128.0, 100.0]), label: '14' },
+  // 15 Kreise: 1 auf der Achse, 7 ganz auf einer Seite
+  { ...tetra(79.0, [109.15, -21.22], [-185.3, 36.0], [142.09, 96.52]), label: '15' },
+  // 16 Kreise: 2 auf der Achse, 7 ganz auf einer Seite
+  { ...tetra(60.0, [-20.8, 12.01], [239.0, -138.0], [58.0, 148.5]), label: '16' },
+  // 17 Kreise: 1 auf der Achse, 8 ganz auf einer Seite
+  { ...tetra(90.0, [44.0, -0.0], [344.0, -0.0], [44.0, 100.0]), label: '17' },
+  // 18 Kreise: 0 auf der Achse, 9 ganz auf einer Seite
+  { ...tetra(60.0, [-41.8, 24.13], [218.0, -125.9], [37.0, 160.62]), label: '18' },
+  // 19 Kreise: 1 auf der Achse, 9 ganz auf einer Seite
+  { ...tetra(90.0, [184.0, -0.0], [-116.0, 0.0], [184.0, 100.0]), label: '19' },
+  // 20 Kreise: 0 auf der Achse, 10 ganz auf einer Seite
+  { ...tetra(75.0, [148.77, -39.86], [-141.0, 37.8], [193.03, 83.31]), label: '20' },
+  // 21 Kreise gehen nicht (Szene ohne Bedeutung, das Feld zeigt nur die Zahl).
+  { ...t('translate', 0, 0, 0, 90, 0.5, 0.5, 1), label: '21', ownScale: true },
 ];
 
 /** Stoffhasen: Mitte des vorderen und des hinteren Hasen, rechter Fuß des hinteren (Motivkoordinaten). */

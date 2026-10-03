@@ -20,6 +20,7 @@ import {
 } from '../geometry';
 import { applyVariant, findBuiltinMotif, svgToImage, type BuiltinMotif } from '../motifs/builtin';
 import {
+  AREA_COLOR,
   contentBounds,
   createFigureBuffer,
   cropSquare,
@@ -55,6 +56,11 @@ export interface PlannedTarget {
   variantBoth?: boolean;
   /** Nur bei Drehung: Drehpunkt im Motiv (Koordinaten 0…200) statt auf der Achse unter der Figurmitte. */
   pivot?: [number, number];
+  /**
+   * Statt des Zielbilds steht diese Zahl im Feld (Tetraktys: so viele ganze
+   * Kreise). Die Szene bleibt als gespeicherte Lösung erhalten.
+   */
+  label?: string;
 }
 
 interface ChallengeSpec {
@@ -87,7 +93,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'stifte-1', name: 'Buntstifte', motifId: 'stifte', version: 1, seed: 1111, total: 12, unsolvable: ['error', 'error', 'error'], layout: STIFTE_LAYOUT },
   { id: 'gesicht-1', name: 'Gesicht', motifId: 'gesicht', version: 3, seed: 1212, total: 12, unsolvable: ['error', 'rotate', 'error'], layout: GESICHT_LAYOUT },
   { id: 'boa-1', name: 'BOA', motifId: 'boa', version: 1, seed: 1313, total: 12, unsolvable: ['error', 'translate', 'error'], layout: BOA_LAYOUT },
-  { id: 'tetraktys-1', name: 'Tetraktys', motifId: 'tetraktys', version: 1, seed: 808, total: 20, unsolvable: [], layout: TETRAKTYS_LAYOUT },
+  { id: 'tetraktys-1', name: 'Tetraktys', motifId: 'tetraktys', version: 2, seed: 808, total: 22, unsolvable: ['translate'], layout: TETRAKTYS_LAYOUT },
 ];
 
 /** Auflösung, in der die Zielfiguren berechnet werden. */
@@ -230,13 +236,31 @@ async function buildChallenge(spec: ChallengeSpec): Promise<Challenge> {
   const viewSize = viewSizeFor(bounds.filter((_b, i) => !plan[i].ownScale).filter(present));
   const targets: Target[] = raw.map((r, i) => ({
     id: `${spec.id}-${i + 1}`,
-    image: cropSquare(r.canvas, boundsCenter(bounds[i]), plan[i].ownScale ? Math.max(viewSize, viewSizeFor([bounds[i]].filter(present))) : viewSize, TARGET_PX).toDataURL('image/png'),
+    image: plan[i].label !== undefined ? labelImage(plan[i].label!) : cropSquare(r.canvas, boundsCenter(bounds[i]), plan[i].ownScale ? Math.max(viewSize, viewSizeFor([bounds[i]].filter(present))) : viewSize, TARGET_PX).toDataURL('image/png'),
     solvable: r.solvable,
     kind: r.kind,
     scene: r.scene,
   }));
   return { id: spec.id, name: spec.name, motifId: spec.motifId, targets, viewSize };
 }
+
+/** Zielfeld nur mit einer großen Zahl (statt eines Zielbilds). */
+function labelImage(label: string): string {
+  const c = document.createElement('canvas');
+  c.width = c.height = TARGET_PX;
+  const g = c.getContext('2d')!;
+  g.fillStyle = AREA_COLOR;
+  g.fillRect(0, 0, TARGET_PX, TARGET_PX);
+  g.fillStyle = LABEL_COLOR;
+  g.font = `800 ${Math.round(TARGET_PX * 0.5)}px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(label, TARGET_PX / 2, TARGET_PX * 0.53);
+  return c.toDataURL('image/png');
+}
+
+/** Farbe der Zahlen (Petrol wie die Kreise der Tetraktys). */
+const LABEL_COLOR = '#1e6f73';
 
 /**
  * Lädt alle Herausforderungen aus dem Speicher. Fehlende oder veraltete

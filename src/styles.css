@@ -389,6 +389,13 @@ img {
   gap: 8px;
 }
 
+/* Viele Zielfiguren (Tetraktys: 22 Zahlen): kleinere Felder, damit
+   „Passt“ und „Geht nicht“ ohne Scrollen sichtbar bleiben. */
+.target-grid.many {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
 .target-thumb {
   position: relative;
   aspect-ratio: 1;
