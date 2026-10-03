@@ -98,6 +98,12 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
   return (
     <div className="screen challenge-screen">
       <main className="work">
+        {/* Zurück immer oben links über der Arbeitsfläche, wie auf den Auswahlseiten. */}
+        <div className="work-top">
+          <button className="tool-btn" aria-label="Zurück" onClick={onBack}>
+            <BackIcon />
+          </button>
+        </div>
         <MirrorCanvas
           image={image}
           imageSize={{ width: aspect, height: 1 }}
@@ -110,9 +116,6 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
       </main>
       <aside className="side challenge-side">
         <div className="side-top">
-          <button className="tool-btn" aria-label="Zurück" onClick={onBack}>
-            <BackIcon />
-          </button>
           <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(startScene())} onFlip={() => setScene(flipSide)} />
         </div>
 

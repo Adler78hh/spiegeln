@@ -69,6 +69,12 @@ export function FreeMirror(props: Props) {
   return (
     <div className="screen">
       <main className={`work ${flash ? 'flash' : ''}`}>
+        {/* Zurück immer oben links über der Arbeitsfläche, wie auf den Auswahlseiten. */}
+        <div className="work-top">
+          <button className="tool-btn" aria-label="Zurück" onClick={onBack}>
+            <BackIcon />
+          </button>
+        </div>
         <MirrorCanvas
           image={image}
           imageSize={{ width: motif.aspect, height: 1 }}
@@ -83,9 +89,6 @@ export function FreeMirror(props: Props) {
       </main>
       <aside className="side free-side">
         <div className="side-top">
-          <button className="tool-btn" aria-label="Zurück" onClick={onBack}>
-            <BackIcon />
-          </button>
           <button className="tool-btn camera-btn" aria-label="Figur merken" onClick={remember}>
             <CameraIcon />
           </button>
