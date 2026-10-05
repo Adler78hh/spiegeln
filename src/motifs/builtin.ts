@@ -361,6 +361,38 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [],
   },
   {
+    id: 'wuerfelbau',
+    name: 'Würfelbau',
+    // Sieben Würfel schräg von vorn (Schrägbild): drei unten nebeneinander,
+    // links zwei darüber, oben zwei nach hinten. Farben Petrol, Brombeer, Ocker.
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="2.5" stroke-linejoin="round">
+        <polygon points="109.50,71.50 128.50,52.50 128.50,14.50 109.50,33.50" fill="#d69a2d"/>
+        <polygon points="71.50,33.50 109.50,33.50 128.50,14.50 90.50,14.50" fill="#8e2f62"/>
+        <polygon points="71.50,71.50 109.50,71.50 109.50,33.50 71.50,33.50" fill="#8e2f62"/>
+        <polygon points="90.50,90.50 109.50,71.50 109.50,33.50 90.50,52.50" fill="#8e2f62"/>
+        <polygon points="52.50,52.50 90.50,52.50 109.50,33.50 71.50,33.50" fill="#1e6f73"/>
+        <polygon points="52.50,90.50 90.50,90.50 90.50,52.50 52.50,52.50" fill="#1e6f73"/>
+        <polygon points="71.50,185.50 90.50,166.50 90.50,128.50 71.50,147.50" fill="#1e6f73"/>
+        <polygon points="33.50,147.50 71.50,147.50 90.50,128.50 52.50,128.50" fill="#8e2f62"/>
+        <polygon points="33.50,185.50 71.50,185.50 71.50,147.50 33.50,147.50" fill="#d69a2d"/>
+        <polygon points="109.50,185.50 128.50,166.50 128.50,128.50 109.50,147.50" fill="#1e6f73"/>
+        <polygon points="71.50,147.50 109.50,147.50 128.50,128.50 90.50,128.50" fill="#8e2f62"/>
+        <polygon points="71.50,185.50 109.50,185.50 109.50,147.50 71.50,147.50" fill="#1e6f73"/>
+        <polygon points="147.50,185.50 166.50,166.50 166.50,128.50 147.50,147.50" fill="#1e6f73"/>
+        <polygon points="109.50,147.50 147.50,147.50 166.50,128.50 128.50,128.50" fill="#d69a2d"/>
+        <polygon points="109.50,185.50 147.50,185.50 147.50,147.50 109.50,147.50" fill="#8e2f62"/>
+        <polygon points="71.50,147.50 90.50,128.50 90.50,90.50 71.50,109.50" fill="#d69a2d"/>
+        <polygon points="33.50,109.50 71.50,109.50 90.50,90.50 52.50,90.50" fill="#1e6f73"/>
+        <polygon points="33.50,147.50 71.50,147.50 71.50,109.50 33.50,109.50" fill="#1e6f73"/>
+        <polygon points="71.50,109.50 90.50,90.50 90.50,52.50 71.50,71.50" fill="#1e6f73"/>
+        <polygon points="33.50,71.50 71.50,71.50 90.50,52.50 52.50,52.50" fill="#d69a2d"/>
+        <polygon points="33.50,109.50 71.50,109.50 71.50,71.50 33.50,71.50" fill="#8e2f62"/>
+      </g>`),
+    errorVariants: [],
+    swapVariants: [],
+  },
+  {
     id: 'stifte',
     name: 'Buntstifte',
     // Fünf gleiche Buntstifte (in sich symmetrisch) auf den Kanten zweier
