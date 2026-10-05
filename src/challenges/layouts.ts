@@ -612,7 +612,7 @@ export const WUERFELBAU_LAYOUT: PlannedTarget[] = [
  * ganze Kreise und Quadrate.
  */
 /**
- * Alle 34 verschiedenen Figuren, die nach diesen Regeln entstehen können,
+ * Alle 32 verschiedenen Figuren, die nach diesen Regeln entstehen können,
  * sortiert nach der Anzahl der Formen (1 bis 12). Alle lösbar. Liegt die
  * Achse an einer Kante, dann an der Kante der bleibenden Formen; die
  * wegfallenden haben so Abstand und hinterlassen keine Striche.
@@ -676,10 +676,6 @@ export const KREISQUADRAT_LAYOUT: PlannedTarget[] = [
   { ...keeping(0, 0.0955, 0.1432, [32.5, 55], 135, [60.8, 83.3]), ownScale: true },
   // 11 Formen
   { ...keeping(0, -0.0955, -0.1432, [167.5, 145], 135, [139.2, 116.7]), ownScale: true },
-  // 12 Formen
-  { ...keeping(0, -0.0, 0.1379, [100, 35], 0, [100.0, 75.0]), ownScale: true },
-  // 12 Formen
-  { ...keeping(0, -0.0, -0.1379, [100, 165], 0, [100.0, 125.0]), ownScale: true },
   // 12 Formen
   { ...keeping(0, -0.0, -0.1379, [100, 165], 0, [100.0, 125.0]), ownScale: true },
   // 12 Formen
