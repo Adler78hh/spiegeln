@@ -605,3 +605,41 @@ export const WUERFELBAU_LAYOUT: PlannedTarget[] = [
   // E-Figur: 5. waagrechte Linie, unten bleibt.
   keeping(0, 0, 0, BAU.waagrecht5, 0, BELOW),
 ];
+
+/**
+ * Kreise und Quadrate: nur Achsen durch einen Kreisdurchmesser, eine
+ * Quadratdiagonale oder an einer Quadratseite – so entstehen wieder nur
+ * ganze Kreise und Quadrate.
+ */
+/**
+ * Achse etwas neben die Kante in die Lücke zwischen den Formen, wenn die Form
+ * hinter der Kante wegfällt (sonst bliebe ihr Rand als feiner Strich stehen).
+ */
+const HALBSTRICH = 3;
+
+export const KREISQUADRAT_LAYOUT: PlannedTarget[] = [
+  // Senkrecht an der linken Seite des mittleren Quadrats, links bleibt.
+  keeping(0, 0, 0, [102.5 - HALBSTRICH, 100], 90, [60, 100]),
+  // Waagrecht an der Oberseite der Reihe, unten bleibt.
+  keeping(0, 0, 0, [100, 80], 0, [100, 120]),
+  // Diagonale des linken Quadrats (nach rechts oben), rechts unten bleibt.
+  keeping(0, 0, 0, [32.5, 100], 135, [60.8, 128.3]),
+  // Wie Nr. 1, aber oben rechts ein Quadrat statt eines Kreises.
+  keeping(0, 0, 0, [102.5 - HALBSTRICH, 100], 90, [60, 100], 'error', 0),
+  // Senkrecht an der rechten Seite des linken Quadrats, rechts bleibt.
+  keeping(0, 0, 0, [52.5 + HALBSTRICH, 100], 90, [100, 100]),
+  // Waagrecht an der Unterseite des unteren Quadrats: die ganze Figur doppelt.
+  keeping(0, 0, 0, [100, 165], 0, [100, 120]),
+  // Ganze Figur neben der ganzen Figur (verschoben statt gespiegelt).
+  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
+  // Diagonale des linken Quadrats (nach rechts unten), rechts oben bleibt.
+  keeping(0, 0, 0, [32.5, 100], 45, [60.8, 71.7]),
+  // Senkrecht an der linken Seite des mittleren Quadrats, rechts bleibt.
+  keeping(0, 0, 0, [102.5, 100], 90, [140, 100]),
+  // Waagrecht an der Unterseite der Reihe, oben bleibt.
+  keeping(0, 0, 0, [100, 120], 0, [100, 80]),
+  // Wie Nr. 5, aber ein Kreis in Brombeer.
+  keeping(0, 0, 0, [52.5 + HALBSTRICH, 100], 90, [100, 100], 'error', 1),
+  // Durch den rechten Kreis (nach rechts oben), links oben bleibt.
+  keeping(0, 0, 0, [167.5, 100], 135, [139.2, 71.7]),
+];

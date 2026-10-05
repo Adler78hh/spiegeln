@@ -394,6 +394,28 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     swapVariants: [],
   },
   {
+    id: 'kreisquadrat',
+    name: 'Kreise und Quadrate',
+    // Drei Kreise (Petrol) und drei Quadrate (Brombeer) im Raster; Durchmesser
+    // der Kreise = Seitenlänge der Quadrate, kleine Abstände dazwischen. Gespiegelt wird nur durch einen
+    // Kreisdurchmesser, eine Quadratdiagonale oder an einer Quadratseite.
+    svg: svg(`
+      <g stroke="${INK}" stroke-width="3" stroke-linejoin="round">
+        <circle cx="32.5" cy="55" r="20" fill="#1e6f73"/>
+        <rect x="12.5" y="80" width="40" height="40" fill="#8e2f62"/>
+        <circle cx="77.5" cy="100" r="20" fill="#1e6f73"/>
+        <rect x="102.5" y="80" width="40" height="40" fill="#8e2f62"/>
+        <circle cx="167.5" cy="100" r="20" fill="#1e6f73"/>
+        <rect x="147.5" y="125" width="40" height="40" fill="#8e2f62"/>
+      </g>`),
+    // Fehler: [0] oberer Kreis als Quadrat, [1] mittlerer Kreis in Brombeer.
+    errorVariants: [
+      [['<circle cx="32.5" cy="55" r="20" fill="#1e6f73"/>', '<rect x="12.5" y="35" width="40" height="40" fill="#8e2f62"/>']],
+      [['<circle cx="77.5" cy="100" r="20" fill="#1e6f73"/>', '<circle cx="77.5" cy="100" r="20" fill="#8e2f62"/>']],
+    ],
+    swapVariants: [],
+  },
+  {
     id: 'stifte',
     name: 'Buntstifte',
     // Fünf gleiche Buntstifte (in sich symmetrisch) auf den Kanten zweier
