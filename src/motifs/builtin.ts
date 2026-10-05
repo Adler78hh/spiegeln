@@ -401,12 +401,12 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     // Kreisdurchmesser, eine Quadratdiagonale oder an einer Quadratseite.
     svg: svg(`
       <g stroke="${INK}" stroke-width="3" stroke-linejoin="round">
-        <circle cx="32.5" cy="55" r="20" fill="#1e6f73"/>
-        <rect x="12.5" y="80" width="40" height="40" fill="#8e2f62"/>
-        <circle cx="77.5" cy="100" r="20" fill="#1e6f73"/>
-        <rect x="102.5" y="80" width="40" height="40" fill="#8e2f62"/>
-        <circle cx="167.5" cy="100" r="20" fill="#1e6f73"/>
-        <rect x="147.5" y="125" width="40" height="40" fill="#8e2f62"/>
+        <circle cx="31" cy="54" r="20" fill="#1e6f73"/>
+        <rect x="11" y="80" width="40" height="40" fill="#8e2f62"/>
+        <circle cx="77" cy="100" r="20" fill="#1e6f73"/>
+        <rect x="103" y="80" width="40" height="40" fill="#8e2f62"/>
+        <circle cx="169" cy="100" r="20" fill="#1e6f73"/>
+        <rect x="149" y="126" width="40" height="40" fill="#8e2f62"/>
       </g>`),
     errorVariants: [],
     swapVariants: [],
