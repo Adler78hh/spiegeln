@@ -419,6 +419,14 @@ img {
   gap: 6px;
 }
 
+/* Sehr viele Zielfiguren (z. B. 34): im Hochformat noch mehr Felder je Reihe. */
+@media (orientation: portrait) {
+  .challenge-side .target-grid.very-many {
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 4px;
+  }
+}
+
 .target-thumb {
   position: relative;
   aspect-ratio: 1;

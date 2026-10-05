@@ -145,7 +145,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
               </div>
             )}
           </div>
-          <div className={`target-grid ${targets.length > 12 ? 'many' : ''}`} role="listbox" aria-label="Zielfiguren">
+          <div className={`target-grid ${targets.length > 12 ? 'many' : ''} ${targets.length > 24 ? 'very-many' : ''}`} role="listbox" aria-label="Zielfiguren">
             {targets.map((t, i) => {
               const a = answers[t.id];
               return (

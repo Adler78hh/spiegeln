@@ -91,7 +91,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'hasen-1', name: 'Stoffhasen', motifId: 'hasen', version: 3, seed: 909, total: 12, unsolvable: ['swap', 'error', 'error'], layout: HASEN_LAYOUT },
   { id: 'wuerfel-1', name: 'Würfel', motifId: 'wuerfel', version: 1, seed: 1010, total: 12, unsolvable: ['rotate', 'error', 'translate'], layout: WUERFEL_LAYOUT },
   { id: 'wuerfelbau-1', name: 'Würfelbau', motifId: 'wuerfelbau', version: 1, seed: 1515, total: 12, unsolvable: ['error', 'translate', 'error'], layout: WUERFELBAU_LAYOUT },
-  { id: 'kreisquadrat-1', name: 'Kreise und Quadrate', motifId: 'kreisquadrat', version: 1, seed: 1616, total: 12, unsolvable: ['error', 'translate', 'error'], layout: KREISQUADRAT_LAYOUT },
+  { id: 'kreisquadrat-1', name: 'Kreise und Quadrate', motifId: 'kreisquadrat', version: 2, seed: 1616, total: 34, unsolvable: [], layout: KREISQUADRAT_LAYOUT },
   { id: 'stifte-1', name: 'Buntstifte', motifId: 'stifte', version: 1, seed: 1111, total: 12, unsolvable: ['error', 'error', 'error'], layout: STIFTE_LAYOUT },
   { id: 'gesicht-1', name: 'Gesicht', motifId: 'gesicht', version: 3, seed: 1212, total: 12, unsolvable: ['error', 'rotate', 'error'], layout: GESICHT_LAYOUT },
   { id: 'mia-1', name: 'MIA', motifId: 'mia', version: 1, seed: 1414, total: 12, unsolvable: ['translate', 'translate', 'error'], layout: MIA_LAYOUT },

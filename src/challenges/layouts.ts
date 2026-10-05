@@ -612,34 +612,78 @@ export const WUERFELBAU_LAYOUT: PlannedTarget[] = [
  * ganze Kreise und Quadrate.
  */
 /**
- * Achse etwas neben die Kante in die Lücke zwischen den Formen, wenn die Form
- * hinter der Kante wegfällt (sonst bliebe ihr Rand als feiner Strich stehen).
+ * Alle 34 verschiedenen Figuren, die nach diesen Regeln entstehen können,
+ * sortiert nach der Anzahl der Formen (1 bis 12). Alle lösbar. Liegt die
+ * Achse an einer Kante, dann an der Kante der bleibenden Formen; die
+ * wegfallenden haben so Abstand und hinterlassen keine Striche.
  */
-const HALBSTRICH = 3;
-
 export const KREISQUADRAT_LAYOUT: PlannedTarget[] = [
-  // Senkrecht an der linken Seite des mittleren Quadrats, links bleibt.
-  keeping(0, 0, 0, [102.5 - HALBSTRICH, 100], 90, [60, 100]),
-  // Waagrecht an der Oberseite der Reihe, unten bleibt.
-  keeping(0, 0, 0, [100, 80], 0, [100, 120]),
-  // Diagonale des linken Quadrats (nach rechts oben), rechts unten bleibt.
-  keeping(0, 0, 0, [32.5, 100], 135, [60.8, 128.3]),
-  // Wie Nr. 1, aber oben rechts ein Quadrat statt eines Kreises.
-  keeping(0, 0, 0, [102.5 - HALBSTRICH, 100], 90, [60, 100], 'error', 0),
-  // Senkrecht an der rechten Seite des linken Quadrats, rechts bleibt.
-  keeping(0, 0, 0, [52.5 + HALBSTRICH, 100], 90, [100, 100]),
-  // Waagrecht an der Unterseite des unteren Quadrats: die ganze Figur doppelt.
-  keeping(0, 0, 0, [100, 165], 0, [100, 120]),
-  // Ganze Figur neben der ganzen Figur (verschoben statt gespiegelt).
-  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
-  // Diagonale des linken Quadrats (nach rechts unten), rechts oben bleibt.
-  keeping(0, 0, 0, [32.5, 100], 45, [60.8, 71.7]),
-  // Senkrecht an der linken Seite des mittleren Quadrats, rechts bleibt.
-  keeping(0, 0, 0, [102.5, 100], 90, [140, 100]),
-  // Waagrecht an der Unterseite der Reihe, oben bleibt.
-  keeping(0, 0, 0, [100, 120], 0, [100, 80]),
-  // Wie Nr. 5, aber ein Kreis in Brombeer.
-  keeping(0, 0, 0, [52.5 + HALBSTRICH, 100], 90, [100, 100], 'error', 1),
-  // Durch den rechten Kreis (nach rechts oben), links oben bleibt.
-  keeping(0, 0, 0, [167.5, 100], 135, [139.2, 71.7]),
+  // 1 Formen
+  keeping(0, 0.1432, 0.0955, [32.5, 55], 0, [32.5, 15.0]),
+  // 1 Formen
+  keeping(0, 0.1432, -0.0, [32.5, 100], 45, [4.2, 128.3]),
+  // 2 Formen
+  keeping(0, 0.1432, 0.053, [100, 75], 0, [100.0, 35.0]),
+  // 2 Formen
+  keeping(0, -0.1432, -0.053, [100, 125], 0, [100.0, 165.0]),
+  // 3 Formen
+  keeping(0, 0.0955, 0.0477, [32.5, 100], 135, [4.2, 71.7]),
+  // 3 Formen
+  keeping(0, -0.0955, -0.0477, [167.5, 100], 135, [195.8, 128.3]),
+  // 4 Formen
+  keeping(0, 0.1008, 0.0477, [52.5, 100], 90, [12.5, 100.0]),
+  // 4 Formen
+  keeping(0, 0.0955, 0.0477, [32.5, 55], 45, [4.2, 83.3]),
+  // 5 Formen
+  keeping(0, 0.0477, 0.0477, [77.5, 100], 90, [37.5, 100.0]),
+  // 5 Formen
+  keeping(0, 0.0477, -0.0, [77.5, 100], 135, [49.2, 71.7]),
+  // 5 Formen
+  keeping(0, -0.0477, -0.0, [122.5, 100], 135, [150.8, 128.3]),
+  // 6 Formen
+  keeping(0, 0.0053, 0.0477, [97.5, 100], 90, [57.5, 100.0]),
+  // 6 Formen
+  keeping(0, -0.0053, -0.0477, [102.5, 100], 90, [142.5, 100.0]),
+  // 7 Formen
+  keeping(0, 0.0477, -0.0477, [77.5, 100], 90, [117.5, 100.0]),
+  // 7 Formen
+  keeping(0, -0.0, 0.0477, [77.5, 100], 135, [105.8, 128.3]),
+  // 7 Formen
+  keeping(0, -0.0, -0.0477, [122.5, 100], 135, [94.2, 71.7]),
+  // 8 Formen
+  { ...keeping(0, 0.0902, -0.0477, [57.5, 100], 90, [97.5, 100.0]), ownScale: true },
+  // 8 Formen
+  { ...keeping(0, -0.0902, 0.0477, [142.5, 100], 90, [102.5, 100.0]), ownScale: true },
+  // 8 Formen
+  keeping(0, -0.0, -0.0477, [32.5, 55], 45, [60.8, 26.7]),
+  // 8 Formen
+  keeping(0, -0.0, 0.0477, [122.5, 100], 45, [94.2, 128.3]),
+  // 9 Formen
+  keeping(0, 0.0477, 0.0955, [32.5, 100], 135, [60.8, 128.3]),
+  // 9 Formen
+  keeping(0, -0.0477, -0.0955, [167.5, 100], 135, [139.2, 71.7]),
+  // 10 Formen
+  keeping(0, -0.0, 0.0424, [100, 80], 0, [100.0, 120.0]),
+  // 10 Formen
+  keeping(0, -0.0, -0.0424, [100, 120], 0, [100.0, 80.0]),
+  // 11 Formen
+  keeping(0, -0.0, 0.0955, [32.5, 55], 0, [32.5, 95.0]),
+  // 11 Formen
+  keeping(0, 0.0477, -0.0955, [32.5, 100], 45, [60.8, 71.7]),
+  // 11 Formen
+  keeping(0, -0.0477, 0.0955, [167.5, 100], 45, [139.2, 128.3]),
+  // 11 Formen
+  { ...keeping(0, 0.0955, 0.1432, [32.5, 55], 135, [60.8, 83.3]), ownScale: true },
+  // 11 Formen
+  { ...keeping(0, -0.0955, -0.1432, [167.5, 145], 135, [139.2, 116.7]), ownScale: true },
+  // 12 Formen
+  { ...keeping(0, -0.0, 0.1379, [100, 35], 0, [100.0, 75.0]), ownScale: true },
+  // 12 Formen
+  { ...keeping(0, -0.0, -0.1379, [100, 165], 0, [100.0, 125.0]), ownScale: true },
+  // 12 Formen
+  { ...keeping(0, -0.0, -0.1379, [100, 165], 0, [100.0, 125.0]), ownScale: true },
+  // 12 Formen
+  { ...keeping(0, 0.1856, -0.0, [12.5, 100], 90, [52.5, 100.0]), ownScale: true },
+  // 12 Formen
+  { ...keeping(0, -0.1856, -0.0, [187.5, 100], 90, [147.5, 100.0]), ownScale: true },
 ];
