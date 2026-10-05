@@ -30,7 +30,7 @@ import {
   sampleFigure,
 } from '../render/composite';
 import { allOnOriginalSide, boundsCenter, candidateScenes, shuffle, solvableFirst, viewSizeFor, type CandidateOptions } from './generate';
-import { AUTO_LAYOUT, BOOT_LAYOUT, EICHHOERNCHEN_LAYOUT, HASEN_LAYOUT, WUERFEL_LAYOUT, STIFTE_LAYOUT, GESICHT_LAYOUT, MIA_LAYOUT, TETRAKTYS_LAYOUT, FISCH_LAYOUT, FORMEN_LAYOUT, HAUS_LAYOUT, SCHNECKE_LAYOUT } from './layouts';
+import { AUTO_LAYOUT, BOOT_LAYOUT, EICHHOERNCHEN_LAYOUT, HASEN_LAYOUT, WUERFEL_LAYOUT, STIFTE_LAYOUT, GESICHT_LAYOUT, MIA_LAYOUT, WUERFELBAU_LAYOUT, TETRAKTYS_LAYOUT, FISCH_LAYOUT, FORMEN_LAYOUT, HAUS_LAYOUT, SCHNECKE_LAYOUT } from './layouts';
 import type { Store } from '../storage/store';
 import type { Challenge, Target, TargetKind } from './types';
 
@@ -90,6 +90,7 @@ export const BUILTIN_CHALLENGES: ChallengeSpec[] = [
   { id: 'eichhoernchen-1', name: 'Eichhörnchen', motifId: 'eichhoernchen', version: 4, seed: 707, total: 12, unsolvable: ['error', 'error', 'error'], layout: EICHHOERNCHEN_LAYOUT },
   { id: 'hasen-1', name: 'Stoffhasen', motifId: 'hasen', version: 3, seed: 909, total: 12, unsolvable: ['swap', 'error', 'error'], layout: HASEN_LAYOUT },
   { id: 'wuerfel-1', name: 'Würfel', motifId: 'wuerfel', version: 1, seed: 1010, total: 12, unsolvable: ['rotate', 'error', 'translate'], layout: WUERFEL_LAYOUT },
+  { id: 'wuerfelbau-1', name: 'Würfelbau', motifId: 'wuerfelbau', version: 1, seed: 1515, total: 12, unsolvable: ['error', 'translate', 'error'], layout: WUERFELBAU_LAYOUT },
   { id: 'stifte-1', name: 'Buntstifte', motifId: 'stifte', version: 1, seed: 1111, total: 12, unsolvable: ['error', 'error', 'error'], layout: STIFTE_LAYOUT },
   { id: 'gesicht-1', name: 'Gesicht', motifId: 'gesicht', version: 3, seed: 1212, total: 12, unsolvable: ['error', 'rotate', 'error'], layout: GESICHT_LAYOUT },
   { id: 'mia-1', name: 'MIA', motifId: 'mia', version: 1, seed: 1414, total: 12, unsolvable: ['translate', 'translate', 'error'], layout: MIA_LAYOUT },

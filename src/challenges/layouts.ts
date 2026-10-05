@@ -558,3 +558,50 @@ export const MIA_LAYOUT: PlannedTarget[] = [
   // Senkrecht durch das A, links bleibt: MIAIM.
   { ...keeping(0, -0.13, 0, A_MID_MIA, 90, LEFT), ownScale: true },
 ];
+
+/**
+ * Würfelbau: Linien des Schrägbilds (Motivkoordinaten). Senkrechte von links
+ * nach rechts, waagrechte von unten nach oben gezählt, schräge von oben.
+ */
+const BAU = {
+  senkrecht2: [71.5, 100] as [number, number],
+  senkrecht4: [109.5, 100] as [number, number],
+  waagrecht2: [100, 147.5] as [number, number],
+  waagrecht3: [100, 128.5] as [number, number],
+  waagrecht5: [100, 71.5] as [number, number],
+  /** Schräge Linien (45° nach rechts oben) x + y = 143 bzw. 181. */
+  schraeg2: [71.5, 71.5] as [number, number],
+  schraeg3: [90.5, 90.5] as [number, number],
+  /** Untere rechte Ecke des Brombeer-Quadrats unten rechts. */
+  eckeUnten: [147.5, 185.5] as [number, number],
+};
+const OBEN_LINKS: [number, number] = [20, 20];
+const UNTEN_RECHTS: [number, number] = [190, 190];
+
+export const WUERFELBAU_LAYOUT: PlannedTarget[] = [
+  // 1. Turm: 2. senkrechte Linie, links bleibt.
+  keeping(0, 0, 0, BAU.senkrecht2, 90, LEFT),
+  // 2. 3. waagrechte Linie, unten bleibt, um 90° gegen den Uhrzeigersinn gedreht.
+  keeping(-90, 0, 0, BAU.waagrecht3, 0, BELOW),
+  // 3. 2. schräge Linie von oben, oben bleibt.
+  keeping(0, 0, 0, BAU.schraeg2, -45, OBEN_LINKS),
+  // Fehler: wie der Turm, aber rechts Petrol und Brombeer vertauscht.
+  keeping(0, 0, 0, BAU.senkrecht2, 90, LEFT, 'error', 0),
+  // 3. schräge Linie von oben, oben bleibt.
+  keeping(0, 0, 0, BAU.schraeg3, -45, OBEN_LINKS),
+  // 3. schräge Linie von oben, unten bleibt (Achse um eine halbe Strichbreite
+  // nach unten versetzt, sonst bliebe die Kante als feiner Strich stehen).
+  keeping(0, 0, 0, [94, 94], -45, UNTEN_RECHTS),
+  // Würfelbau neben Würfelbau (verschoben statt gespiegelt).
+  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
+  // Ring: Achse ab der unteren rechten Ecke des Brombeer-Quadrats, 75° nach links oben, links bleibt.
+  keeping(0, 0, 0, BAU.eckeUnten, 75, LEFT),
+  // 2. waagrechte Linie, oben bleibt, um 90° im Uhrzeigersinn gedreht.
+  keeping(90, 0, 0, BAU.waagrecht2, 0, ABOVE),
+  // Haus mit Loch: 4. senkrechte Linie, links bleibt.
+  keeping(0, 0, 0, BAU.senkrecht4, 90, LEFT),
+  // Fehler: wie das Haus, aber unten Ocker und Petrol vertauscht.
+  keeping(0, 0, 0, BAU.senkrecht4, 90, LEFT, 'error', 1),
+  // E-Figur: 5. waagrechte Linie, unten bleibt.
+  keeping(0, 0, 0, BAU.waagrecht5, 0, BELOW),
+];

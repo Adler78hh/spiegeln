@@ -389,7 +389,8 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
         <polygon points="33.50,71.50 71.50,71.50 90.50,52.50 52.50,52.50" fill="#d69a2d"/>
         <polygon points="33.50,109.50 71.50,109.50 71.50,71.50 33.50,71.50" fill="#8e2f62"/>
       </g>`),
-    errorVariants: [],
+    // Fehler: [0] Turmfront Petrol und Brombeer vertauscht, [1] unten links Ocker und Petrol vertauscht.
+    errorVariants: [[['<polygon points="33.50,147.50 71.50,147.50 71.50,109.50 33.50,109.50" fill="#1e6f73"/>', '<polygon points="33.50,147.50 71.50,147.50 71.50,109.50 33.50,109.50" fill="#8e2f62"/>'], ['<polygon points="33.50,109.50 71.50,109.50 71.50,71.50 33.50,71.50" fill="#8e2f62"/>', '<polygon points="33.50,109.50 71.50,109.50 71.50,71.50 33.50,71.50" fill="#1e6f73"/>']], [['<polygon points="33.50,185.50 71.50,185.50 71.50,147.50 33.50,147.50" fill="#d69a2d"/>', '<polygon points="33.50,185.50 71.50,185.50 71.50,147.50 33.50,147.50" fill="#1e6f73"/>'], ['<polygon points="71.50,185.50 109.50,185.50 109.50,147.50 71.50,147.50" fill="#1e6f73"/>', '<polygon points="71.50,185.50 109.50,185.50 109.50,147.50 71.50,147.50" fill="#d69a2d"/>']]],
     swapVariants: [],
   },
   {
