@@ -427,6 +427,14 @@ img {
   }
 }
 
+/* Im Querformat (z. B. 45 Figuren): 7 Felder je Reihe. */
+@media (orientation: landscape) {
+  .challenge-side .target-grid.very-many {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+  }
+}
+
 .target-thumb {
   position: relative;
   aspect-ratio: 1;

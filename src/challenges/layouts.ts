@@ -612,7 +612,9 @@ export const WUERFELBAU_LAYOUT: PlannedTarget[] = [
  * eines Quadrats oder durch einen Kreismittelpunkt (waagerecht, senkrecht,
  * diagonal). So liegen alle Formen wieder im Raster mit gleichem Abstand
  * und gleicher Ausrichtung. Alle 37 optisch verschiedenen Figuren,
- * sortiert nach der Anzahl der Formen. Alle lösbar.
+ * sortiert nach der Anzahl der Formen, dazu die 8 Figuren, bei denen die
+ * Achse im Raster direkt neben der ganzen Figur liegt (12 Formen).
+ * Alle lösbar.
  */
 export const KREISQUADRAT_LAYOUT: PlannedTarget[] = [
   // 1 Formen
@@ -689,4 +691,20 @@ export const KREISQUADRAT_LAYOUT: PlannedTarget[] = [
   { ...keeping(0, 0.0976, 0.1464, [31, 54], 135, [59.3, 82.3]), ownScale: true },
   // 11 Formen
   { ...keeping(0, -0.0976, -0.1464, [169, 146], 135, [140.7, 117.7]), ownScale: true },
+  // 12 Formen: ganze Figur neben der Figur gespiegelt
+  { ...keeping(0, 0.0, 0.1464, [100, 31], 0, [100.0, 71.0]), ownScale: true },
+  // 12 Formen: ganze Figur neben der Figur gespiegelt
+  { ...keeping(0, 0.0, -0.1464, [100, 169], 0, [100.0, 129.0]), ownScale: true },
+  // 12 Formen: ganze Figur neben der Figur gespiegelt
+  { ...keeping(0, -0.0976, 0.1464, [100, -15], 45, [71.7, 13.3]), ownScale: true },
+  // 12 Formen: ganze Figur neben der Figur gespiegelt
+  { ...keeping(0, 0.0976, -0.1464, [100, 215], 45, [128.3, 186.7]), ownScale: true },
+  // 12 Formen: ganze Figur neben der Figur gespiegelt
+  { ...keeping(0, -0.1952, 0.0, [192, 100], 90, [152.0, 100.0]), ownScale: true },
+  // 12 Formen: ganze Figur neben der Figur gespiegelt
+  { ...keeping(0, 0.1952, 0.0, [8, 100], 90, [48.0, 100.0]), ownScale: true },
+  // 12 Formen: ganze Figur neben der Figur gespiegelt
+  { ...keeping(0, -0.1464, -0.1952, [100, 261], 135, [71.7, 232.7]), ownScale: true },
+  // 12 Formen: ganze Figur neben der Figur gespiegelt
+  { ...keeping(0, 0.1464, 0.1952, [100, -61], 135, [128.3, -32.7]), ownScale: true },
 ];
