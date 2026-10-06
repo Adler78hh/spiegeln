@@ -198,9 +198,57 @@ interface PageProps {
   limited?: boolean;
   /** Zusätzliche Knöpfe in der Kopfzeile. */
   actions?: ReactNode;
+  /** Für die Gruppe ausgeblendete Herausforderungen festlegen. */
+  onHiddenChange: (hidden: string[]) => void;
 }
 
-export type GroupTab = 'kids' | 'results';
+/** Freischalten: welche Herausforderungen die Kinder der Gruppe sehen. */
+function ChallengeAccess(props: { group: Group; challenges: Challenge[]; motifs: MotifInfo[]; onChange: (hidden: string[]) => void }) {
+  const { group, challenges, motifs, onChange } = props;
+  const hidden = new Set(group.hiddenChallenges ?? []);
+  const visible = challenges.filter((c) => !hidden.has(c.id)).length;
+  const toggle = (id: string) => {
+    const next = new Set(hidden);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onChange([...next]);
+  };
+  return (
+    <>
+      <div className="access-head">
+        <p className="hint">
+          Nur angehakte Herausforderungen sehen die Kinder dieser Gruppe ({visible} von {challenges.length}). Antworten bleiben beim Ausblenden erhalten.
+          Neue Herausforderungen sind zunächst sichtbar.
+        </p>
+        <button className="text-btn" onClick={() => onChange([])}>
+          Alle
+        </button>
+        <button className="text-btn" onClick={() => onChange(challenges.map((c) => c.id))}>
+          Keine
+        </button>
+      </div>
+      <ul className="access-list">
+        {challenges.map((c) => {
+          const motif = motifs.find((m) => m.id === c.motifId);
+          return (
+            <li key={c.id}>
+              <label className={`access-row ${hidden.has(c.id) ? 'off' : ''}`}>
+                <input type="checkbox" checked={!hidden.has(c.id)} onChange={() => toggle(c.id)} />
+                {motif && <img className="access-motif" src={motif.src} alt="" />}
+                <span className="access-name">
+                  {c.name}
+                  <span className="row-meta">{c.targets.length} Figuren</span>
+                </span>
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
+
+export type GroupTab = 'kids' | 'results' | 'access';
 
 /** Eine Gruppe: Name, Farbe, Löschen; Reiter „Kinder“ und „Ergebnisse“. */
 export function GroupPage(props: PageProps) {
@@ -276,11 +324,16 @@ export function GroupPage(props: PageProps) {
         <button role="tab" aria-selected={tab === 'results'} className={`tab ${tab === 'results' ? 'active' : ''}`} onClick={() => onTabChange('results')}>
           Ergebnisse
         </button>
+        <button role="tab" aria-selected={tab === 'access'} className={`tab ${tab === 'access' ? 'active' : ''}`} onClick={() => onTabChange('access')}>
+          Freischalten
+        </button>
       </div>
 
       <div className="tab-panel" role="tabpanel">
         {tab === 'kids' ? (
           <ProfileManager store={store} group={group} profiles={kids} onChange={onProfilesChange} fixed={limited} />
+        ) : tab === 'access' ? (
+          <ChallengeAccess group={group} challenges={challenges} motifs={motifs} onChange={props.onHiddenChange} />
         ) : (
           <Results
             store={store}

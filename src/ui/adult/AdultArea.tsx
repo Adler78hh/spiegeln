@@ -12,7 +12,8 @@ import { ChallengeEditor } from './ChallengeEditor';
 import { ChallengeManager } from './ChallengeManager';
 import { MotifManager } from './MotifManager';
 import { BackupPage } from './BackupPage';
-import { SaveIcon } from '../icons';
+import { HelpIcon, SaveIcon } from '../icons';
+import { HelpPage } from './HelpPage';
 import { GroupList, GroupPage, NewGroupDialog, type GroupTab } from './Groups';
 import type { ResultCell } from './Results';
 
@@ -57,6 +58,7 @@ export function AdultArea(props: Props) {
   const [resultCell, setResultCell] = useState<ResultCell | null>(null);
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [backup, setBackup] = useState(false);
+  const [help, setHelp] = useState(false);
 
   const reloadGroups = async () => {
     onGroupsChange(await store.listGroups());
@@ -74,6 +76,7 @@ export function AdultArea(props: Props) {
   // Gratisversion: nur die eine Klasse mit Namen und Ergebnissen (und der Datensicherung).
   if (GRATIS && groups[0]) {
     if (backup) return <BackupPage store={store} onBack={() => setBackup(false)} />;
+    if (help) return <HelpPage onBack={() => setHelp(false)} />;
     return (
       <GroupPage
         store={store}
@@ -94,11 +97,20 @@ export function AdultArea(props: Props) {
         resultCell={resultCell}
         onResultCell={setResultCell}
         onBack={onExit}
+        onHiddenChange={async (hidden) => {
+          await store.setHiddenChallenges(groups[0].id, hidden);
+          await reloadGroups();
+        }}
         limited
         actions={
-          <button className="text-btn" onClick={() => setBackup(true)}>
-            <SaveIcon size={22} /> Datensicherung
-          </button>
+          <>
+            <button className="text-btn" onClick={() => setHelp(true)}>
+              <HelpIcon size={22} /> Hilfe
+            </button>
+            <button className="text-btn" onClick={() => setBackup(true)}>
+              <SaveIcon size={22} /> Datensicherung
+            </button>
+          </>
         }
       />
     );
@@ -172,6 +184,10 @@ export function AdultArea(props: Props) {
             resultCell={resultCell}
             onResultCell={setResultCell}
             onBack={() => openGroup(null)}
+            onHiddenChange={async (hidden) => {
+              await store.setHiddenChallenges(group.id, hidden);
+              await reloadGroups();
+            }}
           />
         );
       }
@@ -193,6 +209,8 @@ export function AdultArea(props: Props) {
         </>
       );
     }
+    case 'help':
+      return <HelpPage onBack={() => setSection(null)} />;
     case 'backup':
       return <BackupPage store={store} onBack={() => setSection(null)} />;
     case 'motifs':

@@ -23,6 +23,8 @@ export function ChallengeList({ challenges, motifs, answers, onOpen, onBack }: P
         <div className="loading" aria-label="Lädt">
           <span className="spinner" />
         </div>
+      ) : challenges.length === 0 ? (
+        <p className="message">Für deine Gruppe ist noch keine Herausforderung freigeschaltet.</p>
       ) : (
         <div className="challenge-grid">
           {challenges.map((c) => {

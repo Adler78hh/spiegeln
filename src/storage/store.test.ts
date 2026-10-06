@@ -216,6 +216,16 @@ describe('Sicherungen (Fotoapparat)', () => {
   });
 });
 
+describe('Freischalten', () => {
+  it('merkt sich ausgeblendete Herausforderungen je Gruppe', async () => {
+    const { groups } = await store.ensureDefaults();
+    await store.setHiddenChallenges(groups[0].id, ['haus-1', 'fisch-1']);
+    expect((await store.listGroups())[0].hiddenChallenges).toEqual(['haus-1', 'fisch-1']);
+    await store.setHiddenChallenges(groups[0].id, []);
+    expect((await store.listGroups())[0].hiddenChallenges).toEqual([]);
+  });
+});
+
 describe('Datensicherung', () => {
   const ch = (id: string, version?: number): Challenge => ({ id, name: id, motifId: 'haus', viewSize: 1, targets: [], version }) as unknown as Challenge;
 

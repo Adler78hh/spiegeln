@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import { ChallengeIcon, PeopleIcon, PhotoIcon, SaveIcon } from '../icons';
+import { ChallengeIcon, HelpIcon, PeopleIcon, PhotoIcon, SaveIcon } from '../icons';
 import { StorageHint } from './BackupPage';
 
-export type AdultSection = 'groups' | 'motifs' | 'challenges' | 'backup';
+export type AdultSection = 'groups' | 'motifs' | 'challenges' | 'backup' | 'help';
 
 interface Props {
   onOpen: (s: AdultSection) => void;
@@ -16,6 +16,7 @@ export function AdultHome({ onOpen, onExit }: Props) {
     { id: 'challenges', label: 'Herausforderungen', icon: <ChallengeIcon size={56} />, hint: 'Eigene erstellen und bearbeiten' },
     { id: 'motifs', label: 'Eigene Motive', icon: <PhotoIcon size={56} />, hint: 'Fotos und Zeichnungen verwalten' },
     { id: 'backup', label: 'Datensicherung', icon: <SaveIcon size={56} />, hint: 'Alles in einer Datei sichern oder wiederherstellen' },
+    { id: 'help', label: 'Hilfe', icon: <HelpIcon size={56} />, hint: 'Kurz erklärt: Knöpfe, Ergebnisse, Daten' },
   ];
   return (
     <div className="adult-screen">

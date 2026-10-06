@@ -181,6 +181,10 @@ export default function App() {
     );
   }
 
+  // Die Lehrkraft kann Herausforderungen für eine Gruppe ausblenden.
+  const hidden = new Set(groups.find((g) => g.id === profile.groupId)?.hiddenChallenges ?? []);
+  const visibleChallenges = challenges && challenges.filter((c) => !hidden.has(c.id));
+
   switch (screen.name) {
     case 'home':
       return (
@@ -221,7 +225,7 @@ export default function App() {
     case 'challenges':
       return (
         <ChallengeList
-          challenges={challenges}
+          challenges={visibleChallenges}
           motifs={motifs}
           answers={answers}
           onOpen={(id) => setScreen({ name: 'challenge', id })}

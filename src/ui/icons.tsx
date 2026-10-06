@@ -123,6 +123,15 @@ export const SaveIcon = ({ size = 32 }: { size?: number }) => (
   </Icon>
 );
 
+/** Hilfe: Fragezeichen im Kreis. */
+export const HelpIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" />
+    <circle cx="12" cy="17" r=".6" fill="currentColor" />
+  </Icon>
+);
+
 export const PenIcon = ({ size = 32 }: { size?: number }) => (
   <Icon size={size}>
     <path d="M4 20l1-5L16 4l4 4L9 19z" />

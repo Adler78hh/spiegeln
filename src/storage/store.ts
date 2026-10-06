@@ -37,6 +37,8 @@ export interface Group {
   color: string;
   order: number;
   createdAt: number;
+  /** Für diese Gruppe ausgeblendete Herausforderungen (neue sind sichtbar). */
+  hiddenChallenges?: string[];
 }
 
 export interface Profile {
@@ -299,6 +301,12 @@ export class Store {
   async renameGroup(id: string, name: string): Promise<void> {
     const g = await this.db.get('groups', id);
     if (g && name.trim()) await this.db.put('groups', { ...g, name: name.trim() });
+  }
+
+  /** Legt fest, welche Herausforderungen die Kinder der Gruppe nicht sehen. */
+  async setHiddenChallenges(id: string, hidden: string[]): Promise<void> {
+    const g = await this.db.get('groups', id);
+    if (g) await this.db.put('groups', { ...g, hiddenChallenges: hidden });
   }
 
   async recolorGroup(id: string, color: string, name: string): Promise<void> {

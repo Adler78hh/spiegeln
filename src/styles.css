@@ -2571,3 +2571,102 @@ button.matrix-kid:active {
   color: #b23a2b;
   font-weight: 700;
 }
+
+/* ---------- Freischalten je Gruppe ---------- */
+
+.access-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.access-head .hint {
+  flex: 1;
+}
+
+.access-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
+}
+
+.access-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  font-weight: 700;
+}
+
+.access-row.off {
+  opacity: 0.55;
+}
+
+.access-row input {
+  width: 26px;
+  height: 26px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.access-motif {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.access-name {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.access-row .row-meta {
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+/* ---------- Hilfe ---------- */
+
+.help-block {
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 2px solid var(--border);
+}
+
+.help-block h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.help-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.help-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.help-icon {
+  width: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
