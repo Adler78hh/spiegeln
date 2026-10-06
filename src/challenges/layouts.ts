@@ -607,22 +607,20 @@ export const WUERFELBAU_LAYOUT: PlannedTarget[] = [
 ];
 
 /**
- * Kreise und Quadrate: nur Achsen durch einen Kreisdurchmesser, eine
- * Quadratdiagonale oder an einer Quadratseite – so entstehen wieder nur
- * ganze Kreise und Quadrate.
- */
-/**
- * Alle 32 verschiedenen Figuren, die nach diesen Regeln entstehen können,
- * sortiert nach der Anzahl der Formen (1 bis 12). Alle lösbar. Liegt die
- * Achse an einer Kante, dann mitten in der Lücke davor: So haben auch die
- * gespiegelten Formen den Abstand aus dem Motiv, und wegfallende Formen
- * hinterlassen keine Striche.
+ * Kreise und Quadrate: Achsen waagerecht oder senkrecht mitten in einer
+ * Lücke zwischen zwei Formen, durch die Diagonale oder Mittelsenkrechte
+ * eines Quadrats oder durch einen Kreismittelpunkt (waagerecht, senkrecht,
+ * diagonal). So liegen alle Formen wieder im Raster mit gleichem Abstand
+ * und gleicher Ausrichtung. Alle 37 optisch verschiedenen Figuren,
+ * sortiert nach der Anzahl der Formen. Alle lösbar.
  */
 export const KREISQUADRAT_LAYOUT: PlannedTarget[] = [
   // 1 Formen
   keeping(0, 0.1464, 0.0976, [31, 54], 0, [31.0, 14.0]),
   // 1 Formen
-  keeping(0, 0.1464, -0.0, [31, 100], 45, [2.7, 128.3]),
+  keeping(0, 0.1464, 0.0, [31, 100], 45, [2.7, 128.3]),
+  // 2 Formen
+  keeping(0, 0.1464, 0.0488, [31, 54], 90, [-9.0, 54.0]),
   // 2 Formen
   keeping(0, 0.1464, 0.0488, [100, 77], 0, [100.0, 37.0]),
   // 2 Formen
@@ -632,43 +630,57 @@ export const KREISQUADRAT_LAYOUT: PlannedTarget[] = [
   // 3 Formen
   keeping(0, -0.0976, -0.0488, [169, 100], 135, [197.3, 128.3]),
   // 4 Formen
-  keeping(0, 0.0976, 0.0488, [54, 100], 90, [14.0, 100.0]),
-  // 4 Formen
   keeping(0, 0.0976, 0.0488, [31, 54], 45, [2.7, 82.3]),
+  // 4 Formen
+  keeping(0, 0.0976, 0.0488, [54, 100], 90, [14.0, 100.0]),
   // 5 Formen
   keeping(0, 0.0488, 0.0488, [77, 100], 90, [37.0, 100.0]),
   // 5 Formen
-  keeping(0, 0.0488, -0.0, [77, 100], 135, [48.7, 71.7]),
+  keeping(0, -0.0488, -0.0488, [123, 100], 90, [163.0, 100.0]),
   // 5 Formen
-  keeping(0, -0.0488, -0.0, [123, 100], 135, [151.3, 128.3]),
+  keeping(0, 0.0488, 0.0, [77, 100], 135, [48.7, 71.7]),
+  // 5 Formen
+  keeping(0, -0.0488, 0.0, [123, 100], 135, [151.3, 128.3]),
   // 6 Formen
-  keeping(0, -0.0, 0.0488, [100, 100], 90, [60.0, 100.0]),
+  keeping(0, 0.0, 0.0488, [100, 100], 90, [60.0, 100.0]),
   // 6 Formen
-  keeping(0, -0.0, -0.0488, [100, 100], 90, [140.0, 100.0]),
+  keeping(0, 0.0, -0.0488, [100, 100], 90, [140.0, 100.0]),
+  // 6 Formen
+  keeping(0, 0.0, 0.0, [31, 100], 0, [31.0, 140.0]),
+  // 6 Formen
+  keeping(0, 0.0, 0.0, [31, 100], 0, [31.0, 60.0]),
   // 7 Formen
   keeping(0, 0.0488, -0.0488, [77, 100], 90, [117.0, 100.0]),
   // 7 Formen
-  keeping(0, -0.0, 0.0488, [77, 100], 135, [105.3, 128.3]),
+  keeping(0, -0.0488, 0.0488, [123, 100], 90, [83.0, 100.0]),
+  // 7 Formen
+  keeping(0, 0.0, 0.0488, [77, 100], 135, [105.3, 128.3]),
   // 7 Formen
   keeping(0, 0.0, -0.0488, [123, 100], 135, [94.7, 71.7]),
   // 8 Formen
+  keeping(0, 0.0, -0.0488, [31, 54], 45, [59.3, 25.7]),
+  // 8 Formen
   { ...keeping(0, 0.0976, -0.0488, [54, 100], 90, [94.0, 100.0]), ownScale: true },
   // 8 Formen
+  keeping(0, 0.0, 0.0488, [123, 100], 45, [94.7, 128.3]),
+  // 8 Formen
   { ...keeping(0, -0.0976, 0.0488, [146, 100], 90, [106.0, 100.0]), ownScale: true },
-  // 8 Formen
-  keeping(0, -0.0, -0.0488, [31, 54], 45, [59.3, 25.7]),
-  // 8 Formen
-  keeping(0, -0.0, 0.0488, [123, 100], 45, [94.7, 128.3]),
   // 9 Formen
   keeping(0, 0.0488, 0.0976, [31, 100], 135, [59.3, 128.3]),
   // 9 Formen
   keeping(0, -0.0488, -0.0976, [169, 100], 135, [140.7, 71.7]),
   // 10 Formen
-  keeping(0, -0.0, 0.0488, [100, 77], 0, [100.0, 117.0]),
+  keeping(0, 0.0, 0.0488, [100, 77], 0, [100.0, 117.0]),
   // 10 Formen
-  keeping(0, -0.0, -0.0488, [100, 123], 0, [100.0, 83.0]),
+  keeping(0, 0.0, -0.0488, [100, 123], 0, [100.0, 83.0]),
+  // 10 Formen
+  { ...keeping(0, 0.1464, 0.0, [31, 54], 90, [71.0, 54.0]), ownScale: true },
+  // 10 Formen
+  { ...keeping(0, -0.1464, 0.0, [169, 100], 90, [129.0, 100.0]), ownScale: true },
   // 11 Formen
-  keeping(0, -0.0, 0.0976, [31, 54], 0, [31.0, 94.0]),
+  keeping(0, 0.0, 0.0976, [31, 54], 0, [31.0, 94.0]),
+  // 11 Formen
+  keeping(0, 0.0, -0.0976, [169, 146], 0, [169.0, 106.0]),
   // 11 Formen
   keeping(0, 0.0488, -0.0976, [31, 100], 45, [59.3, 71.7]),
   // 11 Formen
@@ -677,10 +689,4 @@ export const KREISQUADRAT_LAYOUT: PlannedTarget[] = [
   { ...keeping(0, 0.0976, 0.1464, [31, 54], 135, [59.3, 82.3]), ownScale: true },
   // 11 Formen
   { ...keeping(0, -0.0976, -0.1464, [169, 146], 135, [140.7, 117.7]), ownScale: true },
-  // 12 Formen
-  { ...keeping(0, -0.0, -0.1464, [100, 169], 0, [100.0, 129.0]), ownScale: true },
-  // 12 Formen
-  { ...keeping(0, 0.1952, -0.0, [8, 100], 90, [48.0, 100.0]), ownScale: true },
-  // 12 Formen
-  { ...keeping(0, -0.1952, -0.0, [192, 100], 90, [152.0, 100.0]), ownScale: true },
 ];
