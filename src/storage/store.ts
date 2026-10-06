@@ -6,6 +6,7 @@
  * - profiles:   Profile der Kinder, jedes in genau einer Gruppe
  * - answers:    Eingaben pro Profil × Herausforderung × Zielfigur
  * - snapshots:  gemerkte Figuren aus dem freien Spiegeln, pro Profil
+ * - photos:     Sicherungen (Fotoapparat) pro Profil × Herausforderung × Zielfigur
  * - challenges: Herausforderungen (vorinstalliert und selbst erstellt)
  */
 import { GRATIS } from '../edition';
@@ -60,6 +61,23 @@ export interface Snapshot {
   createdAt: number;
 }
 
+/** Sicherung einer Zielfigur: Lage von Figur und Spiegel samt Bild. */
+export interface Photo {
+  scene: Scene;
+  /** Spiegelergebnis (Daten-URL), gleicher Ausschnitt wie die Zielfigur. */
+  image: string;
+  createdAt: number;
+}
+
+/** Sicherungen einer Herausforderung: Zielfigur-ID → Sicherung. */
+export type ChallengePhotos = Record<string, Photo>;
+
+interface PhotoRecord extends Photo {
+  profileId: string;
+  challengeId: string;
+  targetId: string;
+}
+
 /** Eigenes Motiv (Foto oder Zeichnung), für alle Profile sichtbar. */
 export interface CustomMotif {
   id: string;
@@ -87,13 +105,18 @@ interface SpiegelnSchema extends DBSchema {
     indexes: { byProfile: string };
   };
   snapshots: { key: string; value: Snapshot; indexes: { byProfile: string } };
+  photos: {
+    key: [string, string, string];
+    value: PhotoRecord;
+    indexes: { byProfile: string };
+  };
   challenges: { key: string; value: Challenge & { builtin: boolean; order: number } };
   motifs: { key: string; value: CustomMotif };
 }
 
 /** Eigene Datenbank je Ausgabe: Gratis- und Vollversion teilen sich keine Daten. */
 export const DB_NAME = GRATIS ? 'spiegeln-gratis' : 'spiegeln';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 export function newId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -126,6 +149,10 @@ export class Store {
         }
         if (oldVersion < 3) {
           db.createObjectStore('groups', { keyPath: 'id' });
+        }
+        if (oldVersion < 4) {
+          const photos = db.createObjectStore('photos', { keyPath: ['profileId', 'challengeId', 'targetId'] });
+          photos.createIndex('byProfile', 'profileId');
         }
       },
     });
@@ -250,9 +277,9 @@ export class Store {
   }
 
   private async clearProfile(id: string, removeProfile: boolean): Promise<void> {
-    const tx = this.db.transaction(['profiles', 'answers', 'snapshots'], 'readwrite');
+    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos'], 'readwrite');
     if (removeProfile) await tx.objectStore('profiles').delete(id);
-    for (const store of ['answers', 'snapshots'] as const) {
+    for (const store of ['answers', 'snapshots', 'photos'] as const) {
       const index = tx.objectStore(store).index('byProfile');
       let cursor = await index.openCursor(IDBKeyRange.only(id));
       while (cursor) {
@@ -279,15 +306,37 @@ export class Store {
     await this.db.put('answers', { ...answer, profileId, challengeId, targetId });
   }
 
-  /** Entfernt alle Antworten aller Profile zu einer Herausforderung. */
+  /** Entfernt alle Antworten und Sicherungen aller Profile zu einer Herausforderung. */
   async deleteAnswersForChallenge(challengeId: string): Promise<void> {
-    const tx = this.db.transaction('answers', 'readwrite');
-    let cursor = await tx.store.openCursor();
-    while (cursor) {
-      if (cursor.value.challengeId === challengeId) await cursor.delete();
-      cursor = await cursor.continue();
+    const tx = this.db.transaction(['answers', 'photos'], 'readwrite');
+    for (const store of ['answers', 'photos'] as const) {
+      let cursor = await tx.objectStore(store).openCursor();
+      while (cursor) {
+        if (cursor.value.challengeId === challengeId) await cursor.delete();
+        cursor = await cursor.continue();
+      }
     }
     await tx.done;
+  }
+
+  // ---------- Sicherungen (Fotoapparat) ----------
+
+  /** Alle Sicherungen eines Profils: Herausforderung → Zielfigur → Sicherung. */
+  async getPhotos(profileId: string): Promise<Record<string, ChallengePhotos>> {
+    const records = await this.db.getAllFromIndex('photos', 'byProfile', profileId);
+    const out: Record<string, ChallengePhotos> = {};
+    for (const { profileId: _p, challengeId, targetId, ...photo } of records) {
+      (out[challengeId] ??= {})[targetId] = photo;
+    }
+    return out;
+  }
+
+  async savePhoto(profileId: string, challengeId: string, targetId: string, photo: Photo): Promise<void> {
+    await this.db.put('photos', { ...photo, profileId, challengeId, targetId });
+  }
+
+  async deletePhoto(profileId: string, challengeId: string, targetId: string): Promise<void> {
+    await this.db.delete('photos', [profileId, challengeId, targetId]);
   }
 
   // ---------- Schnappschüsse ----------

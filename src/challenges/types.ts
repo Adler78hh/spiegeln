@@ -50,7 +50,7 @@ export interface Answer {
   decision: Decision;
   /** Konfiguration beim Entscheiden (Drehung, Spiegel, Originalseite). */
   scene: Scene;
-  /** Bild des Spiegelergebnisses bei "Passt" (für die Ergebnisübersicht). */
+  /** Früher: Bild bei „Passt“ (entfällt, heute gibt es die Sicherung mit dem Fotoapparat). */
   snapshot?: string;
   updatedAt: number;
 }

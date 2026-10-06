@@ -3,10 +3,10 @@ import { flipSide, mirrorTransform, type Scene } from '../geometry';
 import { unsolvableCount, type Answer, type Challenge, type ChallengeAnswers, type Decision } from '../challenges/types';
 import { boundsCenter } from '../challenges/generate';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite } from '../render/composite';
-import { BackIcon, CheckIcon, CrossIcon, ThumbsUpIcon } from './icons';
+import { BackIcon, CameraIcon, CheckIcon, CrossIcon, ThumbsUpIcon } from './icons';
 import { checkAnswers } from '../challenges/check';
 import { MirrorCanvas } from './MirrorCanvas';
-import type { ToolPrefs } from '../storage/store';
+import type { ChallengePhotos, Photo, ToolPrefs } from '../storage/store';
 import { MirrorTools } from './MirrorTools';
 import { useMotifImage } from './useMotifImage';
 import { useStartScene } from './useStartScene';
@@ -14,33 +14,38 @@ import type { MotifInfo } from '../motifs/library';
 
 /** Auflösung, in der das Spiegelergebnis berechnet wird. */
 const RENDER_PX = 768;
-/** Auflösung des gespeicherten Spiegelergebnisses. */
-const SNAPSHOT_PX = 256;
+/** Auflösung des Bildes einer Sicherung. */
+const PHOTO_PX = 256;
 
 interface Props {
   challenge: Challenge;
   motif: MotifInfo | undefined;
   answers: ChallengeAnswers;
   onAnswer: (targetId: string, answer: Answer) => void;
+  /** Sicherungen (Fotoapparat) dieser Herausforderung. */
+  photos: ChallengePhotos;
+  /** Sicherung setzen (Photo) oder aufheben (null). */
+  onPhoto: (targetId: string, photo: Photo | null) => void;
   prefs: ToolPrefs;
   onPrefsChange: (p: ToolPrefs) => void;
   onBack: () => void;
 }
 
 /** Modus 2: Startfigur drehen/spiegeln und zu jeder Zielfigur entscheiden. */
-export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPrefsChange, onBack }: Props) {
+export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onPhoto, prefs, onPrefsChange, onBack }: Props) {
   const image = useMotifImage(motif);
   const aspect = motif?.aspect ?? 1;
   const targets = challenge.targets;
   const firstOpen = targets.find((t) => !answers[t.id]) ?? targets[0];
   const [selectedId, setSelectedId] = useState(firstOpen.id);
   const startScene = useStartScene(image, aspect);
-  const [scene, setScene] = useState<Scene>(() => answers[firstOpen.id]?.scene ?? startScene());
+  // Gesicherte Zielfigur: Figur und Spiegel wie beim Sichern, sonst die Startlage.
+  const [scene, setScene] = useState<Scene>(() => photos[firstOpen.id]?.scene ?? startScene());
   // Ist das Bild erst nach dem Öffnen geladen, den Spiegel neben die Figur setzen
   // (solange das Kind noch nichts verändert hat).
   const touched = useRef(false);
   useEffect(() => {
-    if (image && !touched.current && !answers[selectedId]?.scene) setScene(startScene());
+    if (image && !touched.current && !photos[selectedId]) setScene(startScene());
   }, [image]);
   const changeScene = (s: Scene) => {
     touched.current = true;
@@ -61,10 +66,10 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
 
   const select = (id: string) => {
     setSelectedId(id);
-    setScene(answers[id]?.scene ?? startScene());
+    setScene(photos[id]?.scene ?? startScene());
   };
 
-  const snapshot = (s: Scene): string | undefined => {
+  const renderPhoto = (s: Scene): string | undefined => {
     if (!image) return undefined;
     if (figureRef.current?.image !== image) {
       figureRef.current = { image, buffer: createFigureBuffer(image, aspect, RENDER_PX) };
@@ -72,16 +77,11 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
     const fig = figureRef.current.buffer;
     const full = renderComposite(RENDER_PX, s, fig, fig, mirrorTransform(s.mirror));
     // Gleicher Ausschnitt wie bei den Zielbildern, damit man vergleichen kann.
-    return cropSquare(full, boundsCenter(contentBounds(full)), challenge.viewSize, SNAPSHOT_PX).toDataURL('image/png');
+    return cropSquare(full, boundsCenter(contentBounds(full)), challenge.viewSize, PHOTO_PX).toDataURL('image/png');
   };
 
   const decide = (decision: Decision) => {
-    onAnswer(selected.id, {
-      decision,
-      scene,
-      snapshot: decision === 'fits' ? snapshot(scene) : undefined,
-      updatedAt: Date.now(),
-    });
+    onAnswer(selected.id, { decision, scene, updatedAt: Date.now() });
     // Weiter zur nächsten offenen Zielfigur (falls es eine gibt).
     const idx = targets.findIndex((t) => t.id === selected.id);
     for (let k = 1; k < targets.length; k++) {
@@ -94,6 +94,18 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
   };
 
   const current = answers[selected.id]?.decision;
+  const photo = photos[selected.id];
+
+  // Fotoapparat: sichern bzw. die Sicherung wieder aufheben. Weiterbewegen
+  // ändert eine Sicherung nicht; neu sichern heißt erst entsichern.
+  const togglePhoto = () => {
+    if (photo) {
+      onPhoto(selected.id, null);
+      return;
+    }
+    const img = renderPhoto(scene);
+    if (img) onPhoto(selected.id, { scene, image: img, createdAt: Date.now() });
+  };
 
   return (
     <div className="screen challenge-screen">
@@ -176,6 +188,14 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, prefs, onPr
         )}
 
         <div className="decide">
+          <button
+            className={`photo-btn ${photo ? 'saved' : ''}`}
+            aria-pressed={!!photo}
+            aria-label={photo ? 'Gesichert – antippen zum Entsichern' : 'Sichern'}
+            onClick={togglePhoto}
+          >
+            <CameraIcon size={36} />
+          </button>
           <button className={`decide-btn fits ${current === 'fits' ? 'chosen' : ''}`} onClick={() => decide('fits')}>
             <CheckIcon size={36} />
             <span>Passt</span>

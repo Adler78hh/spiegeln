@@ -7,7 +7,7 @@ import type { Group, Profile, Store } from '../../storage/store';
 import { CheckIcon, PlusIcon, TrashIcon } from '../icons';
 import { AdultPage, ConfirmRow } from './AdultPage';
 import { ProfileManager } from './ProfileManager';
-import { Results } from './Results';
+import { Results, type ResultCell } from './Results';
 
 const MAX_KIDS = ANIMAL_ORDER.length;
 
@@ -190,8 +190,8 @@ interface PageProps {
   motifs: MotifInfo[];
   tab: GroupTab;
   onTabChange: (t: GroupTab) => void;
-  resultCell: { profileId: string; challengeId: string } | null;
-  onResultCell: (c: { profileId: string; challengeId: string } | null) => void;
+  resultCell: ResultCell | null;
+  onResultCell: (c: ResultCell | null) => void;
   onBack: () => void;
   /** Gratisversion: eine feste Klasse, kein Umbenennen oder Löschen der Gruppe. */
   limited?: boolean;

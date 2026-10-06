@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { loadChallenges } from './challenges/builtin';
 import type { Answer, Challenge, ChallengeAnswers } from './challenges/types';
 import { allMotifs, BUILTIN_MOTIF_INFOS } from './motifs/library';
-import { Store, type CustomMotif, type Group, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
+import { Store, type ChallengePhotos, type CustomMotif, type Photo, type Group, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
 import { ChallengeList } from './ui/ChallengeList';
 import { ChallengePlay } from './ui/ChallengePlay';
 import { FreeMirror } from './ui/FreeMirror';
@@ -51,6 +51,7 @@ export default function App() {
   const [screen, setScreen] = useState<ScreenState>({ name: 'profiles' });
   const [challenges, setChallenges] = useState<Challenge[] | null>(null);
   const [answers, setAnswers] = useState<Record<string, ChallengeAnswers>>({});
+  const [photos, setPhotos] = useState<Record<string, ChallengePhotos>>({});
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [customMotifs, setCustomMotifs] = useState<CustomMotif[]>([]);
   const [freeMotifId, setFreeMotifId] = useState(BUILTIN_MOTIF_INFOS[0].id);
@@ -94,6 +95,7 @@ export default function App() {
     if (!store) return;
     setProfile(p);
     setAnswers(await store.getAnswers(p.id));
+    setPhotos(await store.getPhotos(p.id));
     setSnapshots(await store.listSnapshots(p.id));
     // Gratisversion ohne freies Spiegeln: gleich zu den Herausforderungen.
     setScreen(GRATIS ? { name: 'challenges' } : { name: 'home' });
@@ -115,6 +117,16 @@ export default function App() {
     if (!profile || !store) return;
     setAnswers((all) => ({ ...all, [challengeId]: { ...all[challengeId], [targetId]: answer } }));
     store.saveAnswer(profile.id, challengeId, targetId, answer).catch(console.error);
+  };
+
+  const savePhoto = (challengeId: string, targetId: string, photo: Photo | null) => {
+    if (!profile || !store) return;
+    setPhotos((all) => {
+      const { [targetId]: _old, ...rest } = all[challengeId] ?? {};
+      return { ...all, [challengeId]: photo ? { ...rest, [targetId]: photo } : rest };
+    });
+    const done = photo ? store.savePhoto(profile.id, challengeId, targetId, photo) : store.deletePhoto(profile.id, challengeId, targetId);
+    done.catch(console.error);
   };
 
   const addSnapshot = async (s: Omit<Snapshot, 'id' | 'createdAt' | 'profileId'>) => {
@@ -226,6 +238,8 @@ export default function App() {
           motif={motifs.find((m) => m.id === challenge.motifId)}
           answers={answers[challenge.id] ?? {}}
           onAnswer={(targetId, a) => saveAnswer(challenge.id, targetId, a)}
+          photos={photos[challenge.id] ?? {}}
+          onPhoto={(targetId, p) => savePhoto(challenge.id, targetId, p)}
           prefs={profile.prefs}
           onPrefsChange={setPrefs}
           onBack={() => setScreen({ name: 'challenges' })}

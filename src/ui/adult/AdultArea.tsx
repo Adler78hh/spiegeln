@@ -12,6 +12,7 @@ import { ChallengeEditor } from './ChallengeEditor';
 import { ChallengeManager } from './ChallengeManager';
 import { MotifManager } from './MotifManager';
 import { GroupList, GroupPage, NewGroupDialog, type GroupTab } from './Groups';
+import type { ResultCell } from './Results';
 
 interface Props {
   store: Store;
@@ -51,7 +52,7 @@ export function AdultArea(props: Props) {
   const [newMotifId, setNewMotifId] = useState<string | null>(null);
   const [groupId, setGroupId] = useState<string | null>(null);
   const [groupTab, setGroupTab] = useState<GroupTab>('kids');
-  const [resultCell, setResultCell] = useState<{ profileId: string; challengeId: string } | null>(null);
+  const [resultCell, setResultCell] = useState<ResultCell | null>(null);
   const [creatingGroup, setCreatingGroup] = useState(false);
 
   const reloadGroups = async () => {

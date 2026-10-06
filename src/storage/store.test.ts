@@ -187,6 +187,35 @@ describe('Schnappschüsse', () => {
   });
 });
 
+describe('Sicherungen (Fotoapparat)', () => {
+  const photo = (image: string) => ({ scene: initialScene(), image, createdAt: 1 });
+
+  it('eine pro Zielfigur, überschreibbar und aufhebbar', async () => {
+    const a = await store.createProfile('g', 'A', 'fuchs');
+    await store.savePhoto(a.id, 'haus-1', 't1', photo('x1'));
+    await store.savePhoto(a.id, 'haus-1', 't2', photo('x2'));
+    await store.savePhoto(a.id, 'haus-1', 't1', photo('x3'));
+    let all = await store.getPhotos(a.id);
+    expect(Object.keys(all['haus-1']).sort()).toEqual(['t1', 't2']);
+    expect(all['haus-1'].t1.image).toBe('x3');
+    await store.deletePhoto(a.id, 'haus-1', 't2');
+    all = await store.getPhotos(a.id);
+    expect(Object.keys(all['haus-1'])).toEqual(['t1']);
+  });
+
+  it('Zurücksetzen und neue Herausforderungsversion löschen die Sicherungen', async () => {
+    const a = await store.createProfile('g', 'A', 'fuchs');
+    const b = await store.createProfile('g', 'B', 'eule');
+    await store.savePhoto(a.id, 'haus-1', 't1', photo('x'));
+    await store.savePhoto(b.id, 'haus-1', 't1', photo('y'));
+    await store.savePhoto(b.id, 'fisch-1', 't1', photo('z'));
+    await store.resetProfile(a.id);
+    expect(await store.getPhotos(a.id)).toEqual({});
+    await store.deleteAnswersForChallenge('haus-1');
+    expect(Object.keys(await store.getPhotos(b.id))).toEqual(['fisch-1']);
+  });
+});
+
 describe('Eigene Motive', () => {
   it('anlegen (mit eigener ID-Kennung), auflisten, löschen', async () => {
     const m = await store.addMotif({ name: 'Mein Bild', source: 'drawing', image: 'data:x', width: 300, height: 200 });
