@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Challenge } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
 import { ANIMAL_ORDER } from '../../profiles/animals';
@@ -8,6 +8,7 @@ import { CheckIcon, PlusIcon, TrashIcon } from '../icons';
 import { AdultPage, ConfirmRow } from './AdultPage';
 import { ProfileManager } from './ProfileManager';
 import { Results, type ResultCell } from './Results';
+import { StorageHint } from './BackupPage';
 
 const MAX_KIDS = ANIMAL_ORDER.length;
 
@@ -195,6 +196,8 @@ interface PageProps {
   onBack: () => void;
   /** Gratisversion: eine feste Klasse, kein Umbenennen oder Löschen der Gruppe. */
   limited?: boolean;
+  /** Zusätzliche Knöpfe in der Kopfzeile. */
+  actions?: ReactNode;
 }
 
 export type GroupTab = 'kids' | 'results';
@@ -209,7 +212,9 @@ export function GroupPage(props: PageProps) {
   const isLast = groups.length <= 1;
 
   return (
-    <AdultPage title={limited ? 'Klasse' : `Gruppe ${group.name}`} onBack={onBack}>
+    <AdultPage title={limited ? 'Klasse' : `Gruppe ${group.name}`} onBack={onBack} actions={props.actions}>
+      {/* Gratisversion: keine Startseite, also den Speicher-Hinweis hier zeigen. */}
+      {limited && <StorageHint />}
       {!limited && (
       <div className="group-head">
         <button

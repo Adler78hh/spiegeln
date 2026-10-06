@@ -72,7 +72,7 @@ export interface Photo {
 /** Sicherungen einer Herausforderung: Zielfigur-ID → Sicherung. */
 export type ChallengePhotos = Record<string, Photo>;
 
-interface PhotoRecord extends Photo {
+export interface PhotoRecord extends Photo {
   profileId: string;
   challengeId: string;
   targetId: string;
@@ -90,7 +90,7 @@ export interface CustomMotif {
   createdAt: number;
 }
 
-interface AnswerRecord extends Answer {
+export interface AnswerRecord extends Answer {
   profileId: string;
   challengeId: string;
   targetId: string;
@@ -110,8 +110,47 @@ interface SpiegelnSchema extends DBSchema {
     value: PhotoRecord;
     indexes: { byProfile: string };
   };
-  challenges: { key: string; value: Challenge & { builtin: boolean; order: number } };
+  challenges: { key: string; value: StoredChallenge };
   motifs: { key: string; value: CustomMotif };
+}
+
+type StoredChallenge = Challenge & { builtin: boolean; order: number };
+
+/**
+ * Datensicherung als Datei: alles außer den mitgelieferten Herausforderungen
+ * (die erzeugt die App selbst; von ihnen steht nur die Version darin, damit
+ * Antworten zu inzwischen geänderten Herausforderungen nicht falsch zugeordnet werden).
+ */
+export interface Backup {
+  app: 'spiegeln';
+  format: 1;
+  edition: 'full' | 'gratis';
+  createdAt: number;
+  groups: Group[];
+  profiles: Profile[];
+  answers: AnswerRecord[];
+  photos: PhotoRecord[];
+  snapshots: Snapshot[];
+  motifs: CustomMotif[];
+  /** Selbst erstellte Herausforderungen. */
+  challenges: StoredChallenge[];
+  /** Mitgelieferte Herausforderungen: ID → Version. */
+  builtinVersions: Record<string, number | null>;
+}
+
+/**
+ * Prüft eine eingelesene Sicherungsdatei. Wirft einen Fehler mit einem
+ * verständlichen Text, wenn sie nicht passt.
+ */
+export function checkBackup(raw: unknown, gratis: boolean): Backup {
+  const b = raw as Partial<Backup> | null;
+  if (!b || b.app !== 'spiegeln' || typeof b.format !== 'number') throw new Error('Das ist keine Sicherungsdatei von Spiegeln.');
+  if (b.format > 1) throw new Error('Diese Sicherung stammt aus einer neueren Version der App. Bitte die App zuerst aktualisieren.');
+  const lists = ['groups', 'profiles', 'answers', 'photos', 'snapshots', 'motifs', 'challenges'] as const;
+  if (lists.some((k) => !Array.isArray(b[k])) || typeof b.builtinVersions !== 'object') throw new Error('Die Sicherungsdatei ist unvollständig.');
+  if (gratis && b.edition !== 'gratis') throw new Error('Eine Sicherung der Vollversion lässt sich in der Gratisversion nicht wiederherstellen.');
+  if (b.groups!.length === 0) throw new Error('Die Sicherung enthält keine Gruppe.');
+  return b as Backup;
 }
 
 /** Eigene Datenbank je Ausgabe: Gratis- und Vollversion teilen sich keine Daten. */
@@ -161,6 +200,56 @@ export class Store {
 
   close(): void {
     this.db.close();
+  }
+
+  // ---------- Datensicherung ----------
+
+  async exportBackup(): Promise<Backup> {
+    const challenges = await this.db.getAll('challenges');
+    return {
+      app: 'spiegeln',
+      format: 1,
+      edition: GRATIS ? 'gratis' : 'full',
+      createdAt: Date.now(),
+      groups: await this.db.getAll('groups'),
+      profiles: await this.db.getAll('profiles'),
+      answers: await this.db.getAll('answers'),
+      photos: await this.db.getAll('photos'),
+      snapshots: await this.db.getAll('snapshots'),
+      motifs: await this.db.getAll('motifs'),
+      challenges: challenges.filter((c) => !c.builtin),
+      builtinVersions: Object.fromEntries(challenges.filter((c) => c.builtin).map((c) => [c.id, c.version ?? null])),
+    };
+  }
+
+  /**
+   * Ersetzt alle Daten dieses Geräts durch die Sicherung. Mitgelieferte
+   * Herausforderungen bleiben die des Geräts; Antworten und Sicherungen zu
+   * ihnen kommen nur mit, wenn die Version gleich ist.
+   */
+  async importBackup(b: Backup): Promise<void> {
+    const deviceBuiltins = (await this.db.getAll('challenges')).filter((c) => c.builtin);
+    const customIds = new Set(b.challenges.map((c) => c.id));
+    const sameVersion = new Set(deviceBuiltins.filter((c) => (c.version ?? null) === b.builtinVersions[c.id]).map((c) => c.id));
+    const keep = (challengeId: string) => customIds.has(challengeId) || sameVersion.has(challengeId);
+
+    const stores = ['groups', 'profiles', 'answers', 'photos', 'snapshots', 'motifs', 'challenges'] as const;
+    const tx = this.db.transaction(stores, 'readwrite');
+    for (const s of stores) if (s !== 'challenges') await tx.objectStore(s).clear();
+    const ch = tx.objectStore('challenges');
+    let cursor = await ch.openCursor();
+    while (cursor) {
+      if (!cursor.value.builtin) await cursor.delete();
+      cursor = await cursor.continue();
+    }
+    for (const g of b.groups) await tx.objectStore('groups').put(g);
+    for (const p of b.profiles) await tx.objectStore('profiles').put(p);
+    for (const a of b.answers) if (keep(a.challengeId)) await tx.objectStore('answers').put(a);
+    for (const p of b.photos) if (keep(p.challengeId)) await tx.objectStore('photos').put(p);
+    for (const s of b.snapshots) await tx.objectStore('snapshots').put(s);
+    for (const m of b.motifs) await tx.objectStore('motifs').put(m);
+    for (const c of b.challenges) await ch.put({ ...c, builtin: false });
+    await tx.done;
   }
 
   // ---------- Gruppen ----------

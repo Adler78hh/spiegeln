@@ -115,6 +115,14 @@ export const CameraIcon = ({ size = 32 }: { size?: number }) => (
   </Icon>
 );
 
+/** Datensicherung: Pfeil in eine Ablage. */
+export const SaveIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M12 3v11M7.5 9.5 12 14l4.5-4.5" />
+    <path d="M4 15v4h16v-4" />
+  </Icon>
+);
+
 export const PenIcon = ({ size = 32 }: { size?: number }) => (
   <Icon size={size}>
     <path d="M4 20l1-5L16 4l4 4L9 19z" />

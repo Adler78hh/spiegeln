@@ -11,6 +11,8 @@ import { AdultHome, type AdultSection } from './AdultHome';
 import { ChallengeEditor } from './ChallengeEditor';
 import { ChallengeManager } from './ChallengeManager';
 import { MotifManager } from './MotifManager';
+import { BackupPage } from './BackupPage';
+import { SaveIcon } from '../icons';
 import { GroupList, GroupPage, NewGroupDialog, type GroupTab } from './Groups';
 import type { ResultCell } from './Results';
 
@@ -54,6 +56,7 @@ export function AdultArea(props: Props) {
   const [groupTab, setGroupTab] = useState<GroupTab>('kids');
   const [resultCell, setResultCell] = useState<ResultCell | null>(null);
   const [creatingGroup, setCreatingGroup] = useState(false);
+  const [backup, setBackup] = useState(false);
 
   const reloadGroups = async () => {
     onGroupsChange(await store.listGroups());
@@ -68,8 +71,9 @@ export function AdultArea(props: Props) {
 
   const reloadChallenges = async () => onChallengesChange(await loadChallenges(store));
 
-  // Gratisversion: nur die eine Klasse mit Namen und Ergebnissen.
+  // Gratisversion: nur die eine Klasse mit Namen und Ergebnissen (und der Datensicherung).
   if (GRATIS && groups[0]) {
+    if (backup) return <BackupPage store={store} onBack={() => setBackup(false)} />;
     return (
       <GroupPage
         store={store}
@@ -91,6 +95,11 @@ export function AdultArea(props: Props) {
         onResultCell={setResultCell}
         onBack={onExit}
         limited
+        actions={
+          <button className="text-btn" onClick={() => setBackup(true)}>
+            <SaveIcon size={22} /> Datensicherung
+          </button>
+        }
       />
     );
   }
@@ -184,6 +193,8 @@ export function AdultArea(props: Props) {
         </>
       );
     }
+    case 'backup':
+      return <BackupPage store={store} onBack={() => setSection(null)} />;
     case 'motifs':
       return (
         <MotifManager

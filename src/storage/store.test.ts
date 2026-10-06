@@ -4,7 +4,7 @@ import { initialScene } from '../geometry';
 import type { Challenge } from '../challenges/types';
 import { openDB } from 'idb';
 import { ANIMAL_ORDER } from '../profiles/animals';
-import { Store } from './store';
+import { checkBackup, Store } from './store';
 
 let store: Store;
 let n = 0;
@@ -213,6 +213,55 @@ describe('Sicherungen (Fotoapparat)', () => {
     expect(await store.getPhotos(a.id)).toEqual({});
     await store.deleteAnswersForChallenge('haus-1');
     expect(Object.keys(await store.getPhotos(b.id))).toEqual(['fisch-1']);
+  });
+});
+
+describe('Datensicherung', () => {
+  const ch = (id: string, version?: number): Challenge => ({ id, name: id, motifId: 'haus', viewSize: 1, targets: [], version }) as unknown as Challenge;
+
+  it('überträgt alles auf ein anderes Gerät und ersetzt dort die Daten', async () => {
+    const { groups } = await store.ensureDefaults();
+    const kid = (await store.listProfiles())[0];
+    await store.saveChallenge(ch('haus-1', 3), true, 0);
+    await store.saveChallenge(ch('eigen-1'), false, 1);
+    await store.saveAnswer(kid.id, 'haus-1', 't1', answer('fits'));
+    await store.saveAnswer(kid.id, 'eigen-1', 't1', answer('impossible'));
+    await store.savePhoto(kid.id, 'haus-1', 't1', { scene: initialScene(), image: 'x', createdAt: 1 });
+    await store.addMotif({ name: 'M', source: 'drawing', image: 'data:x', width: 1, height: 1 });
+    const backup = checkBackup(JSON.parse(JSON.stringify(await store.exportBackup())), false);
+    expect(backup.challenges.map((c) => c.id)).toEqual(['eigen-1']);
+
+    const other = await Store.open(`test-${n++}`);
+    await other.ensureDefaults();
+    await other.saveChallenge(ch('haus-1', 3), true, 0);
+    await other.importBackup(backup);
+    expect((await other.listGroups()).map((g) => g.id)).toEqual(groups.map((g) => g.id));
+    expect(Object.keys(await other.getAnswers(kid.id)).sort()).toEqual(['eigen-1', 'haus-1']);
+    expect(Object.keys(await other.getPhotos(kid.id))).toEqual(['haus-1']);
+    expect((await other.listMotifs()).length).toBe(1);
+    expect((await other.listChallenges()).map((c) => [c.id, c.builtin])).toEqual([['haus-1', true], ['eigen-1', false]]);
+    other.close();
+  });
+
+  it('lässt Antworten zu inzwischen geänderten Herausforderungen weg', async () => {
+    await store.ensureDefaults();
+    const kid = (await store.listProfiles())[0];
+    await store.saveChallenge(ch('haus-1', 3), true, 0);
+    await store.saveAnswer(kid.id, 'haus-1', 't1', answer('fits'));
+    const backup = await store.exportBackup();
+    const other = await Store.open(`test-${n++}`);
+    await other.saveChallenge(ch('haus-1', 4), true, 0);
+    await other.importBackup(backup);
+    expect(await other.getAnswers(kid.id)).toEqual({});
+    other.close();
+  });
+
+  it('erkennt falsche Dateien und schützt die Gratisversion', async () => {
+    expect(() => checkBackup({ foo: 1 }, false)).toThrow('keine Sicherungsdatei');
+    await store.ensureDefaults();
+    const full = await store.exportBackup();
+    expect(() => checkBackup(full, true)).toThrow('Vollversion');
+    expect(() => checkBackup({ ...full, format: 2 }, false)).toThrow('neueren Version');
   });
 });
 
