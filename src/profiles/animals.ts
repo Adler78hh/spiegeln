@@ -387,15 +387,36 @@ export const ANIMALS: Record<AnimalId, Animal> = {
   koala: {
     id: 'koala',
     name: 'Koala',
+    // Breite Ohren mit weißem, zottigem Fell und eine große Nase, damit der
+    // Koala nicht wie die Maus aussieht.
     svg: svg(`
-      <circle cx="20" cy="34" r="17" fill="#9aa0a8"/>
-      <circle cx="80" cy="34" r="17" fill="#9aa0a8"/>
-      <circle cx="20" cy="34" r="10" fill="#f1e8e8"/>
-      <circle cx="80" cy="34" r="10" fill="#f1e8e8"/>
-      <ellipse cx="50" cy="56" rx="32" ry="30" fill="#aeb4bc"/>
-      ${eyes(50, 15, 4)}
-      <ellipse cx="50" cy="62" rx="8" ry="11" fill="#3c4250"/>
-      ${smile(78, 5)}`),
+      <circle cx="21" cy="36" r="19" fill="#8f96a3"/>
+      <circle cx="31.0" cy="36.0" r="5" fill="#f4f1ee"/>
+      <circle cx="28.7" cy="42.4" r="5" fill="#f4f1ee"/>
+      <circle cx="22.7" cy="45.8" r="5" fill="#f4f1ee"/>
+      <circle cx="16.0" cy="44.7" r="5" fill="#f4f1ee"/>
+      <circle cx="11.6" cy="39.4" r="5" fill="#f4f1ee"/>
+      <circle cx="11.6" cy="32.6" r="5" fill="#f4f1ee"/>
+      <circle cx="16.0" cy="27.3" r="5" fill="#f4f1ee"/>
+      <circle cx="22.7" cy="26.2" r="5" fill="#f4f1ee"/>
+      <circle cx="28.7" cy="29.6" r="5" fill="#f4f1ee"/>
+      <circle cx="21" cy="36" r="9" fill="#f4f1ee"/>
+      <circle cx="79" cy="36" r="19" fill="#8f96a3"/>
+      <circle cx="89.0" cy="36.0" r="5" fill="#f4f1ee"/>
+      <circle cx="86.7" cy="42.4" r="5" fill="#f4f1ee"/>
+      <circle cx="80.7" cy="45.8" r="5" fill="#f4f1ee"/>
+      <circle cx="74.0" cy="44.7" r="5" fill="#f4f1ee"/>
+      <circle cx="69.6" cy="39.4" r="5" fill="#f4f1ee"/>
+      <circle cx="69.6" cy="32.6" r="5" fill="#f4f1ee"/>
+      <circle cx="74.0" cy="27.3" r="5" fill="#f4f1ee"/>
+      <circle cx="80.7" cy="26.2" r="5" fill="#f4f1ee"/>
+      <circle cx="86.7" cy="29.6" r="5" fill="#f4f1ee"/>
+      <circle cx="79" cy="36" r="9" fill="#f4f1ee"/>
+      <ellipse cx="50" cy="58" rx="34" ry="29" fill="#a3aab6"/>
+      <ellipse cx="50" cy="77" rx="16" ry="8" fill="#d9dde3"/>
+      ${eyes(50, 16, 4)}
+      <path d="M50,52 C60,52 62,60 61,67 C60,74 55,77 50,77 C45,77 40,74 39,67 C38,60 40,52 50,52 Z" fill="#2f3440"/>
+      <ellipse cx="46" cy="58" rx="3" ry="2" fill="#fff" opacity=".5"/>`),
   },
   affe: {
     id: 'affe',
