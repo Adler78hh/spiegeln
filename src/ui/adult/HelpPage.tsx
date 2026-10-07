@@ -53,7 +53,7 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
             </>
           )}
           <Item>Kinder: Namen eintragen. „Zurücksetzen“ löscht Antworten und Sicherungen eines Kindes.</Item>
-          <Item>Freischalten: festlegen, welche Herausforderungen die Kinder einer Gruppe sehen. Antworten bleiben beim Ausblenden erhalten.</Item>
+          <Item>Freischalten: festlegen, welche Herausforderungen die Kinder einer Gruppe sehen. Ergebnisse und Druck zeigen nur diese; Antworten bleiben beim Ausblenden erhalten.</Item>
           <Item>Ergebnisse: Tabelle Kind × Herausforderung. Ein Kind antippen zeigt seine Detailansicht mit Zielfigur, Sicherung und Antwort.</Item>
           <Item>Drucken: in der Detailansicht ein Kind, über der Tabelle alle Kinder. Herausforderungen auswählen, im Druckfenster geht auch „Als PDF sichern“.</Item>
           {!GRATIS && <Item>Eigene Motive (Foto oder Zeichnung) und eigene Herausforderungen lassen sich im Erwachsenenbereich anlegen.</Item>}

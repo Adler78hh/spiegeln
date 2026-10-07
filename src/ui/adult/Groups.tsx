@@ -217,7 +217,7 @@ function ChallengeAccess(props: { group: Group; challenges: Challenge[]; motifs:
     <>
       <div className="access-head">
         <p className="hint">
-          Nur angehakte Herausforderungen sehen die Kinder dieser Gruppe ({visible} von {challenges.length}). Antworten bleiben beim Ausblenden erhalten.
+          Nur angehakte Herausforderungen sehen die Kinder dieser Gruppe ({visible} von {challenges.length}). Ausgeblendete fehlen auch in den Ergebnissen und beim Drucken; die Antworten bleiben erhalten.
           Neue Herausforderungen sind zunächst sichtbar.
         </p>
         <button className="text-btn" onClick={() => onChange([])}>
@@ -339,7 +339,8 @@ export function GroupPage(props: PageProps) {
             store={store}
             group={group}
             profiles={kids}
-            challenges={challenges}
+            // Ergebnisse, Detailansicht und Druck nur für freigeschaltete Herausforderungen.
+            challenges={challenges.filter((c) => !group.hiddenChallenges?.includes(c.id))}
             motifs={motifs}
             open={props.resultCell}
             onOpen={props.onResultCell}
