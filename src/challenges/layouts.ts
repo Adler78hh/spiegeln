@@ -84,23 +84,35 @@ const WALL_CORNER: [number, number] = [156, 184];
 const WINDOW_CENTER: [number, number] = [125, 130];
 
 export const HAUS_LAYOUT: PlannedTarget[] = [
-  // Ungedreht, senkrecht durch die Dachspitze: ganzes Haus mit zwei Fenstern.
+  // Nach und nach kommen alle Handgriffe vor (Reihenfolge für den Tutor).
+  // 1 Achse verschieben: senkrecht durch die Dachspitze, Haus mit zwei Fenstern.
   keeping(0, 0, 0, ROOF_TOP, 90, [150, 120]),
+  // 2 Achse drehen: aus der Startlage (Spiegel senkrecht knapp rechts neben
+  // dem Haus) den unteren Punkt um 15° nach links ziehen; der obere bleibt.
+  t('mirror', 0, 0, 0, 105, 0.65, 0, 1),
+  // 3 Spiegel umdrehen: senkrecht durch die Dachspitze, Haus mit zwei Türen.
   keeping(0, 0, 0, ROOF_TOP, 90, [50, 120]),
-  // Achse senkrecht zur Dachkante durch die Wandecke: gerade Unterkante,
-  // die gelben Wände bilden zusammen ein Quadrat.
-  throughPoint('mirror', 225, 0.0753, -0.0267, ...WALL_CORNER, -1, 45),
-  // Ganzes Haus neben dem ganzen Haus (eigener, kleinerer Maßstab).
+  // 4 Haus drehen: 90° gegen den Uhrzeigersinn (Schornstein oben), Achse
+  // senkrecht in der Wand zwischen Dach und Fenster: Dach, gelbes Rechteck, Dach.
+  keeping(270, 0, 0, [100, 92], 0, [100, 40]),
+  // 5 Erstes „Geht nicht“: ganzes Haus neben dem ganzen Haus.
   wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
-  t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
-  t('mirror', 135, -0.078, -0.0878, 150, 0.5, 0.3862, 1),
+  // 6 Spiegel und Haus drehen: Achse auf der Diagonale der Fläche (unten links
+  // nach oben rechts); nur eine Ecke der Wand bleibt, ein gerades gelbes
+  // Quadrat mit Fenster- und Türstücken.
+  t('mirror', 180, -0.0314, 0.1146, 135, 0.5, 0.5, 1),
+  // 7 Geht nicht: Tür und Fenster vertauscht (Tutor: „Hier ist etwas seltsam.“).
   t('swap', 285, -0.0145, 0.0937, 45, 0.3863, 0.6137, -1),
-  t('mirror', 75, -0.0712, -0.0443, 75, 0.419, 0.5, -1),
-  t('rotate', 225, 0.015, 0.0863, 15, 0.5, 0.5265, 1),
-  t('mirror', 300, 0.0114, -0.0609, 105, 0.5261, 0.5, -1),
-  // Achse durch die waagrechte Fensterstrebe, untere Haushälfte ohne Dach: das Fenster erscheint ganz.
+  // 8 Winkel einrasten: schräge Achse bei 30°.
+  t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
+  // 9 Umriss: Achse durch die waagrechte Fensterstrebe, untere Haushälfte ohne Dach.
   throughPoint('mirror', 180, -0.0755, -0.0653, ...WINDOW_CENTER, 1, 0),
-  t('mirror', 210, -0.0845, -0.0229, 165, 0.5, 0.3936, 1),
+  // 10 Achse ausblenden: die gelben Wände bilden zusammen ein Quadrat.
+  throughPoint('mirror', 225, 0.0753, -0.0267, ...WALL_CORNER, -1, 45),
+  // 11 Geht nicht: Drehung statt Spiegelung.
+  t('rotate', 225, 0.015, 0.0863, 15, 0.5, 0.5265, 1),
+  // 12 Abschluss: schräge Achse, Haus gedreht.
+  t('mirror', 300, 0.0114, -0.0609, 105, 0.5261, 0.5, -1),
 ];
 
 /** Fisch: Mitte der Längsachse, Auge, Maul (Motivkoordinaten). */
