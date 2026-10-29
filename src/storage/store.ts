@@ -331,6 +331,25 @@ export class Store {
       .sort((a, b) => a.order - b.order || a.createdAt - b.createdAt);
   }
 
+  /**
+   * Gratisversion: Die eine Klasse hat jedes Tier genau einmal, in der
+   * Reihenfolge von ANIMAL_ORDER. Neu hinzugekommene Tiere werden ergänzt;
+   * Namen, Antworten und Sicherungen der vorhandenen Kinder bleiben.
+   */
+  async syncAllAnimals(groupId: string): Promise<Profile[]> {
+    const mine = (await this.listProfiles()).filter((p) => p.groupId === groupId);
+    const byAnimal = new Map(mine.filter((p) => p.animal).map((p) => [p.animal!, p]));
+    const tx = this.db.transaction('profiles', 'readwrite');
+    const now = Date.now();
+    ANIMAL_ORDER.forEach((a, order) => {
+      const p = byAnimal.get(a.id);
+      if (!p) tx.store.put({ id: newId(), groupId, name: a.name, animal: a.id, order, prefs: DEFAULT_PREFS, createdAt: now + order });
+      else if (p.order !== order) tx.store.put({ ...p, order });
+    });
+    await tx.done;
+    return this.listProfiles();
+  }
+
   private async addProfiles(groupId: string, animals: AnimalId[], firstOrder: number): Promise<void> {
     const tx = this.db.transaction('profiles', 'readwrite');
     const now = Date.now();

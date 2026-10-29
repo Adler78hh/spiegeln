@@ -68,7 +68,8 @@ export default function App() {
         // Gratisversion: eine Klasse mit allen Tieren.
         const data = await s.ensureDefaults(GRATIS ? ANIMAL_ORDER : undefined);
         setGroups(data.groups);
-        setProfiles(data.profiles);
+        // Gratisversion: neu hinzugekommene Tiere ergänzen, Reihenfolge angleichen.
+        setProfiles(GRATIS && data.groups[0] ? await s.syncAllAnimals(data.groups[0].id) : data.profiles);
         setCustomMotifs(await s.listMotifs());
         const c = await loadChallenges(s);
         if (!alive) return;

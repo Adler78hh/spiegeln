@@ -21,7 +21,7 @@ describe('Profile', () => {
     const first = await store.ensureDefaults();
     expect(first.groups.map((g) => [g.name, g.color])).toEqual([['Weiß', 'weiss']]);
     expect(first.profiles.map((p) => p.name)).toEqual([
-      'Mathe-Waschbär', 'Igel', 'Pinguin', 'Fuchs', 'Eule', 'Bär', 'Hase', 'Katze', 'Frosch', 'Löwe',
+      'Mathe-Waschbär', 'Affe', 'Bär', 'Biene', 'Eichhörnchen', 'Elefant', 'Ente', 'Eule', 'Fledermaus', 'Frosch',
     ]);
     expect(first.profiles.every((p) => p.groupId === first.groups[0].id)).toBe(true);
     const again = await store.ensureDefaults();
@@ -54,7 +54,7 @@ describe('Gruppen', () => {
     const g = await store.createGroup('Gelb', 'gelb', 12);
     const kids = (await store.listProfiles()).filter((p) => p.groupId === g.id);
     expect(kids.map((p) => p.animal)).toEqual([
-      'mathewaschbaer', 'igel', 'pinguin', 'fuchs', 'eule', 'baer', 'hase', 'katze', 'frosch', 'loewe', 'maus', 'hund',
+      'mathewaschbaer', 'affe', 'baer', 'biene', 'eichhoernchen', 'elefant', 'ente', 'eule', 'fledermaus', 'frosch', 'fuchs', 'giraffe',
     ]);
     expect((await store.listGroups()).map((x) => x.name)).toEqual(['Weiß', 'Gelb']);
   });
@@ -172,6 +172,27 @@ describe('Gratisversion', () => {
     expect(all.map((p) => p.name)).toEqual(['Fuchs', 'Tom']);
     expect(await store.getAnswers(a.id)).toEqual({});
     expect(Object.keys(await store.getAnswers(b.id))).toEqual(['haus-1']);
+  });
+});
+
+describe('Tiere', () => {
+  it('40 Tiere: Mathe-Waschbär zuerst, dann alphabetisch, Regenbogendrache zuletzt', () => {
+    const names = ANIMAL_ORDER.map((a) => a.name);
+    expect(names).toHaveLength(40);
+    expect(names[0]).toBe('Mathe-Waschbär');
+    expect(names[39]).toBe('Regenbogendrache');
+    const middle = names.slice(1, 39);
+    expect(middle).toEqual([...middle].sort((x, y) => x.localeCompare(y, 'de')));
+    for (const n of ['Hummel', 'Fledermaus', 'Qualle', 'Spinne', 'Schlange', 'Ratte', 'Regenwurm', 'Schnecke']) expect(names).toContain(n);
+  });
+
+  it('Gratisversion: fehlende Tiere werden ergänzt, Namen bleiben', async () => {
+    const { groups } = await store.ensureDefaults(ANIMAL_ORDER.slice(0, 32));
+    const first = (await store.listProfiles())[0];
+    await store.updateProfile(first.id, { name: 'Lena' });
+    const all = await store.syncAllAnimals(groups[0].id);
+    expect(all.map((p) => p.animal)).toEqual(ANIMAL_ORDER.map((a) => a.id));
+    expect(all.find((p) => p.id === first.id)!.name).toBe('Lena');
   });
 });
 

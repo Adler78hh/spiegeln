@@ -35,6 +35,14 @@ export type AnimalId =
   | 'marienkaefer'
   | 'biene'
   | 'schildkroete'
+  | 'hummel'
+  | 'fledermaus'
+  | 'qualle'
+  | 'spinne'
+  | 'schlange'
+  | 'ratte'
+  | 'regenwurm'
+  | 'schnecke'
   | 'regenbogendrache';
 
 export interface Animal {
@@ -152,10 +160,10 @@ export const ANIMALS: Record<AnimalId, Animal> = {
     id: 'katze',
     name: 'Katze',
     svg: svg(`
-      <path d="M16,46 L20,12 L44,30 Z" fill="#9aa0a8"/>
-      <path d="M84,46 L80,12 L56,30 Z" fill="#9aa0a8"/>
-      <path d="M22,36 L24,20 L36,30 Z" fill="#f3b3c3"/>
-      <path d="M78,36 L76,20 L64,30 Z" fill="#f3b3c3"/>
+      <path d="M17,54 Q12,30 20,11 Q34,16 48,32 Z" fill="#9aa0a8"/>
+      <path d="M83,54 Q88,30 80,11 Q66,16 52,32 Z" fill="#9aa0a8"/>
+      <path d="M23,42 Q21,28 24,19 Q33,23 40,31 Z" fill="#f3b3c3"/>
+      <path d="M77,42 Q79,28 76,19 Q67,23 60,31 Z" fill="#f3b3c3"/>
       <ellipse cx="50" cy="58" rx="35" ry="31" fill="#aeb4bc"/>
       <path d="M40,30 L44,42 M50,28 L50,42 M60,30 L56,42" stroke="#7d838b" stroke-width="3" stroke-linecap="round"/>
       ${eyes(56, 13, 4.5)}
@@ -236,8 +244,10 @@ export const ANIMALS: Record<AnimalId, Animal> = {
     id: 'schwein',
     name: 'Schwein',
     svg: svg(`
-      <path d="M20,38 L22,12 L42,26 Z" fill="#e89aac"/>
-      <path d="M80,38 L78,12 L58,26 Z" fill="#e89aac"/>
+      <path d="M17,46 Q12,22 22,9 Q36,14 46,28 Z" fill="#f6b8c6"/>
+      <path d="M83,46 Q88,22 78,9 Q64,14 54,28 Z" fill="#f6b8c6"/>
+      <path d="M23,36 Q21,22 25,16 Q33,20 39,28 Z" fill="#e89aac"/>
+      <path d="M77,36 Q79,22 75,16 Q67,20 61,28 Z" fill="#e89aac"/>
       <circle cx="50" cy="56" r="34" fill="#f6b8c6"/>
       ${eyes(46, 14, 4)}
       <ellipse cx="50" cy="65" rx="15" ry="11" fill="#ee9db0"/>
@@ -361,16 +371,17 @@ export const ANIMALS: Record<AnimalId, Animal> = {
   krake: {
     id: 'krake',
     name: 'Krake',
+    // Wie Spinne und Qualle: Kopf oben, acht Arme darunter.
     svg: svg(`
-      <path d="M26,62 Q14,80 24,92 M38,66 Q32,84 40,94 M50,68 L50,94 M62,66 Q68,84 60,94 M74,62 Q86,80 76,92" stroke="#d9608a" stroke-width="9" fill="none" stroke-linecap="round"/>
-      <ellipse cx="50" cy="44" rx="32" ry="30" fill="#e8739c"/>
-      <circle cx="34" cy="26" r="4" fill="#f3a3bf"/>
-      <circle cx="62" cy="22" r="3" fill="#f3a3bf"/>
-      <circle cx="70" cy="32" r="4.5" fill="#f3a3bf"/>
-      ${eyes(46, 12, 5)}
-      ${smile(57, 6)}
-      <circle cx="28" cy="54" r="5" fill="#ffd0df" opacity=".8"/>
-      <circle cx="72" cy="54" r="5" fill="#ffd0df" opacity=".8"/>`),
+      <path d="M29,58 Q20.3,69 7.9,76.4 Q1.9,83.4 1.9,75.4 M35,58 Q29.4,71.8 18.9,80.9 Q12.9,87.9 12.9,79.9 M41,58 Q39,73.7 31,84.1 Q25,91.1 25,83.1 M47,58 Q49,74.7 43.6,85.8 Q37.6,92.8 37.6,84.8 M53,58 Q51,74.7 56.4,85.8 Q62.4,92.8 62.4,84.8 M59,58 Q61,73.7 69,84.1 Q75,91.1 75,83.1 M65,58 Q70.6,71.8 81.1,80.9 Q87.1,87.9 87.1,79.9 M71,58 Q79.7,69 92.1,76.4 Q98.1,83.4 98.1,75.4" stroke="#d9608a" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="38" rx="30" ry="28" fill="#e8739c"/>
+      <circle cx="34" cy="20" r="4" fill="#f3a3bf"/>
+      <circle cx="62" cy="16" r="3" fill="#f3a3bf"/>
+      <circle cx="70" cy="27" r="4.5" fill="#f3a3bf"/>
+      ${eyes(40, 12, 5)}
+      ${smile(51, 6)}
+      <circle cx="28" cy="48" r="5" fill="#ffd0df" opacity=".8"/>
+      <circle cx="72" cy="48" r="5" fill="#ffd0df" opacity=".8"/>`),
   },
   panda: {
     id: 'panda',
@@ -460,8 +471,10 @@ export const ANIMALS: Record<AnimalId, Animal> = {
     id: 'eichhoernchen',
     name: 'Eichhörnchen',
     svg: svg(`
-      <path d="M20,42 L24,12 L28,3 L32,14 L42,28 Z" fill="#c8662a"/>
-      <path d="M80,42 L76,12 L72,3 L68,14 L58,28 Z" fill="#c8662a"/>
+      <path d="M19,50 Q14,26 24,10 Q26,2 30,4 Q30,10 33,13 Q42,22 46,32 Z" fill="#d9743a"/>
+      <path d="M81,50 Q86,26 76,10 Q74,2 70,4 Q70,10 67,13 Q58,22 54,32 Z" fill="#d9743a"/>
+      <path d="M25,40 Q23,26 28,16 Q35,23 39,31 Z" fill="#f3c9a8"/>
+      <path d="M75,40 Q77,26 72,16 Q65,23 61,31 Z" fill="#f3c9a8"/>
       <ellipse cx="50" cy="56" rx="32" ry="30" fill="#d9743a"/>
       <ellipse cx="50" cy="70" rx="21" ry="15" fill="#fbe2c4"/>
       ${eyes(51, 13, 4.5)}
@@ -508,14 +521,14 @@ export const ANIMALS: Record<AnimalId, Animal> = {
       <circle cx="80" cy="47" r="5" fill="#2d2d2d"/>
       <circle cx="38" cy="45" r="4" fill="#2d2d2d"/>
       <circle cx="62" cy="45" r="4" fill="#2d2d2d"/>
-      <ellipse cx="50" cy="68" rx="25" ry="22" fill="#2d2d2d"/>
-      <circle cx="40" cy="64" r="5.5" fill="#fff"/>
-      <circle cx="60" cy="64" r="5.5" fill="#fff"/>
-      <circle cx="40.5" cy="65" r="2.8" fill="${INK}"/>
-      <circle cx="60.5" cy="65" r="2.8" fill="${INK}"/>
-      <path d="M42,76 Q50,82 58,76" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-      <circle cx="32" cy="74" r="3.5" fill="#f3a3a3" opacity=".7"/>
-      <circle cx="68" cy="74" r="3.5" fill="#f3a3a3" opacity=".7"/>`),
+      <ellipse cx="50" cy="60" rx="25" ry="22" fill="#2d2d2d"/>
+      <circle cx="40" cy="56" r="5.5" fill="#fff"/>
+      <circle cx="60" cy="56" r="5.5" fill="#fff"/>
+      <circle cx="40.5" cy="57" r="2.8" fill="${INK}"/>
+      <circle cx="60.5" cy="57" r="2.8" fill="${INK}"/>
+      <path d="M42,68 Q50,74 58,68" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="32" cy="66" r="3.5" fill="#f3a3a3" opacity=".7"/>
+      <circle cx="68" cy="66" r="3.5" fill="#f3a3a3" opacity=".7"/>`),
   },
   biene: {
     id: 'biene',
@@ -545,13 +558,148 @@ export const ANIMALS: Record<AnimalId, Animal> = {
     svg: svg(`
       <path d="M8,58 Q8,10 50,10 Q92,10 92,58 Z" fill="#8a6a3c"/>
       <path d="M38,18 L62,18 L68,32 L50,40 L32,32 Z M14,50 L20,34 L30,38 L28,50 Z M86,50 L80,34 L70,38 L72,50 Z" fill="#a8834c"/>
-      <ellipse cx="50" cy="66" rx="26" ry="24" fill="#8cc152"/>
-      ${eyes(61, 11, 4.5)}
-      ${smile(73, 7)}
-      <circle cx="32" cy="70" r="4.5" fill="#f3b3c3" opacity=".6"/>
-      <circle cx="68" cy="70" r="4.5" fill="#f3b3c3" opacity=".6"/>`),
+      <ellipse cx="50" cy="58" rx="26" ry="24" fill="#8cc152"/>
+      ${eyes(53, 11, 4.5)}
+      ${smile(65, 7)}
+      <circle cx="32" cy="62" r="4.5" fill="#f3b3c3" opacity=".6"/>
+      <circle cx="68" cy="62" r="4.5" fill="#f3b3c3" opacity=".6"/>`),
   },
   // Längsstreifen in Regenbogenfarben, die oben in Hörner und Stacheln auslaufen.
+  spinne: {
+    id: 'spinne',
+    name: 'Spinne',
+    // Wie Krake und Qualle: Kopf, acht Beine (je vier auf jeder Seite).
+    svg: svg(`
+      <path d="M34,42 L16,22 L4,44 M34,49 L14.5,33 L6,59 M34,56 L13,44 L8,74 M34,63 L11.5,55 L10,89 M66,42 L84,22 L96,44 M66,49 L85.5,33 L94,59 M66,56 L87,44 L92,74 M66,63 L88.5,55 L90,89" stroke="#4a3a5c" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="44" rx="23" ry="22" fill="#6b5683"/>
+      <circle cx="43" cy="31" r="2.2" fill="${INK}"/>
+      <circle cx="57" cy="31" r="2.2" fill="${INK}"/>
+      <circle cx="41" cy="42" r="6" fill="#fff"/>
+      <circle cx="59" cy="42" r="6" fill="#fff"/>
+      <circle cx="41.5" cy="43" r="3" fill="${INK}"/>
+      <circle cx="59.5" cy="43" r="3" fill="${INK}"/>
+      <path d="M43,54 Q50,60 57,54" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="33" cy="52" r="3.5" fill="#f3a3bf" opacity=".7"/>
+      <circle cx="67" cy="52" r="3.5" fill="#f3a3bf" opacity=".7"/>`),
+  },
+  qualle: {
+    id: 'qualle',
+    name: 'Qualle',
+    // Wie Krake und Spinne: Schirm oben, acht Fäden darunter.
+    svg: svg(`
+      <path d="M24,54 q4,5 0,10 q-4,5 0,10 q4,5 0,10 q-4,5 0,10 M31.4,54 q4,5 0,10 q-4,5 0,10 q4,5 0,10 q-4,5 0,10 M38.9,54 q4,5 0,10 q-4,5 0,10 q4,5 0,10 q-4,5 0,10 M46.3,54 q4,5 0,10 q-4,5 0,10 q4,5 0,10 q-4,5 0,10 M53.7,54 q4,5 0,10 q-4,5 0,10 q4,5 0,10 q-4,5 0,10 M61.1,54 q4,5 0,10 q-4,5 0,10 q4,5 0,10 q-4,5 0,10 M68.6,54 q4,5 0,10 q-4,5 0,10 q4,5 0,10 q-4,5 0,10 M76,54 q4,5 0,10 q-4,5 0,10 q4,5 0,10 q-4,5 0,10" stroke="#9d86e8" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".9"/>
+      <path d="M20,52 Q20,12 50,12 Q80,12 80,52 Q75,57 70,52 Q65,57 60,52 Q55,57 50,52 Q45,57 40,52 Q35,57 30,52 Q25,57 20,52 Z" fill="#b9a7f0"/>
+      <path d="M30,24 Q38,16 48,16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+      ${eyes(36, 11, 4.5)}
+      ${smile(45, 5)}
+      <circle cx="30" cy="43" r="4" fill="#f3b3d8" opacity=".8"/>
+      <circle cx="70" cy="43" r="4" fill="#f3b3d8" opacity=".8"/>`),
+  },
+  hummel: {
+    id: 'hummel',
+    name: 'Hummel',
+    // Dick, rund und flauschig (anders als die schlanke Biene), weißes Hinterteil.
+    svg: svg(`
+      <defs><clipPath id="hummelfell"><ellipse cx="50" cy="57" rx="36" ry="33"/><circle cx="85" cy="57" r="4.2"/><circle cx="84.2" cy="63.7" r="4.2"/><circle cx="82" cy="70" r="4.2"/><circle cx="78.3" cy="75.8" r="4.2"/><circle cx="73.4" cy="80.8" r="4.2"/><circle cx="67.5" cy="84.7" r="4.2"/><circle cx="60.8" cy="87.4" r="4.2"/><circle cx="53.7" cy="88.8" r="4.2"/><circle cx="46.3" cy="88.8" r="4.2"/><circle cx="39.2" cy="87.4" r="4.2"/><circle cx="32.5" cy="84.7" r="4.2"/><circle cx="26.6" cy="80.8" r="4.2"/><circle cx="21.7" cy="75.8" r="4.2"/><circle cx="18" cy="70" r="4.2"/><circle cx="15.8" cy="63.7" r="4.2"/><circle cx="15" cy="57" r="4.2"/><circle cx="15.8" cy="50.3" r="4.2"/><circle cx="18" cy="44" r="4.2"/><circle cx="21.7" cy="38.2" r="4.2"/><circle cx="26.6" cy="33.2" r="4.2"/><circle cx="32.5" cy="29.3" r="4.2"/><circle cx="39.2" cy="26.6" r="4.2"/><circle cx="46.3" cy="25.2" r="4.2"/><circle cx="53.7" cy="25.2" r="4.2"/><circle cx="60.8" cy="26.6" r="4.2"/><circle cx="67.5" cy="29.3" r="4.2"/><circle cx="73.4" cy="33.2" r="4.2"/><circle cx="78.3" cy="38.2" r="4.2"/><circle cx="82" cy="44" r="4.2"/><circle cx="84.2" cy="50.3" r="4.2"/></clipPath></defs>
+      <ellipse cx="24" cy="24" rx="13" ry="9" fill="#e3f1f8" stroke="#a9cfe0" stroke-width="2" transform="rotate(-30 24 24)"/>
+      <ellipse cx="76" cy="24" rx="13" ry="9" fill="#e3f1f8" stroke="#a9cfe0" stroke-width="2" transform="rotate(30 76 24)"/>
+      <g clip-path="url(#hummelfell)">
+        <rect x="0" y="0" width="100" height="64" fill="#f7c948"/>
+        <rect x="0" y="64" width="100" height="11" fill="#2d2d2d"/>
+        <rect x="0" y="75" width="100" height="8" fill="#f7c948"/>
+        <rect x="0" y="83" width="100" height="20" fill="#eadbc0"/>
+      </g>
+      <path d="M43,24 Q41,15 36,13 M57,24 Q59,15 64,13" fill="none" stroke="#2d2d2d" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="36" cy="13" r="3.5" fill="#2d2d2d"/>
+      <circle cx="64" cy="13" r="3.5" fill="#2d2d2d"/>
+      ${eyes(42, 12, 4.5)}
+      ${smile(52, 6)}
+      <circle cx="30" cy="50" r="4.5" fill="#f3a3a3" opacity=".7"/>
+      <circle cx="70" cy="50" r="4.5" fill="#f3a3a3" opacity=".7"/>`),
+  },
+  fledermaus: {
+    id: 'fledermaus',
+    name: 'Fledermaus',
+    // Ausgebreitete Flügel, große Ohren, kleine Zähnchen.
+    svg: svg(`
+      <path d="M50,50 L6,30 Q12,44 4,56 Q16,52 18,64 Q26,56 34,66 Z M50,50 L94,30 Q88,44 96,56 Q84,52 82,64 Q74,56 66,66 Z" fill="#5a4a6b"/>
+      <path d="M36,40 L30,16 L46,32 Z M64,40 L70,16 L54,32 Z" fill="#6f5d82"/>
+      <path d="M36,36 L33,22 L42,31 Z M64,36 L67,22 L58,31 Z" fill="#e8b4c8"/>
+      <circle cx="50" cy="52" r="21" fill="#7a6890"/>
+      <ellipse cx="50" cy="60" rx="12" ry="9" fill="#b8a6c8"/>
+      ${eyes(48, 9, 4)}
+      <ellipse cx="50" cy="57" rx="3" ry="2" fill="${INK}"/>
+      <path d="M44,63 Q50,68 56,63" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M46,64 L47.5,68 L49,64.6 Z M54,64 L52.5,68 L51,64.6 Z" fill="#fff"/>`),
+  },
+  schlange: {
+    id: 'schlange',
+    name: 'Schlange',
+    // Freundlicher Kopf mit Zunge, der Körper schlängelt sich darunter.
+    svg: svg(`
+      <path d="M12,90 Q30,66 50,82 Q70,98 88,76" fill="none" stroke="#5fae4c" stroke-width="15" stroke-linecap="round"/>
+      <circle cx="28" cy="78" r="3" fill="#a6d98a"/>
+      <circle cx="50" cy="83" r="3" fill="#a6d98a"/>
+      <circle cx="72" cy="86" r="3" fill="#a6d98a"/>
+      <path d="M50,60 L50,80" stroke="#5fae4c" stroke-width="14" stroke-linecap="round"/>
+      <path d="M50,62 L50,72 M50,72 L46,77 M50,72 L54,77" fill="none" stroke="#e0323a" stroke-width="2.5" stroke-linecap="round"/>
+      <ellipse cx="50" cy="40" rx="27" ry="23" fill="#7ccf63"/>
+      <circle cx="38" cy="26" r="3" fill="#a6d98a"/>
+      <circle cx="62" cy="26" r="3" fill="#a6d98a"/>
+      ${eyes(38, 11, 5)}
+      ${smile(50, 7)}
+      <circle cx="28" cy="46" r="4" fill="#f3b3c3" opacity=".6"/>
+      <circle cx="72" cy="46" r="4" fill="#f3b3c3" opacity=".6"/>`),
+  },
+  ratte: {
+    id: 'ratte',
+    name: 'Ratte',
+    // Braun, kleine Ohren, lange Schnauze mit Nagezähnen (anders als die Maus).
+    svg: svg(`
+      <circle cx="26" cy="28" r="12" fill="#9b7b66"/>
+      <circle cx="74" cy="28" r="12" fill="#9b7b66"/>
+      <circle cx="26" cy="28" r="7" fill="#f0b9c3"/>
+      <circle cx="74" cy="28" r="7" fill="#f0b9c3"/>
+      <ellipse cx="50" cy="50" rx="28" ry="27" fill="#9b7b66"/>
+      <ellipse cx="50" cy="70" rx="15" ry="14" fill="#c9ad98"/>
+      ${eyes(46, 11, 4)}
+      <circle cx="50" cy="74" r="4.5" fill="#e88aa0"/>
+      <rect x="46.5" y="80" width="3" height="5" rx="1" fill="#fff" stroke="#d9cfc4" stroke-width=".8"/>
+      <rect x="50.5" y="80" width="3" height="5" rx="1" fill="#fff" stroke="#d9cfc4" stroke-width=".8"/>
+      <path d="M20,68 L37,71 M20,76 L37,75 M80,68 L63,71 M80,76 L63,75" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>`),
+  },
+  regenwurm: {
+    id: 'regenwurm',
+    name: 'Regenwurm',
+    // Geringelter Körper, Gesicht am Kopfende.
+    svg: svg(`
+      <path d="M10,90 C10,66 40,80 44,62 C47,50 56,52 58,46" fill="none" stroke="#e89aa6" stroke-width="16" stroke-linecap="round"/>
+      <path d="M10,90 C10,66 40,80 44,62 C47,50 56,52 58,46" fill="none" stroke="#d47888" stroke-width="16" stroke-dasharray="1.5 7"/>
+      <path d="M25,74 Q30,69 34,75" fill="none" stroke="#f4c0c8" stroke-width="10"/>
+      <circle cx="60" cy="38" r="22" fill="#e89aa6"/>
+      ${eyes(35, 9, 4.2)}
+      <path d="M53,45 Q60,52 67,45" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round" transform="translate(-10 0)"/>
+      <circle cx="42" cy="44" r="4" fill="#f7c6cf"/>
+      <circle cx="78" cy="44" r="4" fill="#f7c6cf"/>`),
+  },
+  schnecke: {
+    id: 'schnecke',
+    name: 'Schnecke',
+    // Haus mit Spirale, Augen auf Stielen.
+    svg: svg(`
+      <circle cx="62" cy="46" r="28" fill="#e0a458" stroke="#b9783a" stroke-width="3"/>
+      <path d="M63.5,46 L63.7,46.3 L63.9,46.6 L64.1,47 L64.1,47.4 L64.1,47.9 L63.9,48.4 L63.7,48.9 L63.3,49.4 L62.8,49.8 L62.3,50.1 L61.7,50.4 L60.9,50.5 L60.2,50.6 L59.4,50.5 L58.6,50.2 L57.8,49.9 L57.1,49.3 L56.4,48.7 L55.8,47.9 L55.3,47 L55,45.9 L54.8,44.9 L54.8,43.7 L55,42.5 L55.4,41.4 L56,40.3 L56.7,39.2 L57.7,38.3 L58.8,37.5 L60,36.8 L61.4,36.4 L62.9,36.1 L64.4,36.1 L65.9,36.3 L67.5,36.8 L68.9,37.5 L70.3,38.5 L71.6,39.7 L72.7,41.1 L73.5,42.6 L74.2,44.4 L74.5,46.2 L74.6,48.1 L74.4,50.1 L73.9,52 L73.1,53.9 L72,55.6 L70.6,57.2 L68.9,58.6 L67.1,59.7 L65,60.6 L62.8,61.1 L60.5,61.3 L58.2,61.2 L55.9,60.7 L53.6,59.8 L51.4,58.6 L49.5,57.1 L47.7,55.2 L46.3,53.1 L45.1,50.8 L44.4,48.2 L44,45.5 L44,42.8 L44.4,40.1 L45.3,37.4 L46.5,34.8 L48.2,32.5 L50.2,30.3 L52.5,28.5 L55.2,27.1 L58,26 L61.1,25.4 L64.2,25.2 L67.3,25.5 L70.4,26.3 L73.4,27.5 L76.2,29.3 L78.8,31.4 L81,33.9 L82.8,36.8" fill="none" stroke="#b9783a" stroke-width="3" stroke-linecap="round"/>
+      <path d="M6,92 Q8,76 26,72 L86,76 Q96,80 94,92 Z" fill="#b7d48a"/>
+      <path d="M24,54 L18,30 M36,54 L40,30" stroke="#a3c475" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="18" cy="28" r="6.5" fill="#fff"/>
+      <circle cx="40" cy="28" r="6.5" fill="#fff"/>
+      <circle cx="18.5" cy="29" r="3.2" fill="${INK}"/>
+      <circle cx="40.5" cy="29" r="3.2" fill="${INK}"/>
+      <ellipse cx="30" cy="68" rx="19" ry="16" fill="#b7d48a"/>
+      <path d="M23,70 Q30,77 37,70" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="17" cy="70" r="4" fill="#f3b3c3" opacity=".7"/>
+      <circle cx="43" cy="70" r="4" fill="#f3b3c3" opacity=".7"/>`),
+  },
   regenbogendrache: {
     id: 'regenbogendrache',
     name: 'Regenbogendrache',
@@ -565,11 +713,14 @@ export const ANIMALS: Record<AnimalId, Animal> = {
 };
 
 /** Feste Reihenfolge aller Tiere: neue Gruppen bekommen die ersten N. */
-const FIRST: AnimalId[] = ['mathewaschbaer', 'igel', 'pinguin', 'fuchs'];
+/** Erst der Mathe-Waschbär, dann alle Tiere alphabetisch, zuletzt der Regenbogendrache. */
+const FIRST: AnimalId[] = ['mathewaschbaer'];
 const LAST: AnimalId[] = ['regenbogendrache'];
 export const ANIMAL_ORDER: Animal[] = [
   ...FIRST.map((id) => ANIMALS[id]),
-  ...Object.values(ANIMALS).filter((a) => !FIRST.includes(a.id) && !LAST.includes(a.id)),
+  ...Object.values(ANIMALS)
+    .filter((a) => !FIRST.includes(a.id) && !LAST.includes(a.id))
+    .sort((x, y) => x.name.localeCompare(y.name, 'de')),
   ...LAST.map((id) => ANIMALS[id]),
 ];
 
