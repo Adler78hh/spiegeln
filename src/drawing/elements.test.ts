@@ -13,6 +13,9 @@ import {
   rotationTowards,
   sendBackward,
   shapeOutline,
+  shapeVertices,
+  snapMove,
+  snapPoint,
   topElementAt,
   worldPoints,
   type DrawElement,
@@ -125,5 +128,43 @@ describe('Ordnen und Kopieren', () => {
     const { elements, copy } = duplicate([a, b], a.id);
     expect(elements.map((e) => e.id)).toEqual([a.id, copy!.id, b.id]);
     expect(copy!.cx).toBeGreaterThan(a.cx);
+  });
+});
+
+describe('Magnet', () => {
+  const thr = 0.02;
+  const sq = (cx: number, cy: number, rot = 0) => ({ ...createShape('square', '#fff'), cx, cy, rot });
+
+  it('Ecke an Ecke', () => {
+    const a = sq(0.3, 0.3);
+    const b = sq(0.3 + BASE + 0.01, 0.3 + BASE + 0.012); // Ecke oben links nah an a's Ecke unten rechts
+    const { element, marks } = snapMove(b, [a], thr);
+    const corners = shapeVertices(element);
+    const target = { x: 0.3 + BASE / 2, y: 0.3 + BASE / 2 };
+    expect(corners.some((v) => Math.hypot(v.x - target.x, v.y - target.y) < 1e-9)).toBe(true);
+    expect(marks.points).toHaveLength(1);
+  });
+
+  it('Kante an Kante: bündig und gerade gedreht', () => {
+    const a = sq(0.3, 0.3);
+    const b = sq(0.3 + BASE + 0.012, 0.36, (5 * Math.PI) / 180); // rechts daneben, leicht schief
+    const { element, marks } = snapMove(b, [a], thr);
+    close(element.rot % (Math.PI / 2), 0);
+    close(element.cx - element.w / 2, 0.3 + BASE / 2);
+    expect(marks.segments).toHaveLength(1);
+  });
+
+  it('weiter weg: keine Veränderung', () => {
+    const a = sq(0.3, 0.3);
+    const b = sq(0.8, 0.8);
+    expect(snapMove(b, [a], thr).element).toEqual(b);
+  });
+
+  it('Anfasser rastet an einer Ecke ein; Striche ziehen nicht an', () => {
+    const a = sq(0.3, 0.3);
+    const line = pathFromWorld([{ x: 0.7, y: 0.7 }, { x: 0.8, y: 0.7 }], '#000', 0.01);
+    const r = snapPoint({ x: 0.3 + BASE / 2 + 0.01, y: 0.3 - BASE / 2 }, [a, line], 'x', thr);
+    close(r.p.x, 0.3 + BASE / 2);
+    expect(snapPoint({ x: 0.705, y: 0.7 }, [a, line], 'x', thr).marks.points).toHaveLength(0);
   });
 });

@@ -85,22 +85,22 @@ const WINDOW_CENTER: [number, number] = [125, 130];
 
 export const HAUS_LAYOUT: PlannedTarget[] = [
   // Nach und nach kommen alle Handgriffe vor (Reihenfolge für den Tutor).
-  // 1 Achse verschieben: senkrecht durch die Dachspitze, Haus mit zwei Fenstern.
-  keeping(0, 0, 0, ROOF_TOP, 90, [150, 120]),
+  // 1 Spiegel umdrehen: senkrecht durch die Dachspitze, Haus mit zwei Türen.
+  keeping(0, 0, 0, ROOF_TOP, 90, [50, 120]),
   // 2 Achse drehen: aus der Startlage (Spiegel senkrecht knapp rechts neben
   // dem Haus) den unteren Punkt um 15° nach links ziehen; der obere bleibt.
   t('mirror', 0, 0, 0, 105, 0.65, 0, 1),
-  // 3 Spiegel umdrehen: senkrecht durch die Dachspitze, Haus mit zwei Türen.
-  keeping(0, 0, 0, ROOF_TOP, 90, [50, 120]),
-  // 4 Haus drehen: 90° gegen den Uhrzeigersinn (Schornstein oben), Achse
+  // 3 Haus drehen: 90° gegen den Uhrzeigersinn (Schornstein oben), Achse
   // senkrecht in der Wand zwischen Dach und Fenster: Dach, gelbes Rechteck, Dach.
   keeping(270, 0, 0, [100, 92], 0, [100, 40]),
-  // 5 Erstes „Geht nicht“: ganzes Haus neben dem ganzen Haus.
-  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
-  // 6 Spiegel und Haus drehen: Achse auf der Diagonale der Fläche (unten links
+  // 4 Achse verschieben: senkrecht durch die Dachspitze, Haus mit zwei Fenstern.
+  keeping(0, 0, 0, ROOF_TOP, 90, [150, 120]),
+  // 5 Spiegel und Haus drehen: Achse auf der Diagonale der Fläche (unten links
   // nach oben rechts); nur eine Ecke der Wand bleibt, ein gerades gelbes
   // Quadrat mit Fenster- und Türstücken.
   t('mirror', 180, -0.0314, 0.1146, 135, 0.5, 0.5, 1),
+  // 6 Erstes „Geht nicht“: ganzes Haus neben dem ganzen Haus.
+  wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
   // 7 Geht nicht: Tür und Fenster vertauscht (Tutor: „Hier ist etwas seltsam.“).
   t('swap', 285, -0.0145, 0.0937, 45, 0.3863, 0.6137, -1),
   // 8 Winkel einrasten: schräge Achse bei 30°.

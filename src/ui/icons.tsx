@@ -208,6 +208,15 @@ export const TrapezoidIcon = () => (
   </Icon>
 );
 
+/** Magnet: Formen docken aneinander an. */
+export const MagnetIcon = () => (
+  <Icon>
+    <path d="M6 4v8a6 6 0 0 0 12 0V4" />
+    <path d="M6 4h4v8a2 2 0 0 0 4 0V4h4" />
+    <path d="M6 8h4M14 8h4" />
+  </Icon>
+);
+
 /** Kopieren: zwei versetzte Rechtecke. */
 export const CopyIcon = () => (
   <Icon>

@@ -4,6 +4,10 @@ import {
   createShape,
   drawElements,
   drawSelection,
+  drawSnapMarks,
+  snapMove,
+  snapPoint,
+  type SnapMarks,
   bringForward,
   sendBackward,
   duplicate,
@@ -26,6 +30,7 @@ import {
   CheckIcon,
   CircleShapeIcon,
   CopyIcon,
+  MagnetIcon,
   EquilateralTriangleIcon,
   EraserIcon,
   ForwardIcon,
@@ -44,6 +49,8 @@ import {
 const EXPORT_PX = 800;
 /** Greifbereich der Anfasser (CSS-Pixel). */
 const HANDLE_TOUCH_PX = 22;
+/** Reichweite des Magneten (CSS-Pixel). */
+const MAGNET_PX = 12;
 /** Radierer-Radius im Verhältnis zur Strichstärke. */
 const ERASER_FACTOR = 1.2;
 
@@ -142,6 +149,8 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
   const [color, setColor] = useState(PALETTE[1]);
   const [width, setWidth] = useState(WIDTHS[1]);
   const [snap, setSnap] = useState(false);
+  const [magnet, setMagnet] = useState(true);
+  const marks = useRef<SnapMarks | null>(null);
 
   // Während des Ziehens wird nur gezeichnet; gespeichert wird beim Loslassen.
   const live = useRef<DrawElement[]>(elements);
@@ -149,8 +158,8 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
   const before = useRef<DrawElement[] | null>(null);
   const frame = useRef(0);
   const cssSize = useRef(1);
-  const stateRef = useRef({ selectedId, tool, snap, color, width });
-  stateRef.current = { selectedId, tool, snap, color, width };
+  const stateRef = useRef({ selectedId, tool, snap, magnet, color, width });
+  stateRef.current = { selectedId, tool, snap, magnet, color, width };
   const bgRef = useRef(background);
   bgRef.current = background;
 
@@ -176,6 +185,7 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
       drawElements(g, els);
       const sel = live.current.find((e) => e.id === stateRef.current.selectedId);
       if (sel && stateRef.current.tool === 'select') drawSelection(g, sel, 1 / cssSize.current);
+      if (marks.current) drawSnapMarks(g, marks.current, 1 / cssSize.current);
     });
   };
 
@@ -267,11 +277,23 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
       }
       d.last = p;
     } else if (d.kind === 'move') {
-      replaceLive({ ...d.start, cx: d.start.cx + p.x - d.from.x, cy: d.start.cy + p.y - d.from.y });
+      const next = { ...d.start, cx: d.start.cx + p.x - d.from.x, cy: d.start.cy + p.y - d.from.y };
+      // Magnet: Formen docken an anderen Formen an (Striche nicht).
+      if (stateRef.current.magnet && next.type === 'shape') {
+        const r = snapMove(next, live.current, MAGNET_PX / cssSize.current);
+        replaceLive(r.element);
+        marks.current = r.marks;
+      } else replaceLive(next);
     } else if (d.handle === 'rotate') {
       replaceLive({ ...d.start, rot: rotationTowards(d.start, p, stateRef.current.snap ? 15 : undefined) });
     } else {
-      replaceLive(resizeByHandle(d.start, d.handle, p));
+      let q = p;
+      if (stateRef.current.magnet && d.start.type === 'shape') {
+        const r = snapPoint(p, live.current, d.start.id, MAGNET_PX / cssSize.current);
+        q = r.p;
+        marks.current = r.marks;
+      }
+      replaceLive(resizeByHandle(d.start, d.handle, q));
     }
     redraw();
   };
@@ -280,6 +302,7 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
     const d = drag.current;
     if (!d || d.pointerId !== e.pointerId) return;
     drag.current = null;
+    marks.current = null;
     const prev = before.current ?? elements;
     before.current = null;
     if (d.kind === 'pen') {
@@ -375,6 +398,15 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
             onClick={() => setSnap((s) => !s)}
           >
             <SnapIcon />
+          </button>
+          <button
+            className={`tool-btn ${magnet ? 'on' : ''}`}
+            aria-pressed={magnet}
+            aria-label="Magnet: Formen docken aneinander an"
+            title="Magnet"
+            onClick={() => setMagnet((m) => !m)}
+          >
+            <MagnetIcon />
           </button>
         </div>
 

@@ -394,3 +394,154 @@ export function drawSelection(ctx: CanvasRenderingContext2D, e: DrawElement, px:
   }
   ctx.restore();
 }
+
+// ---------- Magnet: Formen docken an anderen Formen an ----------
+
+export interface SnapMarks {
+  points: Vec2[];
+  segments: [Vec2, Vec2][];
+}
+
+const NO_MARKS: SnapMarks = { points: [], segments: [] };
+
+/** Eckpunkte einer Form (Kreis: Mitte und vier Randpunkte). */
+export function shapeVertices(e: ShapeElement): Vec2[] {
+  const outline = shapeOutline(e.shape);
+  if (!outline) return [{ x: 0, y: 0 }, { x: 0.5, y: 0 }, { x: 0, y: 0.5 }, { x: -0.5, y: 0 }, { x: 0, y: -0.5 }].map((q) => toWorld(e, q));
+  return outline.map((q) => toWorld(e, q));
+}
+
+/** Kanten einer Form (Kreis: keine). */
+export function shapeEdges(e: ShapeElement): [Vec2, Vec2][] {
+  if (!shapeOutline(e.shape)) return [];
+  const v = shapeVertices(e);
+  return v.map((p, i) => [p, v[(i + 1) % v.length]] as [Vec2, Vec2]);
+}
+
+function projectOnSegment(p: Vec2, a: Vec2, b: Vec2): Vec2 {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const l2 = dx * dx + dy * dy;
+  const t = l2 === 0 ? 0 : Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2));
+  return { x: a.x + t * dx, y: a.y + t * dy };
+}
+
+const moved = <T extends DrawElement>(e: T, dx: number, dy: number): T => ({ ...e, cx: e.cx + dx, cy: e.cy + dy });
+
+/** Größte Winkelabweichung, bei der Kanten noch bündig angelegt werden. */
+const EDGE_ANGLE = (10 * Math.PI) / 180;
+
+/**
+ * Lässt eine verschobene Form an anderen Formen einrasten (innerhalb `thr`):
+ * Ecke an Ecke, Kante an Kante (dreht dabei leicht), Ecke an Kante.
+ */
+export function snapMove(moving: ShapeElement, others: DrawElement[], thr: number): { element: ShapeElement; marks: SnapMarks } {
+  const shapes = others.filter((o): o is ShapeElement => o.type === 'shape' && o.id !== moving.id);
+  if (!shapes.length) return { element: moving, marks: NO_MARKS };
+  const myV = shapeVertices(moving);
+  const otherV = shapes.flatMap(shapeVertices);
+  const otherE = shapes.flatMap(shapeEdges);
+
+  // 1. Ecke an Ecke
+  let best: { d: number; dx: number; dy: number; mark: Vec2 } | null = null;
+  for (const v of myV)
+    for (const w of otherV) {
+      const d = Math.hypot(w.x - v.x, w.y - v.y);
+      if (d < thr && (!best || d < best.d)) best = { d, dx: w.x - v.x, dy: w.y - v.y, mark: w };
+    }
+  if (best) return { element: moved(moving, best.dx, best.dy), marks: { points: [best.mark], segments: [] } };
+
+  // 2. Kante an Kante: fast parallel und nah → bündig anlegen
+  let edge: { cost: number; element: ShapeElement; seg: [Vec2, Vec2] } | null = null;
+  const myEdges = shapeEdges(moving);
+  for (let i = 0; i < myEdges.length; i++) {
+    const [a, b] = myEdges[i];
+    for (const [c, d] of otherE) {
+      let delta = Math.atan2(d.y - c.y, d.x - c.x) - Math.atan2(b.y - a.y, b.x - a.x);
+      delta = Math.atan2(Math.sin(2 * delta), Math.cos(2 * delta)) / 2; // auf ±90°
+      if (Math.abs(delta) > EDGE_ANGLE) continue;
+      const turned = { ...moving, rot: moving.rot + delta };
+      const [a2, b2] = shapeEdges(turned)[i];
+      const len = Math.hypot(d.x - c.x, d.y - c.y);
+      const ux = (d.x - c.x) / len;
+      const uy = (d.y - c.y) / len;
+      const mid = { x: (a2.x + b2.x) / 2, y: (a2.y + b2.y) / 2 };
+      const dist = (mid.x - c.x) * -uy + (mid.y - c.y) * ux; // senkrechter Abstand
+      if (Math.abs(dist) >= thr) continue;
+      // Die Kanten müssen sich in Längsrichtung überlappen.
+      const t1 = (a2.x - c.x) * ux + (a2.y - c.y) * uy;
+      const t2 = (b2.x - c.x) * ux + (b2.y - c.y) * uy;
+      if (Math.min(Math.max(t1, t2), len) - Math.max(Math.min(t1, t2), 0) <= 0) continue;
+      let el = moved(turned, uy * dist, -ux * dist);
+      // Liegt danach eine Ecke nah an einer Ecke, entlang der Kante nachrücken.
+      let slide: number | null = null;
+      for (const v of shapeVertices(el))
+        for (const w of otherV) {
+          const s = (w.x - v.x) * ux + (w.y - v.y) * uy;
+          const n = (w.x - v.x) * -uy + (w.y - v.y) * ux;
+          if (Math.abs(n) < 1e-6 && Math.abs(s) < thr && (slide === null || Math.abs(s) < Math.abs(slide))) slide = s;
+        }
+      if (slide !== null) el = moved(el, ux * slide, uy * slide);
+      const cost = Math.abs(dist) + Math.abs(delta) * 0.05;
+      if (!edge || cost < edge.cost) edge = { cost, element: el, seg: [c, d] };
+    }
+  }
+  if (edge) return { element: edge.element, marks: { points: [], segments: [edge.seg] } };
+
+  // 3. Ecke an Kante (in beide Richtungen)
+  let line: { d: number; dx: number; dy: number; seg: [Vec2, Vec2]; mark: Vec2 } | null = null;
+  for (const v of myV)
+    for (const [c, d] of otherE) {
+      const q = projectOnSegment(v, c, d);
+      const dist = Math.hypot(q.x - v.x, q.y - v.y);
+      if (dist < thr && (!line || dist < line.d)) line = { d: dist, dx: q.x - v.x, dy: q.y - v.y, seg: [c, d], mark: q };
+    }
+  for (const w of otherV)
+    for (const [a, b] of shapeEdges(moving)) {
+      const q = projectOnSegment(w, a, b);
+      const dist = Math.hypot(q.x - w.x, q.y - w.y);
+      if (dist < thr && (!line || dist < line.d)) line = { d: dist, dx: w.x - q.x, dy: w.y - q.y, seg: [a, b], mark: w };
+    }
+  if (line) return { element: moved(moving, line.dx, line.dy), marks: { points: [line.mark], segments: [] } };
+  return { element: moving, marks: NO_MARKS };
+}
+
+/** Ein gezogener Punkt (Anfasser beim Strecken) rastet an Ecken oder Kanten anderer Formen ein. */
+export function snapPoint(p: Vec2, others: DrawElement[], excludeId: string, thr: number): { p: Vec2; marks: SnapMarks } {
+  const shapes = others.filter((o): o is ShapeElement => o.type === 'shape' && o.id !== excludeId);
+  let best: { d: number; q: Vec2 } | null = null;
+  for (const w of shapes.flatMap(shapeVertices)) {
+    const d = Math.hypot(w.x - p.x, w.y - p.y);
+    if (d < thr && (!best || d < best.d)) best = { d, q: w };
+  }
+  if (best) return { p: best.q, marks: { points: [best.q], segments: [] } };
+  let line: { d: number; q: Vec2; seg: [Vec2, Vec2] } | null = null;
+  for (const [c, d] of shapes.flatMap(shapeEdges)) {
+    const q = projectOnSegment(p, c, d);
+    const dist = Math.hypot(q.x - p.x, q.y - p.y);
+    if (dist < thr && (!line || dist < line.d)) line = { d: dist, q, seg: [c, d] };
+  }
+  if (line) return { p: line.q, marks: { points: [line.q], segments: [line.seg] } };
+  return { p, marks: NO_MARKS };
+}
+
+/** Leuchtet auf, wo eingerastet wurde. */
+export function drawSnapMarks(ctx: CanvasRenderingContext2D, marks: SnapMarks, px: number): void {
+  ctx.save();
+  ctx.strokeStyle = '#f28c28';
+  ctx.fillStyle = '#f28c28';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 5 * px;
+  for (const [a, b] of marks.segments) {
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+  }
+  for (const p of marks.points) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 7 * px, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
