@@ -7,6 +7,7 @@ import type { Challenge } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
 import { newId, type CustomMotif, type Group, type Profile, type Store } from '../../storage/store';
 import { MotifCreator } from '../MotifCreator';
+import { DrawingEditor } from '../DrawingEditor';
 import { AdultHome, type AdultSection } from './AdultHome';
 import { ChallengeEditor } from './ChallengeEditor';
 import { ChallengeManager } from './ChallengeManager';
@@ -51,6 +52,7 @@ export function AdultArea(props: Props) {
   const [editing, setEditing] = useState<{ draft: Draft; createdAt: number } | null>(null);
   // Motiv anlegen: von wo aus (Motivverwaltung oder Startfigur-Auswahl)?
   const [creatingMotif, setCreatingMotif] = useState<null | 'motifs' | 'pick'>(null);
+  const [editingMotif, setEditingMotif] = useState<CustomMotif | null>(null);
   const [picking, setPicking] = useState(false);
   const [newMotifId, setNewMotifId] = useState<string | null>(null);
   const [groupId, setGroupId] = useState<string | null>(null);
@@ -112,6 +114,20 @@ export function AdultArea(props: Props) {
             </button>
           </>
         }
+      />
+    );
+  }
+
+  if (editingMotif?.drawing) {
+    return (
+      <DrawingEditor
+        initial={editingMotif.drawing}
+        onCancel={() => setEditingMotif(null)}
+        onSave={async (r) => {
+          await store.updateMotifDrawing(editingMotif.id, { image: r.image, width: r.width, height: r.height, drawing: r.doc });
+          onCustomMotifsChange(await store.listMotifs());
+          setEditingMotif(null);
+        }}
       />
     );
   }
@@ -188,6 +204,10 @@ export function AdultArea(props: Props) {
               await store.setHiddenChallenges(group.id, hidden);
               await reloadGroups();
             }}
+            onDrawingToggle={async (enabled) => {
+              await store.setDrawingEnabled(group.id, enabled);
+              await reloadGroups();
+            }}
           />
         );
       }
@@ -217,10 +237,12 @@ export function AdultArea(props: Props) {
       return (
         <MotifManager
           store={store}
-          motifs={customMotifs}
+          // Zeichnungen der Kinder sieht nur das jeweilige Kind.
+          motifs={customMotifs.filter((m) => !m.ownerProfileId)}
           challenges={challenges}
           onChange={onCustomMotifsChange}
           onCreate={() => setCreatingMotif('motifs')}
+          onEdit={setEditingMotif}
           onBack={() => setSection(null)}
         />
       );

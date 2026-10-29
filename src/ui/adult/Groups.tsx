@@ -4,7 +4,7 @@ import type { MotifInfo } from '../../motifs/library';
 import { ANIMAL_ORDER } from '../../profiles/animals';
 import { findColor, firstFreeColor, GROUP_COLORS, suggestGroupName, textOn } from '../../profiles/colors';
 import type { Group, Profile, Store } from '../../storage/store';
-import { CheckIcon, PlusIcon, TrashIcon } from '../icons';
+import { CheckIcon, PenIcon, PlusIcon, TrashIcon } from '../icons';
 import { AdultPage, ConfirmRow } from './AdultPage';
 import { ProfileManager } from './ProfileManager';
 import { Results, type ResultCell } from './Results';
@@ -200,6 +200,8 @@ interface PageProps {
   actions?: ReactNode;
   /** Für die Gruppe ausgeblendete Herausforderungen festlegen. */
   onHiddenChange: (hidden: string[]) => void;
+  /** Zeichnen-Editor für die Kinder ein- oder ausschalten (fehlt in der Gratisversion). */
+  onDrawingToggle?: (enabled: boolean) => void;
 }
 
 /** Freischalten: welche Herausforderungen die Kinder der Gruppe sehen. */
@@ -333,7 +335,21 @@ export function GroupPage(props: PageProps) {
         {tab === 'kids' ? (
           <ProfileManager store={store} group={group} profiles={kids} onChange={onProfilesChange} fixed={limited} />
         ) : tab === 'access' ? (
-          <ChallengeAccess group={group} challenges={challenges} motifs={motifs} onChange={props.onHiddenChange} />
+          <>
+            {props.onDrawingToggle && (
+              <label className="access-row drawing-access">
+                <input type="checkbox" checked={!!group.drawingEnabled} onChange={(e) => props.onDrawingToggle!(e.target.checked)} />
+                <span className="access-motif access-icon">
+                  <PenIcon size={36} />
+                </span>
+                <span className="access-name">
+                  Zeichnen
+                  <span className="row-meta">Die Kinder können eigene Bilder zeichnen; jedes sieht nur seine eigenen.</span>
+                </span>
+              </label>
+            )}
+            <ChallengeAccess group={group} challenges={challenges} motifs={motifs} onChange={props.onHiddenChange} />
+          </>
         ) : (
           <Results
             store={store}

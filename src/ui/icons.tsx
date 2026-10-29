@@ -165,6 +165,80 @@ export const TriangleIcon = () => (
   </Icon>
 );
 
+/** Auswählen und Bearbeiten (Zeiger). */
+export const SelectIcon = () => (
+  <Icon>
+    <path d="M6 3l12 9-5.5 1.2L15 20l-2.6 1.1-2.5-6.6L6 18z" fill="currentColor" fillOpacity=".25" />
+  </Icon>
+);
+
+export const SquareShapeIcon = () => (
+  <Icon>
+    <rect x="5" y="5" width="14" height="14" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+export const CircleShapeIcon = () => (
+  <Icon>
+    <circle cx="12" cy="12" r="7.5" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+export const RightTriangleIcon = () => (
+  <Icon>
+    <path d="M5 5v14h14z" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+export const EquilateralTriangleIcon = () => (
+  <Icon>
+    <path d="M12 5.5 19.5 18.5h-15z" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+export const ParallelogramIcon = () => (
+  <Icon>
+    <path d="M8 8h14l-6 8H2z" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+export const TrapezoidIcon = () => (
+  <Icon>
+    <path d="M9 8h6l7 8H2z" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
+/** Kopieren: zwei versetzte Rechtecke. */
+export const CopyIcon = () => (
+  <Icon>
+    <rect x="8" y="8" width="12" height="12" rx="1.5" />
+    <path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8" />
+  </Icon>
+);
+
+/** Nach vorn: oberes Quadrat gefüllt. */
+export const ForwardIcon = () => (
+  <Icon>
+    <rect x="4" y="4" width="11" height="11" rx="1" />
+    <rect x="9" y="9" width="11" height="11" rx="1" fill="currentColor" />
+  </Icon>
+);
+
+/** Nach hinten: unteres Quadrat gefüllt. */
+export const BackwardIcon = () => (
+  <Icon>
+    <rect x="9" y="9" width="11" height="11" rx="1" fill="currentColor" />
+    <rect x="4" y="4" width="11" height="11" rx="1" fill="#fff" />
+  </Icon>
+);
+
+/** Umrandung an/aus. */
+export const BorderIcon = () => (
+  <Icon>
+    <rect x="4.5" y="4.5" width="15" height="15" rx="1" strokeWidth="3" />
+  </Icon>
+);
+
 export const UndoIcon = () => (
   <Icon>
     <path d="M9 7 4 12l5 5" />

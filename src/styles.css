@@ -2670,3 +2670,81 @@ button.matrix-kid:active {
   display: grid;
   place-items: center;
 }
+
+.drawing-access {
+  margin-bottom: 12px;
+  max-width: 640px;
+}
+
+.access-icon {
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+
+/* ---------- Zeichen-Editor: Formen bearbeiten ---------- */
+
+.draw-side .tool-row .tool-btn {
+  width: 48px;
+  height: 48px;
+}
+
+.draw-side .swatches {
+  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  gap: 6px;
+}
+
+.draw-side .swatch {
+  min-width: 36px;
+}
+
+.selection-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+}
+
+/* Platz bleibt reserviert, damit nichts springt. */
+.selection-tools.is-hidden {
+  visibility: hidden;
+}
+
+.line-swatch {
+  background: var(--panel) !important;
+  border-width: 6px;
+}
+
+.line-swatches.is-dim {
+  opacity: 0.35;
+}
+
+/* Hochformat: Werkzeuge unter der Zeichenfläche, zeilenweise umbrechend. */
+@media (orientation: portrait) {
+  .draw-side {
+    width: auto;
+    max-height: 42%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    overflow-y: auto;
+  }
+  .draw-side > * {
+    flex: 0 0 auto;
+  }
+  .draw-side .side-top {
+    flex-direction: row;
+    gap: 8px;
+  }
+  .draw-side .swatches {
+    grid-template-columns: repeat(9, 36px);
+  }
+  .draw-side .selection-tools {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+}

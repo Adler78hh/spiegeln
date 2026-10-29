@@ -1,7 +1,7 @@
 import { findColor, tintOf } from '../profiles/colors';
 import type { Group, Profile } from '../storage/store';
 import { ProfileImage } from './Avatar';
-import { ChallengeIcon, MirrorIcon } from './icons';
+import { ChallengeIcon, MirrorIcon, PenIcon } from './icons';
 
 interface Props {
   profile: Profile;
@@ -9,10 +9,12 @@ interface Props {
   onSwitchProfile: () => void;
   onFree: () => void;
   onChallenges: () => void;
+  /** Nur wenn die Lehrkraft das Zeichnen für die Gruppe freigeschaltet hat. */
+  onDraw?: () => void;
 }
 
-/** Startbildschirm: zwei große Kacheln, oben das eigene Tier. */
-export function Home({ profile, group, onSwitchProfile, onFree, onChallenges }: Props) {
+/** Startbildschirm: zwei (mit Zeichnen drei) große Kacheln, oben das eigene Tier. */
+export function Home({ profile, group, onSwitchProfile, onFree, onChallenges, onDraw }: Props) {
   const tint = tintOf(findColor(group?.color ?? 'weiss').hex);
   return (
     <div className="home-screen">
@@ -31,6 +33,12 @@ export function Home({ profile, group, onSwitchProfile, onFree, onChallenges }: 
           <ChallengeIcon size={120} />
           <span>Herausforderungen</span>
         </button>
+        {onDraw && (
+          <button className="home-tile" onClick={onDraw}>
+            <PenIcon size={120} />
+            <span>Zeichnen</span>
+          </button>
+        )}
       </div>
     </div>
   );

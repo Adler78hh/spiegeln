@@ -61,7 +61,7 @@ export function MotifCreator({ onSave, onCancel }: Props) {
       <DrawingEditor
         onCancel={() => setMode('choose')}
         onSave={(r) => {
-          setPending({ name: 'Zeichnung', source: 'drawing', ...r });
+          setPending({ name: 'Zeichnung', source: 'drawing', image: r.image, width: r.width, height: r.height, drawing: r.doc });
           setName('');
           setMode('review');
         }}

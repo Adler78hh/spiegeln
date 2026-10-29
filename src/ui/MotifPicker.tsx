@@ -1,15 +1,14 @@
 import type { MotifInfo } from '../motifs/library';
-import { BackIcon, PlusIcon } from './icons';
+import { BackIcon } from './icons';
 
 interface Props {
   motifs: MotifInfo[];
   onPick: (id: string) => void;
-  onCreateMotif: () => void;
   onBack: () => void;
 }
 
-/** Frei spiegeln, Schritt 1: ein Motiv wählen (große Kacheln, eigenes Bild zuerst). */
-export function MotifPicker({ motifs, onPick, onCreateMotif, onBack }: Props) {
+/** Frei spiegeln, Schritt 1: ein Motiv wählen (große Kacheln; eigene Zeichnungen des Kindes stehen mit drin). */
+export function MotifPicker({ motifs, onPick, onBack }: Props) {
   return (
     <div className="list-screen">
       <div className="list-top">
@@ -18,10 +17,6 @@ export function MotifPicker({ motifs, onPick, onCreateMotif, onBack }: Props) {
         </button>
       </div>
       <div className="motif-grid" role="list" aria-label="Bild wählen">
-        <button className="motif-tile add-motif" aria-label="Eigenes Motiv" onClick={onCreateMotif}>
-          <PlusIcon size={56} />
-          <span>Eigenes Bild</span>
-        </button>
         {motifs.filter((m) => !m.hidden).map((m) => (
           <button key={m.id} className="motif-tile" role="listitem" aria-label={m.name} onClick={() => onPick(m.id)}>
             <img src={m.src} alt="" />

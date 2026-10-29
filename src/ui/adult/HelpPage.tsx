@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { GRATIS, FULL_VERSION_URL } from '../../edition';
-import { CameraIcon, CheckIcon, CrossIcon, FlipIcon, GearIcon, HideLineIcon, OutlineIcon, ResetIcon, SaveIcon, SnapIcon, ThumbsUpIcon } from '../icons';
+import { PenIcon, CameraIcon, CheckIcon, CrossIcon, FlipIcon, GearIcon, HideLineIcon, OutlineIcon, ResetIcon, SaveIcon, SnapIcon, ThumbsUpIcon } from '../icons';
 import { AdultPage } from './AdultPage';
 
 function Item({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
@@ -56,7 +56,16 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
           <Item>Freischalten: festlegen, welche Herausforderungen die Kinder einer Gruppe sehen. Ergebnisse und Druck zeigen nur diese; Antworten bleiben beim Ausblenden erhalten.</Item>
           <Item>Ergebnisse: Tabelle Kind × Herausforderung. Ein Kind antippen zeigt seine Detailansicht mit Zielfigur, Sicherung und Antwort.</Item>
           <Item>Drucken: in der Detailansicht ein Kind, über der Tabelle alle Kinder. Herausforderungen auswählen, im Druckfenster geht auch „Als PDF sichern“.</Item>
-          {!GRATIS && <Item>Eigene Motive (Foto oder Zeichnung) und eigene Herausforderungen lassen sich im Erwachsenenbereich anlegen.</Item>}
+          {!GRATIS && (
+            <>
+              <Item>Eigene Motive (Foto oder Zeichnung) und eigene Herausforderungen lassen sich im Erwachsenenbereich anlegen.</Item>
+              <Item icon={<PenIcon />}>
+                Zeichnen: Formen antippen, dann verschieben, an den Punkten strecken, am runden Griff drehen; Farbe, Umrandung, Kopieren,
+                Reihenfolge und Löschen für die gewählte Form. Gespeicherte Zeichnungen lassen sich später weiterbearbeiten. Unter
+                „Freischalten“ kann das Zeichnen für eine Gruppe eingeschaltet werden; jedes Kind sieht nur seine eigenen Bilder.
+              </Item>
+            </>
+          )}
         </ul>
       </section>
 

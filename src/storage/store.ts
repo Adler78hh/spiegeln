@@ -14,6 +14,7 @@ import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Answer, Challenge, ChallengeAnswers } from '../challenges/types';
 import type { Scene } from '../geometry';
 import type { InvertMode } from '../render/composite';
+import type { DrawingDoc } from '../drawing/elements';
 import { ANIMAL_ORDER, ANIMALS, DEFAULT_ANIMALS, type Animal, type AnimalId } from '../profiles/animals';
 import { findColor } from '../profiles/colors';
 
@@ -39,6 +40,8 @@ export interface Group {
   createdAt: number;
   /** Für diese Gruppe ausgeblendete Herausforderungen (neue sind sichtbar). */
   hiddenChallenges?: string[];
+  /** Zeichnen-Editor für die Kinder dieser Gruppe freigeschaltet. */
+  drawingEnabled?: boolean;
 }
 
 export interface Profile {
@@ -80,11 +83,18 @@ export interface PhotoRecord extends Photo {
   targetId: string;
 }
 
-/** Eigenes Motiv (Foto oder Zeichnung), für alle Profile sichtbar. */
+/**
+ * Eigenes Motiv (Foto oder Zeichnung). Ohne Besitzer für alle sichtbar
+ * (von der Lehrkraft angelegt); mit Besitzer nur für dieses Kind.
+ */
 export interface CustomMotif {
   id: string;
   name: string;
   source: 'photo' | 'drawing';
+  /** Kind, das die Zeichnung angelegt hat (nur es sieht sie). */
+  ownerProfileId?: string;
+  /** Formen und Striche der Zeichnung, zum Weiterbearbeiten. */
+  drawing?: DrawingDoc;
   /** Bild als Daten-URL (Foto: JPEG, Zeichnung: PNG mit Transparenz). */
   image: string;
   width: number;
@@ -309,6 +319,11 @@ export class Store {
     if (g) await this.db.put('groups', { ...g, hiddenChallenges: hidden });
   }
 
+  async setDrawingEnabled(id: string, enabled: boolean): Promise<void> {
+    const g = await this.db.get('groups', id);
+    if (g) await this.db.put('groups', { ...g, drawingEnabled: enabled });
+  }
+
   async recolorGroup(id: string, color: string, name: string): Promise<void> {
     const g = await this.db.get('groups', id);
     if (g) await this.db.put('groups', { ...g, color, name: name.trim() || g.name });
@@ -393,8 +408,14 @@ export class Store {
   }
 
   private async clearProfile(id: string, removeProfile: boolean): Promise<void> {
-    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos'], 'readwrite');
+    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos', 'motifs'], 'readwrite');
     if (removeProfile) await tx.objectStore('profiles').delete(id);
+    // Eigene Zeichnungen des Kindes
+    let m = await tx.objectStore('motifs').openCursor();
+    while (m) {
+      if (m.value.ownerProfileId === id) await m.delete();
+      m = await m.continue();
+    }
     for (const store of ['answers', 'snapshots', 'photos'] as const) {
       const index = tx.objectStore(store).index('byProfile');
       let cursor = await index.openCursor(IDBKeyRange.only(id));
@@ -483,6 +504,15 @@ export class Store {
     const motif: CustomMotif = { ...m, id: `eigen-${newId()}`, createdAt: Date.now() };
     await this.db.put('motifs', motif);
     return motif;
+  }
+
+  /** Weiterbearbeitete Zeichnung: neues Bild und neue Formen. */
+  async updateMotifDrawing(id: string, change: Pick<CustomMotif, 'image' | 'width' | 'height' | 'drawing'>): Promise<CustomMotif | undefined> {
+    const m = await this.db.get('motifs', id);
+    if (!m) return undefined;
+    const next = { ...m, ...change };
+    await this.db.put('motifs', next);
+    return next;
   }
 
   async renameMotif(id: string, name: string): Promise<void> {

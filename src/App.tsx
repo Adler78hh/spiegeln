@@ -7,7 +7,8 @@ import { ChallengeList } from './ui/ChallengeList';
 import { ChallengePlay } from './ui/ChallengePlay';
 import { FreeMirror } from './ui/FreeMirror';
 import { Home } from './ui/Home';
-import { MotifCreator } from './ui/MotifCreator';
+import { DrawingEditor, type DrawingResult } from './ui/DrawingEditor';
+import { KidDrawings } from './ui/KidDrawings';
 import { MotifPicker } from './ui/MotifPicker';
 import { AdultArea } from './ui/adult/AdultArea';
 import { GRATIS } from './edition';
@@ -37,7 +38,8 @@ type ScreenState =
   | { name: 'home' }
   | { name: 'free-pick' }
   | { name: 'free' }
-  | { name: 'create-motif' }
+  | { name: 'drawings' }
+  | { name: 'draw'; motifId?: string }
   | { name: 'challenges' }
   | { name: 'challenge'; id: string };
 
@@ -55,7 +57,10 @@ export default function App() {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [customMotifs, setCustomMotifs] = useState<CustomMotif[]>([]);
   const [freeMotifId, setFreeMotifId] = useState(BUILTIN_MOTIF_INFOS[0].id);
-  const motifs = allMotifs(customMotifs);
+  // Motive der Lehrkraft für alle; Zeichnungen eines Kindes nur für dieses Kind.
+  const motifs = allMotifs(customMotifs.filter((m) => !m.ownerProfileId));
+  const ownDrawings = profile ? customMotifs.filter((m) => m.ownerProfileId === profile.id) : [];
+  const kidMotifs = [...motifs, ...allMotifs(ownDrawings).filter((m) => !m.builtin)];
 
   useEffect(() => {
     let alive = true;
@@ -136,12 +141,12 @@ export default function App() {
     setSnapshots((all) => [snap, ...all]);
   };
 
-  const addMotif = async (m: Omit<CustomMotif, 'id' | 'createdAt'>) => {
-    if (!store) return;
-    const motif = await store.addMotif(m);
-    setCustomMotifs((all) => [...all, motif]);
-    setFreeMotifId(motif.id);
-    setScreen({ name: 'free' });
+  const saveKidDrawing = async (motifId: string | undefined, r: DrawingResult) => {
+    if (!store || !profile) return;
+    if (motifId) await store.updateMotifDrawing(motifId, { image: r.image, width: r.width, height: r.height, drawing: r.doc });
+    else await store.addMotif({ name: 'Mein Bild', source: 'drawing', image: r.image, width: r.width, height: r.height, drawing: r.doc, ownerProfileId: profile.id });
+    setCustomMotifs(await store.listMotifs());
+    setScreen({ name: 'drawings' });
   };
 
   if (error) return <div className="message">{error}</div>;
@@ -195,24 +200,24 @@ export default function App() {
           onSwitchProfile={switchProfile}
           onFree={() => setScreen({ name: 'free-pick' })}
           onChallenges={() => setScreen({ name: 'challenges' })}
+          onDraw={!GRATIS && groups.find((g) => g.id === profile.groupId)?.drawingEnabled ? () => setScreen({ name: 'drawings' }) : undefined}
         />
       );
     case 'free-pick':
       return (
         <MotifPicker
-          motifs={motifs}
+          motifs={kidMotifs}
           onPick={(id) => {
             setFreeMotifId(id);
             setScreen({ name: 'free' });
           }}
-          onCreateMotif={() => setScreen({ name: 'create-motif' })}
           onBack={() => setScreen({ name: 'home' })}
         />
       );
     case 'free':
       return (
         <FreeMirror
-          motifs={motifs}
+          motifs={kidMotifs}
           motifId={freeMotifId}
           prefs={profile.prefs}
           onPrefsChange={setPrefs}
@@ -221,8 +226,27 @@ export default function App() {
           onBack={() => setScreen({ name: 'free-pick' })}
         />
       );
-    case 'create-motif':
-      return <MotifCreator onSave={addMotif} onCancel={() => setScreen({ name: 'free-pick' })} />;
+    case 'drawings':
+      return (
+        <KidDrawings
+          drawings={ownDrawings}
+          onNew={() => setScreen({ name: 'draw' })}
+          onEdit={(m) => setScreen({ name: 'draw', motifId: m.id })}
+          onBack={() => setScreen({ name: 'home' })}
+        />
+      );
+    case 'draw': {
+      const motifId = screen.motifId;
+      const existing = ownDrawings.find((m) => m.id === motifId);
+      return (
+        <DrawingEditor
+          key={motifId ?? 'neu'}
+          initial={existing?.drawing}
+          onCancel={() => setScreen({ name: 'drawings' })}
+          onSave={(r) => saveKidDrawing(existing?.id, r)}
+        />
+      );
+    }
     case 'challenges':
       return (
         <ChallengeList

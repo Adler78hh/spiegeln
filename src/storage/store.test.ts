@@ -296,6 +296,23 @@ describe('Datensicherung', () => {
   });
 });
 
+describe('Zeichnungen der Kinder', () => {
+  it('gehören dem Kind und verschwinden beim Zurücksetzen; Freischalten je Gruppe', async () => {
+    const { groups } = await store.ensureDefaults();
+    const [a, b] = await store.listProfiles();
+    const doc = { version: 1 as const, elements: [] };
+    const own = await store.addMotif({ name: 'Roboter', source: 'drawing', image: 'data:x', width: 1, height: 1, ownerProfileId: a.id, drawing: doc });
+    await store.addMotif({ name: 'Lehrkraft', source: 'drawing', image: 'data:y', width: 1, height: 1 });
+    await store.addMotif({ name: 'B', source: 'drawing', image: 'data:z', width: 1, height: 1, ownerProfileId: b.id });
+    const upd = await store.updateMotifDrawing(own.id, { image: 'data:neu', width: 2, height: 3, drawing: doc });
+    expect(upd?.image).toBe('data:neu');
+    await store.resetProfile(a.id);
+    expect((await store.listMotifs()).map((m) => m.name).sort()).toEqual(['B', 'Lehrkraft']);
+    await store.setDrawingEnabled(groups[0].id, true);
+    expect((await store.listGroups())[0].drawingEnabled).toBe(true);
+  });
+});
+
 describe('Eigene Motive', () => {
   it('anlegen (mit eigener ID-Kennung), auflisten, löschen', async () => {
     const m = await store.addMotif({ name: 'Mein Bild', source: 'drawing', image: 'data:x', width: 300, height: 200 });

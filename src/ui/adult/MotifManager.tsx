@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Challenge } from '../../challenges/types';
 import type { CustomMotif, Store } from '../../storage/store';
-import { PlusIcon, TrashIcon } from '../icons';
+import { EditIcon, PlusIcon, TrashIcon } from '../icons';
 import { AdultPage, ConfirmRow } from './AdultPage';
 
 interface Props {
@@ -10,11 +10,13 @@ interface Props {
   challenges: Challenge[];
   onChange: (m: CustomMotif[]) => void;
   onCreate: () => void;
+  /** Zeichnung im Editor weiterbearbeiten. */
+  onEdit: (m: CustomMotif) => void;
   onBack: () => void;
 }
 
 /** Eigene Motive umbenennen und löschen. */
-export function MotifManager({ store, motifs, challenges, onChange, onCreate, onBack }: Props) {
+export function MotifManager({ store, motifs, challenges, onChange, onCreate, onEdit, onBack }: Props) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const reload = async () => onChange(await store.listMotifs());
 
@@ -50,6 +52,11 @@ export function MotifManager({ store, motifs, challenges, onChange, onCreate, on
                 onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
               />
               <span className="row-meta">{m.source === 'photo' ? 'Foto' : 'Zeichnung'}</span>
+              {m.drawing && (
+                <button className="tool-btn" aria-label={`${m.name} bearbeiten`} title="Bearbeiten" onClick={() => onEdit(m)}>
+                  <EditIcon />
+                </button>
+              )}
               <button className="tool-btn" aria-label={`${m.name} löschen`} onClick={() => setConfirmId(m.id)}>
                 <TrashIcon />
               </button>
