@@ -85,7 +85,8 @@ const WINDOW_CENTER: [number, number] = [125, 130];
 
 export const HAUS_LAYOUT: PlannedTarget[] = [
   // Nach und nach kommen alle Handgriffe vor (Reihenfolge für den Tutor).
-  // 1 Spiegel umdrehen: senkrecht durch die Dachspitze, Haus mit zwei Türen.
+  // 1 Achse (oder Haus) verschieben: senkrecht durch die Dachspitze; die linke Hälfte
+  // bleibt wie in der Startlage, es entsteht das Haus mit zwei Türen.
   keeping(0, 0, 0, ROOF_TOP, 90, [50, 120]),
   // 2 Achse drehen: aus der Startlage (Spiegel senkrecht knapp rechts neben
   // dem Haus) den unteren Punkt um 15° nach links ziehen; der obere bleibt.
@@ -93,7 +94,8 @@ export const HAUS_LAYOUT: PlannedTarget[] = [
   // 3 Haus drehen: 90° gegen den Uhrzeigersinn (Schornstein oben), Achse
   // senkrecht in der Wand zwischen Dach und Fenster: Dach, gelbes Rechteck, Dach.
   keeping(270, 0, 0, [100, 92], 0, [100, 40]),
-  // 4 Achse verschieben: senkrecht durch die Dachspitze, Haus mit zwei Fenstern.
+  // 4 Spiegel umdrehen: senkrecht durch die Dachspitze, die rechte Hälfte bleibt –
+  // Haus mit zwei Fenstern.
   keeping(0, 0, 0, ROOF_TOP, 90, [150, 120]),
   // 5 Spiegel und Haus drehen: Achse auf der Diagonale der Fläche (unten links
   // nach oben rechts); nur eine Ecke der Wand bleibt, ein gerades gelbes
