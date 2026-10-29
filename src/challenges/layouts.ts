@@ -94,27 +94,28 @@ export const HAUS_LAYOUT: PlannedTarget[] = [
   // 3 Haus drehen: 90° gegen den Uhrzeigersinn (Schornstein oben), Achse
   // senkrecht in der Wand zwischen Dach und Fenster: Dach, gelbes Rechteck, Dach.
   keeping(270, 0, 0, [100, 92], 0, [100, 40]),
-  // 4 Spiegel umdrehen: senkrecht durch die Dachspitze, die rechte Hälfte bleibt –
+  // 4 Achse auf 45° (unten links nach oben rechts) durch zwei Wandecken, Haus nur
+  // verschieben; die obere linke Hälfte bleibt: gelbes Quadrat mit Dach oben und rechts.
+  keeping(0, 0, -0.0594, [100, 128], 135, [70, 100]),
+  // 5 Spiegel umdrehen: senkrecht durch die Dachspitze, die rechte Hälfte bleibt –
   // Haus mit zwei Fenstern.
   keeping(0, 0, 0, ROOF_TOP, 90, [150, 120]),
-  // 5 Spiegel und Haus drehen: Achse auf der Diagonale der Fläche (unten links
+  // 6 Spiegel und Haus drehen: Achse auf der Diagonale der Fläche (unten links
   // nach oben rechts); nur eine Ecke der Wand bleibt, ein gerades gelbes
   // Quadrat mit Fenster- und Türstücken.
   t('mirror', 180, -0.0314, 0.1146, 135, 0.5, 0.5, 1),
-  // 6 Erstes „Geht nicht“: ganzes Haus neben dem ganzen Haus.
+  // 7 Erstes „Geht nicht“: ganzes Haus neben dem ganzen Haus.
   wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
-  // 7 Geht nicht: Tür und Fenster vertauscht (Tutor: „Hier ist etwas seltsam.“).
+  // 8 Geht nicht: Tür und Fenster vertauscht (Tutor: „Hier ist etwas seltsam.“).
   t('swap', 285, -0.0145, 0.0937, 45, 0.3863, 0.6137, -1),
-  // 8 Winkel einrasten: schräge Achse bei 30°.
+  // 9 Winkel einrasten: schräge Achse bei 30°.
   t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
-  // 9 Umriss: Achse durch die waagrechte Fensterstrebe, untere Haushälfte ohne Dach.
+  // 10 Umriss: Achse durch die waagrechte Fensterstrebe, untere Haushälfte ohne Dach.
   throughPoint('mirror', 180, -0.0755, -0.0653, ...WINDOW_CENTER, 1, 0),
-  // 10 Achse ausblenden: die gelben Wände bilden zusammen ein Quadrat.
+  // 11 Achse ausblenden: die gelben Wände bilden zusammen ein Quadrat.
   throughPoint('mirror', 225, 0.0753, -0.0267, ...WALL_CORNER, -1, 45),
-  // 11 Geht nicht: Drehung statt Spiegelung.
+  // 12 Geht nicht: Drehung statt Spiegelung.
   t('rotate', 225, 0.015, 0.0863, 15, 0.5, 0.5265, 1),
-  // 12 Abschluss: schräge Achse, Haus gedreht.
-  t('mirror', 300, 0.0114, -0.0609, 105, 0.5261, 0.5, -1),
 ];
 
 /** Fisch: Mitte der Längsachse, Auge, Maul (Motivkoordinaten). */
