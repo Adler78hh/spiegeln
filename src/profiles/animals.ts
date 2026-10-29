@@ -620,36 +620,43 @@ export const ANIMALS: Record<AnimalId, Animal> = {
   fledermaus: {
     id: 'fledermaus',
     name: 'Fledermaus',
-    // Ausgebreitete Flügel, große Ohren, kleine Zähnchen.
+    // Ausgebreitete Flügel, großer Kopf mit großen Ohren, kleine Zähnchen.
     svg: svg(`
-      <path d="M50,50 L6,30 Q12,44 4,56 Q16,52 18,64 Q26,56 34,66 Z M50,50 L94,30 Q88,44 96,56 Q84,52 82,64 Q74,56 66,66 Z" fill="#5a4a6b"/>
-      <path d="M36,40 L30,16 L46,32 Z M64,40 L70,16 L54,32 Z" fill="#6f5d82"/>
-      <path d="M36,36 L33,22 L42,31 Z M64,36 L67,22 L58,31 Z" fill="#e8b4c8"/>
-      <circle cx="50" cy="52" r="21" fill="#7a6890"/>
-      <ellipse cx="50" cy="60" rx="12" ry="9" fill="#b8a6c8"/>
-      ${eyes(48, 9, 4)}
-      <ellipse cx="50" cy="57" rx="3" ry="2" fill="${INK}"/>
-      <path d="M44,63 Q50,68 56,63" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>
-      <path d="M46,64 L47.5,68 L49,64.6 Z M54,64 L52.5,68 L51,64.6 Z" fill="#fff"/>`),
+      <path d="M50,52 L4,28 Q10,44 2,56 Q14,52 16,64 Q24,56 32,66 Z M50,52 L96,28 Q90,44 98,56 Q86,52 84,64 Q76,56 68,66 Z" fill="#5a4a6b"/>
+      <path d="M32,40 L25,8 L48,30 Z M68,40 L75,8 L52,30 Z" fill="#6f5d82"/>
+      <path d="M33,35 L29,16 L43,30 Z M67,35 L71,16 L57,30 Z" fill="#e8b4c8"/>
+      <circle cx="50" cy="52" r="27" fill="#7a6890"/>
+      <ellipse cx="50" cy="63" rx="15" ry="11" fill="#b8a6c8"/>
+      ${eyes(48, 11, 4.8)}
+      <ellipse cx="50" cy="59" rx="3.5" ry="2.4" fill="${INK}"/>
+      <path d="M43,66 Q50,72 57,66" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M45,67.2 L46.8,72 L48.6,68.4 Z M55,67.2 L53.2,72 L51.4,68.4 Z" fill="#fff"/>
+      <circle cx="32" cy="58" r="4" fill="#f3b3c3" opacity=".6"/>
+      <circle cx="68" cy="58" r="4" fill="#f3b3c3" opacity=".6"/>`),
   },
   schlange: {
     id: 'schlange',
     name: 'Schlange',
-    // Freundlicher Kopf mit Zunge, der Körper schlängelt sich darunter.
+    // Aufgerollter Körper, der Kopf sitzt oben auf dem Hals und schaut nach vorn.
     svg: svg(`
-      <path d="M12,90 Q30,66 50,82 Q70,98 88,76" fill="none" stroke="#5fae4c" stroke-width="15" stroke-linecap="round"/>
-      <circle cx="28" cy="78" r="3" fill="#a6d98a"/>
-      <circle cx="50" cy="83" r="3" fill="#a6d98a"/>
-      <circle cx="72" cy="86" r="3" fill="#a6d98a"/>
-      <path d="M50,60 L50,80" stroke="#5fae4c" stroke-width="14" stroke-linecap="round"/>
-      <path d="M50,62 L50,72 M50,72 L46,77 M50,72 L54,77" fill="none" stroke="#e0323a" stroke-width="2.5" stroke-linecap="round"/>
-      <ellipse cx="50" cy="40" rx="27" ry="23" fill="#7ccf63"/>
-      <circle cx="38" cy="26" r="3" fill="#a6d98a"/>
-      <circle cx="62" cy="26" r="3" fill="#a6d98a"/>
-      ${eyes(38, 11, 5)}
-      ${smile(50, 7)}
-      <circle cx="28" cy="46" r="4" fill="#f3b3c3" opacity=".6"/>
-      <circle cx="72" cy="46" r="4" fill="#f3b3c3" opacity=".6"/>`),
+      <ellipse cx="50" cy="86" rx="40" ry="11" fill="#4f9a3e"/>
+      <ellipse cx="50" cy="83" rx="40" ry="11" fill="#5fae4c"/>
+      <ellipse cx="50" cy="74" rx="31" ry="9" fill="#4f9a3e"/>
+      <ellipse cx="50" cy="71" rx="31" ry="9" fill="#5fae4c"/>
+      <circle cx="24" cy="84" r="2.6" fill="#a6d98a"/>
+      <circle cx="76" cy="84" r="2.6" fill="#a6d98a"/>
+      <circle cx="33" cy="72" r="2.4" fill="#a6d98a"/>
+      <circle cx="67" cy="72" r="2.4" fill="#a6d98a"/>
+      <path d="M38,70 Q36,52 42,44 L58,44 Q64,52 62,70 Z" fill="#6cc055"/>
+      <ellipse cx="50" cy="36" rx="25" ry="21" fill="#7ccf63"/>
+      <ellipse cx="50" cy="50" rx="12" ry="5" fill="#9fdc86"/>
+      <circle cx="38" cy="22" r="3" fill="#a6d98a"/>
+      <circle cx="62" cy="22" r="3" fill="#a6d98a"/>
+      ${eyes(33, 10, 5)}
+      ${smile(43, 6)}
+      <path d="M50,46 L50,52 M50,52 L47,55.5 M50,52 L53,55.5" fill="none" stroke="#e0323a" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="30" cy="41" r="4" fill="#f3b3c3" opacity=".6"/>
+      <circle cx="70" cy="41" r="4" fill="#f3b3c3" opacity=".6"/>`),
   },
   ratte: {
     id: 'ratte',
@@ -671,16 +678,16 @@ export const ANIMALS: Record<AnimalId, Animal> = {
   regenwurm: {
     id: 'regenwurm',
     name: 'Regenwurm',
-    // Geringelter Körper, Gesicht am Kopfende.
+    // Der Wurm richtet sich auf; der Kopf ist das obere Ende des Körpers und schaut nach vorn.
     svg: svg(`
-      <path d="M10,90 C10,66 40,80 44,62 C47,50 56,52 58,46" fill="none" stroke="#e89aa6" stroke-width="16" stroke-linecap="round"/>
-      <path d="M10,90 C10,66 40,80 44,62 C47,50 56,52 58,46" fill="none" stroke="#d47888" stroke-width="16" stroke-dasharray="1.5 7"/>
-      <path d="M25,74 Q30,69 34,75" fill="none" stroke="#f4c0c8" stroke-width="10"/>
-      <circle cx="60" cy="38" r="22" fill="#e89aa6"/>
-      ${eyes(35, 9, 4.2)}
-      <path d="M53,45 Q60,52 67,45" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round" transform="translate(-10 0)"/>
-      <circle cx="42" cy="44" r="4" fill="#f7c6cf"/>
-      <circle cx="78" cy="44" r="4" fill="#f7c6cf"/>`),
+      <path d="M14,84 Q28,90 42,85 Q55,80 53,66 Q50,54 50,42" fill="none" stroke="#e89aa6" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M26,77 Q27,84 26,91 M36,77 Q38,84 37,91 M41,69 Q52,67 63,70 M40,60 Q50,58 61,60" fill="none" stroke="#d47888" stroke-width="2" stroke-linecap="round"/>
+      <path d="M39,52 Q50,50 61,52" fill="none" stroke="#f4c0c8" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="50" cy="34" r="19" fill="#e89aa6"/>
+      ${eyes(31, 7.5, 4)}
+      ${smile(40, 5)}
+      <circle cx="37" cy="39" r="3.5" fill="#f7c6cf"/>
+      <circle cx="63" cy="39" r="3.5" fill="#f7c6cf"/>`),
   },
   schnecke: {
     id: 'schnecke',
@@ -691,8 +698,8 @@ export const ANIMALS: Record<AnimalId, Animal> = {
       <path d="M63.5,46 L63.7,46.3 L63.9,46.6 L64.1,47 L64.1,47.4 L64.1,47.9 L63.9,48.4 L63.7,48.9 L63.3,49.4 L62.8,49.8 L62.3,50.1 L61.7,50.4 L60.9,50.5 L60.2,50.6 L59.4,50.5 L58.6,50.2 L57.8,49.9 L57.1,49.3 L56.4,48.7 L55.8,47.9 L55.3,47 L55,45.9 L54.8,44.9 L54.8,43.7 L55,42.5 L55.4,41.4 L56,40.3 L56.7,39.2 L57.7,38.3 L58.8,37.5 L60,36.8 L61.4,36.4 L62.9,36.1 L64.4,36.1 L65.9,36.3 L67.5,36.8 L68.9,37.5 L70.3,38.5 L71.6,39.7 L72.7,41.1 L73.5,42.6 L74.2,44.4 L74.5,46.2 L74.6,48.1 L74.4,50.1 L73.9,52 L73.1,53.9 L72,55.6 L70.6,57.2 L68.9,58.6 L67.1,59.7 L65,60.6 L62.8,61.1 L60.5,61.3 L58.2,61.2 L55.9,60.7 L53.6,59.8 L51.4,58.6 L49.5,57.1 L47.7,55.2 L46.3,53.1 L45.1,50.8 L44.4,48.2 L44,45.5 L44,42.8 L44.4,40.1 L45.3,37.4 L46.5,34.8 L48.2,32.5 L50.2,30.3 L52.5,28.5 L55.2,27.1 L58,26 L61.1,25.4 L64.2,25.2 L67.3,25.5 L70.4,26.3 L73.4,27.5 L76.2,29.3 L78.8,31.4 L81,33.9 L82.8,36.8" fill="none" stroke="#b9783a" stroke-width="3" stroke-linecap="round"/>
       <path d="M6,92 Q8,76 26,72 L86,76 Q96,80 94,92 Z" fill="#b7d48a"/>
       <path d="M24,54 L18,30 M36,54 L40,30" stroke="#a3c475" stroke-width="5" stroke-linecap="round"/>
-      <circle cx="18" cy="28" r="6.5" fill="#fff"/>
-      <circle cx="40" cy="28" r="6.5" fill="#fff"/>
+      <circle cx="18" cy="28" r="6.5" fill="#fff" stroke="${INK}" stroke-width="1.8"/>
+      <circle cx="40" cy="28" r="6.5" fill="#fff" stroke="${INK}" stroke-width="1.8"/>
       <circle cx="18.5" cy="29" r="3.2" fill="${INK}"/>
       <circle cx="40.5" cy="29" r="3.2" fill="${INK}"/>
       <ellipse cx="30" cy="68" rx="19" ry="16" fill="#b7d48a"/>
