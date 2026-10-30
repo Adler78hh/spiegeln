@@ -59,6 +59,11 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
           {!GRATIS && (
             <>
               <Item>Eigene Motive (Foto oder Zeichnung) und eigene Herausforderungen lassen sich im Erwachsenenbereich anlegen.</Item>
+              <Item>
+                Eigene Herausforderung: „Automatische Vorschläge“ füllt bis zur eingestellten Anzahl mit lösbaren und unlösbaren Zielfiguren auf
+                (Achse verschieben, Figur drehen, Winkel einstellen, andere Seite und Kombinationen). Erneut antippen ersetzt nur die Vorschläge,
+                selbst gemachte Figuren bleiben.
+              </Item>
               <Item icon={<PenIcon />}>
                 Zeichnen: Formen antippen, dann verschieben, an den Punkten strecken, am runden Griff drehen; Farbe (auch eigene Farbe über das Farbrad), Umrandung, Kopieren,
                 Reihenfolge und Löschen für die gewählte Form. Gespeicherte Zeichnungen lassen sich später weiterbearbeiten. Unter

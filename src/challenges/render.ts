@@ -2,7 +2,7 @@
  * Erzeugt Bilder von Zielfiguren aus einer Szene (für den Editor).
  */
 import { apply, figureTransform, lineOf, mirrorTransform, otherSideTransform, sideOf, UNIT_RECT, type ComposeMode, type Scene } from '../geometry';
-import { contentBounds, createFigureBuffer, cropSquare, differenceRatio, renderComposite, sampleFigure } from '../render/composite';
+import { contentBounds, createFigureBuffer, cropSquare, differenceRatio, maskOverlap, renderComposite, sampleFigure } from '../render/composite';
 import { boundsCenter, viewSizeFor } from './generate';
 import type { DraftTarget } from './draft';
 import type { Target } from './types';
@@ -42,6 +42,20 @@ export function renderMirror(source: FigureSource, scene: Scene): HTMLCanvasElem
 /** Unterscheidet sich das Bild sichtbar vom Spiegelbild derselben Szene? */
 export function differsFromMirror(candidate: HTMLCanvasElement, source: FigureSource, scene: Scene): boolean {
   return differenceRatio(candidate, renderMirror(source, scene)) >= MIN_DIFFERENCE;
+}
+
+/** Kleines, mittig zugeschnittenes Abbild einer Zielfigur zum Vergleichen. */
+export function lookOf(canvas: HTMLCanvasElement): HTMLCanvasElement {
+  return cropSquare(canvas, boundsCenter(contentBounds(canvas)), 1, 96);
+}
+
+/**
+ * Sehen zwei Zielfiguren (als Abbild aus `lookOf`) gleich aus? Verglichen
+ * werden die Umrisse: Überdecken sie sich fast ganz, gelten sie als gleich.
+ * So zählt auch eine nur wenig schmalere Figur als Wiederholung.
+ */
+export function looksSame(a: HTMLCanvasElement, b: HTMLCanvasElement): boolean {
+  return maskOverlap(a, b) >= 0.88;
 }
 
 export function canvasFromImage(img: HTMLImageElement, px = RAW_PX): HTMLCanvasElement {

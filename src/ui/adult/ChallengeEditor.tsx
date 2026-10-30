@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   addTarget,
   counts,
@@ -10,7 +10,10 @@ import {
   type Draft,
   type DraftTarget,
 } from '../../challenges/draft';
-import { canvasFromImage, differsFromMirror, finalizeTargets, renderMirror, renderRaw, type FigureSource } from '../../challenges/render';
+import { canvasFromImage, differsFromMirror, finalizeTargets, lookOf, looksSame, RAW_PX, renderMirror, renderRaw, type FigureSource } from '../../challenges/render';
+import { allOnOriginalSide, shuffle, solvableFirst } from '../../challenges/generate';
+import { suggestScenes } from '../../challenges/suggest';
+import { createFigureBuffer, motifToFigurePoint, sampleFigure } from '../../render/composite';
 import type { Challenge, TargetKind } from '../../challenges/types';
 import { flipSide, initialScene, type Scene } from '../../geometry';
 import { applyVariant, findBuiltinMotif, svgToImage } from '../../motifs/builtin';
@@ -20,7 +23,7 @@ import { DrawingEditor, type DrawingBackground } from '../DrawingEditor';
 import { MirrorCanvas } from '../MirrorCanvas';
 import { MirrorTools } from '../MirrorTools';
 import { useMotifImage } from '../useMotifImage';
-import { BackIcon, CheckIcon, ShuffleIcon, TrashIcon } from '../icons';
+import { BackIcon, CheckIcon, ShuffleIcon, SparkleIcon, TrashIcon } from '../icons';
 import { ImageCropper } from './ImageCropper';
 
 interface Props {
@@ -52,6 +55,9 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
   const [pending, setPending] = useState<Pending | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+  /** Rückmeldung nach dem Speichern einer lösbaren Figur (ID der neuen Figur). */
+  const [savedId, setSavedId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const image = useMotifImage(motif);
   const c = counts(draft);
@@ -60,9 +66,17 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
   const source = (): FigureSource | null => (image ? { image, aspect: motif.aspect } : null);
 
   const add = (t: Omit<DraftTarget, 'id' | 'image'>) => {
-    setDraft((d) => addTarget(d, { ...t, id: newId(), image: t.raw }));
+    const id = newId();
+    setDraft((d) => addTarget(d, { ...t, id, image: t.raw }));
     setMessage(null);
+    return id;
   };
+
+  useEffect(() => {
+    if (!savedId) return;
+    const timer = setTimeout(() => setSavedId(null), 1800);
+    return () => clearTimeout(timer);
+  }, [savedId]);
 
   /** Fügt eine unlösbare Figur hinzu; warnt, wenn sie wie ein Spiegelbild aussieht. */
   const addUnsolvable = (canvas: HTMLCanvasElement, kind: TargetKind, s?: Scene) => {
@@ -79,7 +93,85 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
   const addSolvable = () => {
     const src = source();
     if (!src) return;
-    add({ raw: toUrl(renderRaw(src, scene, 'mirror')), solvable: true, kind: 'mirror', scene });
+    setSavedId(add({ raw: toUrl(renderRaw(src, scene, 'mirror')), solvable: true, kind: 'mirror', scene }));
+  };
+
+  /**
+   * Füllt bis zur Vorgabe mit automatischen Vorschlägen auf. Frühere
+   * Vorschläge werden ersetzt, selbst gemachte Figuren bleiben.
+   */
+  const suggest = async () => {
+    const src = source();
+    if (!src) return;
+    const kept = draft.targets.filter((t) => !t.auto);
+    const missing = counts({ ...draft, targets: kept });
+    if (!missing.missingSolvable && !missing.missingUnsolvable) {
+      setMessage('Die Vorgabe ist schon erfüllt. Für Vorschläge die Anzahl der Zielfiguren erhöhen.');
+      return;
+    }
+    setSuggesting(true);
+    setMessage(null);
+    await new Promise((r) => setTimeout(r, 30));
+    try {
+      const samples = sampleFigure(createFigureBuffer(src.image, src.aspect, RAW_PX), src.aspect);
+      const seed = Date.now() % 1_000_000_007;
+      const used = new Set<string>();
+      // Keine zwei Zielfiguren, die gleich aussehen (auch nicht wie selbst gemachte).
+      const looks = await Promise.all(kept.filter((t) => t.kind !== 'upload').map(async (t) => lookOf(canvasFromImage(await loadImage(t.raw)))));
+      const fresh = (canvas: HTMLCanvasElement) => {
+        const look = lookOf(canvas);
+        if (looks.some((l) => looksSame(l, look))) return false;
+        looks.push(look);
+        return true;
+      };
+      const make = (canvas: HTMLCanvasElement, solvable: boolean, kind: TargetKind, s: Scene): DraftTarget => {
+        const raw = toUrl(canvas);
+        return { id: newId(), raw, image: raw, solvable, kind, scene: s, auto: true };
+      };
+      const rendered = new Map<Scene, HTMLCanvasElement>();
+      const added = suggestScenes(samples, missing.missingSolvable, seed, {
+        used,
+        accept: (s) => {
+          const canvas = renderRaw(src, s, 'mirror');
+          rendered.set(s, canvas);
+          return fresh(canvas);
+        },
+      }).map(({ scene: s }) => make(rendered.get(s)!, true, 'mirror', s));
+
+      // Unlösbare: reihum gedreht, verschoben und (falls es eine Vorlage gibt) vertauscht.
+      const swap = builtin?.swapVariants[0];
+      const swapImage = swap ? await svgToImage(applyVariant(builtin!.svg, swap.replacements)) : null;
+      const markers = swap ? swap.markers.map(([x, y]) => motifToFigurePoint({ x: x / 200, y: y / 200 }, motif.aspect)) : [];
+      const kinds: TargetKind[] = swapImage ? ['rotate', 'translate', 'swap'] : ['rotate', 'translate'];
+      for (let i = 0; i < missing.missingUnsolvable; i++) {
+        for (const kind of [kinds[i % kinds.length], ...kinds]) {
+          let canvas: HTMLCanvasElement | null = null;
+          const [hit] = suggestScenes(samples, 1, seed + 101 * (i + 1), {
+            mode: kind === 'swap' ? 'mirror' : (kind as 'rotate' | 'translate'),
+            used,
+            start: i * 4,
+            accept: (s) => {
+              if (kind === 'swap' && !allOnOriginalSide(markers, s)) return false;
+              canvas =
+                kind === 'swap'
+                  ? renderRaw(src, s, 'mirror', { image: swapImage!, aspect: motif.aspect })
+                  : renderRaw(src, s, kind as 'rotate' | 'translate');
+              return differsFromMirror(canvas, src, s) && fresh(canvas);
+            },
+          });
+          if (hit && canvas) {
+            added.push(make(canvas, false, kind, hit.scene));
+            break;
+          }
+        }
+      }
+      const targets = solvableFirst([...kept, ...shuffle(added, seed)], (t) => t.solvable);
+      setDraft((d) => ({ ...d, targets }));
+      const short = missing.missingSolvable + missing.missingUnsolvable - added.length;
+      if (short > 0) setMessage(`${short} Vorschläge ließen sich nicht finden.`);
+    } finally {
+      setSuggesting(false);
+    }
   };
 
   const addTransformed = (mode: 'rotate' | 'translate') => {
@@ -203,6 +295,9 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
           <div className="plan">
             <Stepper label="Zielfiguren" value={draft.plannedTotal} onChange={(v) => setDraft(setPlan(draft, v, draft.plannedUnsolvable))} />
             <Stepper label="davon unlösbar" value={draft.plannedUnsolvable} onChange={(v) => setDraft(setPlan(draft, draft.plannedTotal, v))} />
+            <button className="text-btn suggest-btn" disabled={!image || suggesting} onClick={suggest}>
+              <SparkleIcon /> {suggesting ? 'Erzeuge …' : 'Automatische Vorschläge'}
+            </button>
           </div>
           <p className="plan-status">
             Lösbar {c.solvable} / {draft.plannedTotal - draft.plannedUnsolvable} · Unlösbar {c.unsolvable} / {draft.plannedUnsolvable}
@@ -212,8 +307,9 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
         <section className="editor-section">
           <h2>Lösbare Zielfigur</h2>
           <p className="hint">Startfigur auf der Arbeitsfläche drehen/verschieben und den Spiegel anlegen.</p>
-          <button className="text-btn primary wide" disabled={!image} onClick={addSolvable}>
-            <CheckIcon size={22} /> Als lösbare Zielfigur speichern
+          <button className={`text-btn primary wide ${savedId ? 'just-saved' : ''}`} disabled={!image} onClick={addSolvable} aria-live="polite">
+            <CheckIcon size={22} />{' '}
+            {savedId ? `Gespeichert (lösbar ${c.solvable} von ${draft.plannedTotal - draft.plannedUnsolvable})` : 'Als lösbare Zielfigur speichern'}
           </button>
         </section>
 
@@ -277,11 +373,14 @@ export function ChallengeEditor({ draft: initial, motif, onSave, onCancel }: Pro
           </div>
           <ol className="editor-targets">
             {draft.targets.map((t, i) => (
-              <li key={t.id} className={`editor-target ${t.solvable ? 'solvable' : 'unsolvable'}`}>
+              <li key={t.id} className={`editor-target ${t.solvable ? 'solvable' : 'unsolvable'} ${t.id === savedId ? 'is-new' : ''}`}>
                 <button className="editor-thumb" aria-label={`Figur ${i + 1} in die Arbeitsfläche laden`} onClick={() => select(t)} disabled={!t.scene}>
                   <img src={t.raw} alt="" />
                 </button>
-                <span className="kind">{KIND_LABELS[t.kind]}</span>
+                <span className="kind">
+                  {KIND_LABELS[t.kind]}
+                  {t.auto ? ' · Vorschlag' : ''}
+                </span>
                 <button
                   className={`chip ${t.solvable ? 'fits' : 'impossible'}`}
                   aria-label="Kennzeichnung umschalten"

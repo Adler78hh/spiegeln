@@ -327,6 +327,27 @@ export function differenceRatio(candidate: HTMLCanvasElement, reference: HTMLCan
   }
 }
 
+/** Überdeckung der Figurflächen zweier gleich großer Bilder (Schnitt durch Vereinigung). */
+export function maskOverlap(a: HTMLCanvasElement, b: HTMLCanvasElement): number {
+  try {
+    const da = a.getContext('2d')!.getImageData(0, 0, a.width, a.height).data;
+    const db = b.getContext('2d')!.getImageData(0, 0, b.width, b.height).data;
+    const bg = hexToRgb(AREA_COLOR);
+    const on = (d: Uint8ClampedArray, i: number) => Math.abs(d[i] - bg[0]) + Math.abs(d[i + 1] - bg[1]) + Math.abs(d[i + 2] - bg[2]) > 30;
+    let both = 0;
+    let either = 0;
+    for (let i = 0; i < da.length; i += 4) {
+      const x = on(da, i);
+      const y = on(db, i);
+      if (x && y) both++;
+      if (x || y) either++;
+    }
+    return either ? both / either : 1;
+  } catch {
+    return 0;
+  }
+}
+
 export interface Bounds {
   minX: number;
   minY: number;

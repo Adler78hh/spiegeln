@@ -2853,3 +2853,26 @@ button.matrix-kid:active {
 .line-swatch.is-dim {
   opacity: 0.35;
 }
+
+/* Eigene Herausforderungen: Rückmeldung beim Speichern, Vorschläge */
+.text-btn.primary.just-saved {
+  background: #4f9d69;
+  animation: saved-pop 0.35s ease-out;
+}
+@keyframes saved-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.editor-target.is-new {
+  animation: new-target 1.6s ease-out;
+}
+@keyframes new-target {
+  0%, 30% { background: #cfe9d6; }
+  100% { background: transparent; }
+}
+.suggest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

@@ -7,6 +7,8 @@ import type { Target, TargetKind } from './types';
 export interface DraftTarget extends Target {
   /** Bild der ganzen Arbeitsfläche (unbeschnitten), Grundlage für den Ausschnitt. */
   raw: string;
+  /** Automatisch vorgeschlagen (wird bei neuen Vorschlägen ersetzt). */
+  auto?: boolean;
 }
 
 export interface Draft {
