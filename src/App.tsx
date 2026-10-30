@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { loadChallenges } from './challenges/builtin';
+import { createKidChallenge } from './challenges/autoSuggest';
+import { draftFromChallenge } from './challenges/draft';
+import { ChallengeEditor } from './ui/adult/ChallengeEditor';
 import type { Answer, Challenge, ChallengeAnswers } from './challenges/types';
 import { allMotifs, BUILTIN_MOTIF_INFOS } from './motifs/library';
 import { Store, type ChallengePhotos, type CustomMotif, type Photo, type Group, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
@@ -41,7 +44,8 @@ type ScreenState =
   | { name: 'drawings' }
   | { name: 'draw'; motifId?: string }
   | { name: 'challenges' }
-  | { name: 'challenge'; id: string };
+  | { name: 'challenge'; id: string; from?: 'drawings' }
+  | { name: 'kid-challenge-edit'; id: string };
 
 export default function App() {
   const [store, setStore] = useState<Store | null>(null);
@@ -61,6 +65,11 @@ export default function App() {
   const motifs = allMotifs(customMotifs.filter((m) => !m.ownerProfileId));
   const ownDrawings = profile ? customMotifs.filter((m) => m.ownerProfileId === profile.id) : [];
   const kidMotifs = [...motifs, ...allMotifs(ownDrawings).filter((m) => !m.builtin)];
+  // Eigene Herausforderungen des Kindes, je Zeichnung.
+  const ownChallenges: Record<string, Challenge> = {};
+  for (const c of challenges ?? []) if (profile && c.ownerProfileId === profile.id) ownChallenges[c.motifId] = c;
+  const [busyDrawing, setBusyDrawing] = useState<string | null>(null);
+  const [askRegenerate, setAskRegenerate] = useState<CustomMotif | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -145,8 +154,33 @@ export default function App() {
     if (!store || !profile) return;
     if (motifId) await store.updateMotifDrawing(motifId, { image: r.image, width: r.width, height: r.height, drawing: r.doc });
     else await store.addMotif({ name: 'Mein Bild', source: 'drawing', image: r.image, width: r.width, height: r.height, drawing: r.doc, ownerProfileId: profile.id });
-    setCustomMotifs(await store.listMotifs());
+    const all = await store.listMotifs();
+    setCustomMotifs(all);
+    // Gibt es zum geänderten Bild schon eine Herausforderung, fragen, ob sie neu entstehen soll.
+    if (motifId && ownChallenges[motifId]) setAskRegenerate(all.find((m) => m.id === motifId) ?? null);
     setScreen({ name: 'drawings' });
+  };
+
+  /** Herausforderung zu einer Zeichnung des Kindes erstellen (oder neu erstellen). */
+  const makeKidChallenge = async (m: CustomMotif) => {
+    if (!store || !profile) return;
+    const info = allMotifs([m]).find((x) => x.id === m.id);
+    if (!info) return;
+    setBusyDrawing(m.id);
+    try {
+      const old = ownChallenges[m.id];
+      const c = await createKidChallenge(info, profile.id, old?.id);
+      if (old) {
+        await store.deleteAnswersForChallenge(old.id);
+        setAnswers(({ [old.id]: _a, ...rest }) => rest);
+        setPhotos(({ [old.id]: _p, ...rest }) => rest);
+      }
+      await store.saveChallenge(c, false, c.createdAt ?? Date.now());
+      setChallenges(await loadChallenges(store));
+      setScreen({ name: 'challenge', id: c.id, from: 'drawings' });
+    } finally {
+      setBusyDrawing(null);
+    }
   };
 
   if (error) return <div className="message">{error}</div>;
@@ -189,7 +223,7 @@ export default function App() {
 
   // Die Lehrkraft kann Herausforderungen für eine Gruppe ausblenden.
   const hidden = new Set(groups.find((g) => g.id === profile.groupId)?.hiddenChallenges ?? []);
-  const visibleChallenges = challenges && challenges.filter((c) => !hidden.has(c.id));
+  const visibleChallenges = challenges && challenges.filter((c) => !hidden.has(c.id) && !c.ownerProfileId);
 
   switch (screen.name) {
     case 'home':
@@ -230,8 +264,19 @@ export default function App() {
       return (
         <KidDrawings
           drawings={ownDrawings}
+          challenges={ownChallenges}
+          answers={answers}
+          busyId={busyDrawing}
+          askRegenerate={askRegenerate}
+          onRegenerate={(m, yes) => {
+            setAskRegenerate(null);
+            if (yes) makeKidChallenge(m);
+          }}
           onNew={() => setScreen({ name: 'draw' })}
           onEdit={(m) => setScreen({ name: 'draw', motifId: m.id })}
+          onCreate={makeKidChallenge}
+          onPlay={(c) => setScreen({ name: 'challenge', id: c.id, from: 'drawings' })}
+          onEditChallenge={(c) => setScreen({ name: 'kid-challenge-edit', id: c.id })}
           onBack={() => setScreen({ name: 'home' })}
         />
       );
@@ -264,14 +309,32 @@ export default function App() {
         <ChallengePlay
           key={`${profile.id}-${challenge.id}`}
           challenge={challenge}
-          motif={motifs.find((m) => m.id === challenge.motifId)}
+          motif={kidMotifs.find((m) => m.id === challenge.motifId)}
           answers={answers[challenge.id] ?? {}}
           onAnswer={(targetId, a) => saveAnswer(challenge.id, targetId, a)}
           photos={photos[challenge.id] ?? {}}
           onPhoto={(targetId, p) => savePhoto(challenge.id, targetId, p)}
           prefs={profile.prefs}
           onPrefsChange={setPrefs}
-          onBack={() => setScreen({ name: 'challenges' })}
+          onBack={() => setScreen(screen.from === 'drawings' ? { name: 'drawings' } : { name: 'challenges' })}
+        />
+      );
+    }
+    case 'kid-challenge-edit': {
+      const challenge = challenges?.find((c) => c.id === screen.id && c.ownerProfileId === profile.id);
+      const motif = challenge && kidMotifs.find((m) => m.id === challenge.motifId);
+      if (!challenge || !motif) return null;
+      return (
+        <ChallengeEditor
+          kid
+          draft={draftFromChallenge(challenge)}
+          motif={motif}
+          onCancel={() => setScreen({ name: 'drawings' })}
+          onSave={async (c) => {
+            await store.saveChallenge({ ...c, ownerProfileId: profile.id, createdAt: challenge.createdAt }, false, challenge.createdAt ?? Date.now());
+            setChallenges(await loadChallenges(store));
+            setScreen({ name: 'drawings' });
+          }}
         />
       );
     }

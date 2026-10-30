@@ -65,9 +65,13 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
                 selbst gemachte Figuren bleiben.
               </Item>
               <Item icon={<PenIcon />}>
-                Zeichnen: Formen antippen, dann verschieben, an den Punkten strecken, am runden Griff drehen; Farbe (auch eigene Farbe über das Farbrad), Umrandung, Kopieren,
-                Reihenfolge und Löschen für die gewählte Form. Gespeicherte Zeichnungen lassen sich später weiterbearbeiten. Unter
-                „Freischalten“ lässt sich das Zeichnen (Kachel auf der Startseite der Kinder) für eine Gruppe ausschalten; jedes Kind sieht nur seine eigenen Bilder.
+                Zeichnen: Formen antippen, dann verschieben, an den Punkten strecken, am runden Griff drehen; Farbe (auch eigene Farbe über das Farbrad),
+                Umrandung, Kopieren, Reihenfolge und Löschen für die gewählte Form. Gespeicherte Zeichnungen lassen sich später weiterbearbeiten.
+              </Item>
+              <Item>
+                Eigene Herausforderungen der Kinder (Kachel auf der Startseite): Das Kind zeichnet ein Bild und lässt daraus automatisch eine
+                Herausforderung machen (12 Zielfiguren, davon 3 unlösbar). Es kann sie im selben Editor wie hier ändern. Jedes Kind sieht nur seine
+                eigenen; sie stehen in der Detailansicht des Kindes. Unter „Freischalten“ lässt sich der Bereich für eine Gruppe ausschalten.
               </Item>
             </>
           )}

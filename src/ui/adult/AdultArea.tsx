@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { GRATIS } from '../../edition';
 import { isColorName, suggestGroupName } from '../../profiles/colors';
 import { BUILTIN_CHALLENGES, loadChallenges } from '../../challenges/builtin';
-import { newDraft, type Draft } from '../../challenges/draft';
+import { draftFromChallenge, newDraft, type Draft } from '../../challenges/draft';
 import type { Challenge } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
 import { newId, type CustomMotif, type Group, type Profile, type Store } from '../../storage/store';
@@ -34,20 +34,11 @@ interface Props {
 
 const BUILTIN_IDS = new Set(BUILTIN_CHALLENGES.map((c) => c.id));
 
-function draftFrom(c: Challenge): Draft {
-  return {
-    id: c.id,
-    name: c.name,
-    motifId: c.motifId,
-    plannedTotal: c.plan?.total ?? c.targets.length,
-    plannedUnsolvable: c.plan?.unsolvable ?? c.targets.filter((t) => !t.solvable).length,
-    targets: c.targets.map((t) => ({ ...t, raw: t.raw ?? t.image })),
-  };
-}
-
 /** Erwachsenenbereich: Gruppen (Kinder, Ergebnisse), Herausforderungen, eigene Motive. */
 export function AdultArea(props: Props) {
-  const { store, groups, onGroupsChange, profiles, onProfilesChange, customMotifs, onCustomMotifsChange, motifs, challenges, onChallengesChange, onExit } = props;
+  const { store, groups, onGroupsChange, profiles, onProfilesChange, customMotifs, onCustomMotifsChange, motifs, onChallengesChange, onExit } = props;
+  // Eigene Herausforderungen der Kinder erscheinen nur in deren Detailansicht.
+  const challenges = props.challenges.filter((c) => !c.ownerProfileId);
   const [section, setSection] = useState<AdultSection | null>(null);
   const [editing, setEditing] = useState<{ draft: Draft; createdAt: number } | null>(null);
   // Motiv anlegen: von wo aus (Motivverwaltung oder Startfigur-Auswahl)?
@@ -261,7 +252,7 @@ export function AdultArea(props: Props) {
             const motif = motifs.find((m) => m.id === motifId);
             setEditing({ draft: newDraft(`eigen-${newId()}`, motifId, motif?.name ?? 'Neue Herausforderung'), createdAt: Date.now() });
           }}
-          onEdit={(c) => setEditing({ draft: draftFrom(c), createdAt: c.createdAt ?? Date.now() })}
+          onEdit={(c) => setEditing({ draft: draftFromChallenge(c), createdAt: c.createdAt ?? Date.now() })}
           onDelete={async (id) => {
             await store.deleteChallenge(id);
             await reloadChallenges();

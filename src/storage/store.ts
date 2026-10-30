@@ -408,8 +408,14 @@ export class Store {
   }
 
   private async clearProfile(id: string, removeProfile: boolean): Promise<void> {
-    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos', 'motifs'], 'readwrite');
+    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos', 'motifs', 'challenges'], 'readwrite');
     if (removeProfile) await tx.objectStore('profiles').delete(id);
+    // Eigene Herausforderungen des Kindes
+    let c = await tx.objectStore('challenges').openCursor();
+    while (c) {
+      if (c.value.ownerProfileId === id) await c.delete();
+      c = await c.continue();
+    }
     // Eigene Zeichnungen des Kindes
     let m = await tx.objectStore('motifs').openCursor();
     while (m) {

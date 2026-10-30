@@ -88,10 +88,13 @@ export function KidDetail(props: { store: Store; group: Group; profile: Profile;
   const { store, group, profile, challenges, onBack } = props;
   const [data, setData] = useState<KidData | null>(null);
   const [printing, setPrinting] = useState<'pick' | Challenge[] | null>(null);
+  const [own, setOwn] = useState<Challenge[]>([]);
 
   useEffect(() => {
     let alive = true;
     loadKid(store, profile).then((d) => alive && setData(d));
+    // Eigene Herausforderungen des Kindes (zu seinen Zeichnungen)
+    store.listChallenges().then((all) => alive && setOwn(all.filter((c) => c.ownerProfileId === profile.id)));
     return () => {
       alive = false;
     };
@@ -110,7 +113,15 @@ export function KidDetail(props: { store: Store; group: Group; profile: Profile;
       </div>
       <p className="hint">Je Zielfigur: oben die Zielfigur, darunter die gesicherte Figur (Fotoapparat), darunter die Antwort.</p>
       {data && challenges.map((c) => <SolutionGrid key={c.id} challenge={c} answers={data.answers[c.id] ?? {}} photos={data.photos[c.id] ?? {}} />)}
-      {printing === 'pick' && <PrintDialog challenges={challenges} onCancel={() => setPrinting(null)} onPrint={setPrinting} />}
+      {data && own.length > 0 && (
+        <>
+          <h2 className="own-heading">Eigene Herausforderungen</h2>
+          {own.map((c) => (
+            <SolutionGrid key={c.id} challenge={c} answers={data.answers[c.id] ?? {}} photos={data.photos[c.id] ?? {}} />
+          ))}
+        </>
+      )}
+      {printing === 'pick' && <PrintDialog challenges={[...challenges, ...own]} onCancel={() => setPrinting(null)} onPrint={setPrinting} />}
       {data && Array.isArray(printing) && <PrintSheets group={group} kids={[data]} challenges={printing} onDone={() => setPrinting(null)} />}
     </div>
   );

@@ -2,7 +2,7 @@
  * Entwurf einer eigenen Herausforderung im Editor (rein, ohne DOM).
  */
 import { shuffle, solvableFirst } from './generate';
-import type { Target, TargetKind } from './types';
+import type { Challenge, Target, TargetKind } from './types';
 
 export interface DraftTarget extends Target {
   /** Bild der ganzen Arbeitsfläche (unbeschnitten), Grundlage für den Ausschnitt. */
@@ -26,6 +26,18 @@ export const DEFAULT_UNSOLVABLE = 3;
 
 export function newDraft(id: string, motifId: string, name: string): Draft {
   return { id, name, motifId, plannedTotal: DEFAULT_TOTAL, plannedUnsolvable: DEFAULT_UNSOLVABLE, targets: [] };
+}
+
+/** Entwurf zum Bearbeiten einer gespeicherten Herausforderung. */
+export function draftFromChallenge(c: Challenge): Draft {
+  return {
+    id: c.id,
+    name: c.name,
+    motifId: c.motifId,
+    plannedTotal: c.plan?.total ?? c.targets.length,
+    plannedUnsolvable: c.plan?.unsolvable ?? c.targets.filter((t) => !t.solvable).length,
+    targets: c.targets.map((t) => ({ ...t, raw: t.raw ?? t.image })),
+  };
 }
 
 export function addTarget(d: Draft, t: DraftTarget): Draft {

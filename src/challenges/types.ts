@@ -39,6 +39,8 @@ export interface Challenge {
   plan?: { total: number; unsolvable: number };
   /** Erstellungszeit (nur bei selbst erstellten; bestimmt die Reihenfolge). */
   createdAt?: number;
+  /** Eigene Herausforderung eines Kindes (zu seiner Zeichnung); nur dieses Kind sieht sie. */
+  ownerProfileId?: string;
 }
 
 export const unsolvableCount = (c: Challenge): number => c.targets.filter((t) => !t.solvable).length;

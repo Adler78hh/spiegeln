@@ -9,11 +9,11 @@ interface Props {
   onSwitchProfile: () => void;
   onFree: () => void;
   onChallenges: () => void;
-  /** Nur wenn die Lehrkraft das Zeichnen für die Gruppe freigeschaltet hat. */
+  /** Eigene Herausforderungen (zeichnen und daraus Herausforderungen machen), außer die Lehrkraft schaltet sie aus. */
   onDraw?: () => void;
 }
 
-/** Startbildschirm: zwei (mit Zeichnen drei) große Kacheln, oben das eigene Tier. */
+/** Startbildschirm: zwei (mit eigenen Herausforderungen drei) große Kacheln, oben das eigene Tier. */
 export function Home({ profile, group, onSwitchProfile, onFree, onChallenges, onDraw }: Props) {
   const tint = tintOf(findColor(group?.color ?? 'weiss').hex);
   return (
@@ -36,7 +36,7 @@ export function Home({ profile, group, onSwitchProfile, onFree, onChallenges, on
         {onDraw && (
           <button className="home-tile" onClick={onDraw}>
             <PenIcon size={120} />
-            <span>Zeichnen</span>
+            <span>Eigene Herausforderungen</span>
           </button>
         )}
       </div>

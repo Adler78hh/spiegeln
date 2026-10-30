@@ -2876,3 +2876,76 @@ button.matrix-kid:active {
   align-items: center;
   gap: 6px;
 }
+
+/* Eigene Herausforderungen der Kinder */
+.kid-drawing {
+  position: relative;
+}
+.challenge-badge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+}
+.tile-busy {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 253, 248, 0.75);
+  border-radius: inherit;
+}
+.kid-actions {
+  align-items: center;
+  gap: 16px;
+  width: 520px;
+}
+.kid-actions-img {
+  max-width: 160px;
+  max-height: 160px;
+  object-fit: contain;
+}
+.kid-question {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+.kid-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.kid-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 168px;
+  padding: 16px 8px;
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+  color: var(--ink, #4a3b2f);
+  font: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+.kid-action.primary {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.own-heading {
+  margin: 24px 0 4px;
+  font-size: 20px;
+}

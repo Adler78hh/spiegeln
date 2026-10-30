@@ -314,15 +314,15 @@ export const ShuffleIcon = () => (
 );
 
 /** Funkeln: automatische Vorschläge. */
-export const SparkleIcon = () => (
-  <Icon>
+export const SparkleIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
     <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
     <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" />
   </Icon>
 );
 
-export const EditIcon = () => (
-  <Icon>
+export const EditIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
     <path d="M4 20h4L19 9l-4-4L4 16z" />
   </Icon>
 );

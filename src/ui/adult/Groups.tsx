@@ -343,8 +343,10 @@ export function GroupPage(props: PageProps) {
                   <PenIcon size={36} />
                 </span>
                 <span className="access-name">
-                  Zeichnen
-                  <span className="row-meta">Die Kinder können eigene Bilder zeichnen; jedes sieht nur seine eigenen. Häkchen entfernen schaltet es aus.</span>
+                  Eigene Herausforderungen
+                  <span className="row-meta">
+                    Die Kinder zeichnen eigene Bilder und machen daraus Herausforderungen; jedes sieht nur seine eigenen. Häkchen entfernen schaltet es aus.
+                  </span>
                 </span>
               </label>
             )}
