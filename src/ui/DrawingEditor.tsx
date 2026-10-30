@@ -424,19 +424,37 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
           ))}
         </div>
 
-        <div className="swatches" role="radiogroup" aria-label={selected ? (shape ? 'Füllfarbe' : 'Strichfarbe') : 'Farbe'}>
+        {/* Farbpaare: Flächenfarbe oben, gleiche Randfarbe direkt darunter. */}
+        <div className="color-pairs" role="group" aria-label="Farben">
           {[...PALETTE, ...ownColors].map((c) => (
-            <button
-              key={c}
-              role="radio"
-              aria-checked={activeColor === c}
-              aria-label={`Farbe ${c}`}
-              className={`swatch ${activeColor === c ? 'selected' : ''}`}
-              style={{ background: c }}
-              onClick={() => pickColor(c)}
-            />
+            <div key={c} className="color-pair">
+              <button
+                aria-pressed={activeColor === c}
+                aria-label={`Farbe ${c}`}
+                className={`swatch ${activeColor === c ? 'selected' : ''}`}
+                style={{ background: c }}
+                onClick={() => pickColor(c)}
+              />
+              <button
+                aria-pressed={shape?.line === c}
+                aria-label={`Linienfarbe ${c}`}
+                className={`swatch line-swatch ${shape?.line === c ? 'selected' : ''} ${shape?.outline ? '' : 'is-dim'}`}
+                style={{ borderColor: c }}
+                disabled={!shape?.outline}
+                onClick={() => updateSelected((e) => (e.type === 'shape' ? { ...e, line: c } : e))}
+              />
+            </div>
           ))}
-          <button className="swatch own-color" aria-label="Eigene Farbe" title="Eigene Farbe" onClick={() => setWheelFor('fill')} />
+          <div className="color-pair">
+            <button className="swatch own-color" aria-label="Eigene Farbe" title="Eigene Farbe" onClick={() => setWheelFor('fill')} />
+            <button
+              className={`swatch own-color line-swatch ${shape?.outline ? '' : 'is-dim'}`}
+              aria-label="Eigene Linienfarbe"
+              title="Eigene Linienfarbe"
+              disabled={!shape?.outline}
+              onClick={() => setWheelFor('line')}
+            />
+          </div>
         </div>
 
         <div className="tool-row" role="radiogroup" aria-label="Strichstärke">
@@ -498,27 +516,6 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
             >
               <TrashIcon />
             </button>
-          </div>
-          <div className={`swatches line-swatches ${shape?.outline ? '' : 'is-dim'}`} role="radiogroup" aria-label="Linienfarbe">
-            {[...PALETTE, ...ownColors].map((c) => (
-              <button
-                key={c}
-                role="radio"
-                aria-checked={shape?.line === c}
-                aria-label={`Linienfarbe ${c}`}
-                className={`swatch line-swatch ${shape?.line === c ? 'selected' : ''}`}
-                style={{ borderColor: c }}
-                disabled={!shape?.outline}
-                onClick={() => updateSelected((e) => (e.type === 'shape' ? { ...e, line: c } : e))}
-              />
-            ))}
-            <button
-              className="swatch own-color line-swatch"
-              aria-label="Eigene Linienfarbe"
-              title="Eigene Linienfarbe"
-              disabled={!shape?.outline}
-              onClick={() => setWheelFor('line')}
-            />
           </div>
         </div>
 

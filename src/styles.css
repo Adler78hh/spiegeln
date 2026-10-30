@@ -2830,3 +2830,26 @@ button.matrix-kid:active {
   width: 48px;
   height: 48px;
 }
+
+/* Farbpaare: Fläche oben, gleiche Randfarbe darunter. */
+.color-pairs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 6px;
+}
+.color-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.color-pair .swatch {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+}
+.line-swatch {
+  box-shadow: 0 0 0 1px var(--border);
+}
+.line-swatch.is-dim {
+  opacity: 0.35;
+}
