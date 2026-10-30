@@ -8,7 +8,7 @@
  */
 import type { Vec2 } from '../geometry';
 
-export type ShapeKind = 'square' | 'circle' | 'rtriangle' | 'etriangle' | 'parallelogram' | 'trapezoid';
+export type ShapeKind = 'square' | 'circle' | 'rtriangle' | 'etriangle' | 'rhombus' | 'parallelogram' | 'trapezoid';
 
 interface Frame {
   id: string;
@@ -59,6 +59,8 @@ const SIZE: Record<ShapeKind, [number, number]> = {
   // Quadrat mit zwei angesetzten halben Quadraten (45°-Schrägen).
   parallelogram: [3, 1],
   trapezoid: [3, 1],
+  // Raute aus zwei gleichseitigen Dreiecken (isometrisch), flach liegend: Seiten a, Winkel 60°/120°.
+  rhombus: [Math.sqrt(3), 1],
 };
 
 /** Umriss der Form im Rahmen (−0,5…0,5); null = Ellipse. */
@@ -77,6 +79,8 @@ export function shapeOutline(shape: ShapeKind): Vec2[] | null {
       return [{ x: -s, y: -0.5 }, { x: 0.5, y: -0.5 }, { x: s, y: 0.5 }, { x: -0.5, y: 0.5 }];
     case 'trapezoid': // unten 3a, oben a
       return [{ x: -s, y: -0.5 }, { x: s, y: -0.5 }, { x: 0.5, y: 0.5 }, { x: -0.5, y: 0.5 }];
+    case 'rhombus':
+      return [{ x: 0, y: -0.5 }, { x: 0.5, y: 0 }, { x: 0, y: 0.5 }, { x: -0.5, y: 0 }];
   }
 }
 

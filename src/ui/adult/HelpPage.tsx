@@ -60,7 +60,7 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
             <>
               <Item>Eigene Motive (Foto oder Zeichnung) und eigene Herausforderungen lassen sich im Erwachsenenbereich anlegen.</Item>
               <Item icon={<PenIcon />}>
-                Zeichnen: Formen antippen, dann verschieben, an den Punkten strecken, am runden Griff drehen; Farbe, Umrandung, Kopieren,
+                Zeichnen: Formen antippen, dann verschieben, an den Punkten strecken, am runden Griff drehen; Farbe (auch eigene Farbe über das Farbrad), Umrandung, Kopieren,
                 Reihenfolge und Löschen für die gewählte Form. Gespeicherte Zeichnungen lassen sich später weiterbearbeiten. Unter
                 „Freischalten“ lässt sich das Zeichnen (Kachel auf der Startseite der Kinder) für eine Gruppe ausschalten; jedes Kind sieht nur seine eigenen Bilder.
               </Item>

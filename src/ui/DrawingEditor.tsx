@@ -23,6 +23,7 @@ import {
   type ShapeKind,
 } from '../drawing/elements';
 import type { Vec2 } from '../geometry';
+import { ColorWheel } from './ColorWheel';
 import {
   BackIcon,
   BackwardIcon,
@@ -35,6 +36,7 @@ import {
   EraserIcon,
   ForwardIcon,
   ParallelogramIcon,
+  RhombusIcon,
   PenIcon,
   RightTriangleIcon,
   SelectIcon,
@@ -125,6 +127,7 @@ const SHAPES: Array<{ id: ShapeKind; label: string; icon: ReactNode }> = [
   { id: 'circle', label: 'Kreis', icon: <CircleShapeIcon /> },
   { id: 'rtriangle', label: 'Rechtwinkliges Dreieck', icon: <RightTriangleIcon /> },
   { id: 'etriangle', label: 'Gleichseitiges Dreieck', icon: <EquilateralTriangleIcon /> },
+  { id: 'rhombus', label: 'Raute', icon: <RhombusIcon /> },
   { id: 'parallelogram', label: 'Parallelogramm', icon: <ParallelogramIcon /> },
   { id: 'trapezoid', label: 'Trapez', icon: <TrapezoidIcon /> },
 ];
@@ -150,6 +153,9 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
   const [width, setWidth] = useState(WIDTHS[1]);
   const [snap, setSnap] = useState(false);
   const [magnet, setMagnet] = useState(true);
+  // Farbrad für Füll-/Strichfarbe oder Linienfarbe; zuletzt gewählte eigene Farben.
+  const [wheelFor, setWheelFor] = useState<null | 'fill' | 'line'>(null);
+  const [ownColors, setOwnColors] = useState<string[]>([]);
   const marks = useRef<SnapMarks | null>(null);
 
   // Während des Ziehens wird nur gezeichnet; gespeichert wird beim Loslassen.
@@ -419,7 +425,7 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
         </div>
 
         <div className="swatches" role="radiogroup" aria-label={selected ? (shape ? 'Füllfarbe' : 'Strichfarbe') : 'Farbe'}>
-          {PALETTE.map((c) => (
+          {[...PALETTE, ...ownColors].map((c) => (
             <button
               key={c}
               role="radio"
@@ -430,6 +436,7 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
               onClick={() => pickColor(c)}
             />
           ))}
+          <button className="swatch own-color" aria-label="Eigene Farbe" title="Eigene Farbe" onClick={() => setWheelFor('fill')} />
         </div>
 
         <div className="tool-row" role="radiogroup" aria-label="Strichstärke">
@@ -493,7 +500,7 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
             </button>
           </div>
           <div className={`swatches line-swatches ${shape?.outline ? '' : 'is-dim'}`} role="radiogroup" aria-label="Linienfarbe">
-            {PALETTE.map((c) => (
+            {[...PALETTE, ...ownColors].map((c) => (
               <button
                 key={c}
                 role="radio"
@@ -505,6 +512,13 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
                 onClick={() => updateSelected((e) => (e.type === 'shape' ? { ...e, line: c } : e))}
               />
             ))}
+            <button
+              className="swatch own-color line-swatch"
+              aria-label="Eigene Linienfarbe"
+              title="Eigene Linienfarbe"
+              disabled={!shape?.outline}
+              onClick={() => setWheelFor('line')}
+            />
           </div>
         </div>
 
@@ -525,6 +539,18 @@ export function DrawingEditor({ onSave, onCancel, background, initial }: Props) 
           </button>
         </div>
       </aside>
+      {wheelFor && (
+        <ColorWheel
+          initial={wheelFor === 'line' ? (shape?.line ?? '#4a3b2f') : activeColor}
+          onCancel={() => setWheelFor(null)}
+          onPick={(c) => {
+            if (!PALETTE.includes(c)) setOwnColors((o) => [...o.filter((x) => x !== c), c].slice(-4));
+            if (wheelFor === 'line') updateSelected((e) => (e.type === 'shape' ? { ...e, line: c } : e));
+            else pickColor(c);
+            setWheelFor(null);
+          }}
+        />
+      )}
     </div>
   );
 }

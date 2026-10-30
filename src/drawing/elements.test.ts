@@ -49,6 +49,16 @@ describe('Formen der Vorauswahl', () => {
   });
 });
 
+describe('Raute', () => {
+  it('alle Seiten a, Winkel 60° und 120° (zwei gleichseitige Dreiecke)', () => {
+    const r = createShape('rhombus', '#fff');
+    const v = shapeOutline('rhombus')!.map((q) => ({ x: q.x * r.w, y: q.y * r.h }));
+    for (let i = 0; i < 4; i++) close(Math.hypot(v[(i + 1) % 4].x - v[i].x, v[(i + 1) % 4].y - v[i].y), BASE);
+    // kurze Diagonale = a (gemeinsame Seite der beiden Dreiecke)
+    close(Math.hypot(v[2].x - v[0].x, v[2].y - v[0].y), BASE);
+  });
+});
+
 describe('Auswählen', () => {
   it('trifft gedrehte Formen und Striche, oberstes Element zuerst', () => {
     const a = createShape('square', '#f00');

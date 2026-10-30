@@ -196,6 +196,12 @@ export const EquilateralTriangleIcon = () => (
   </Icon>
 );
 
+export const RhombusIcon = () => (
+  <Icon>
+    <path d="M12 7l9 5-9 5-9-5z" fill="currentColor" fillOpacity=".3" />
+  </Icon>
+);
+
 export const ParallelogramIcon = () => (
   <Icon>
     <path d="M8 8h14l-6 8H2z" fill="currentColor" fillOpacity=".3" />
