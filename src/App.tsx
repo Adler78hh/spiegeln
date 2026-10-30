@@ -200,7 +200,7 @@ export default function App() {
           onSwitchProfile={switchProfile}
           onFree={() => setScreen({ name: 'free-pick' })}
           onChallenges={() => setScreen({ name: 'challenges' })}
-          onDraw={!GRATIS && groups.find((g) => g.id === profile.groupId)?.drawingEnabled ? () => setScreen({ name: 'drawings' }) : undefined}
+          onDraw={!GRATIS && groups.find((g) => g.id === profile.groupId)?.drawingEnabled !== false ? () => setScreen({ name: 'drawings' }) : undefined}
         />
       );
     case 'free-pick':

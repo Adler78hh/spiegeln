@@ -20,7 +20,7 @@ import { AREA_COLOR, createFigureBuffer, drawInvertedComposite, INVERT_COLORS, i
 
 export const COLORS = {
   area: AREA_COLOR,
-  areaBorder: '#d9cdb8',
+  areaBorder: '#c3d6d9',
   line: '#e0322b',
   lineActive: '#b81d17',
   /** Spiegelnde Seite der Achse. */

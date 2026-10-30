@@ -25,13 +25,13 @@ export function Home({ profile, group, onSwitchProfile, onFree, onChallenges, on
         </button>
       </div>
       <div className="home">
-        <button className="home-tile" onClick={onFree}>
-          <MirrorIcon size={120} />
-          <span>Freies Spiegeln</span>
-        </button>
         <button className="home-tile" onClick={onChallenges}>
           <ChallengeIcon size={120} />
           <span>Herausforderungen</span>
+        </button>
+        <button className="home-tile" onClick={onFree}>
+          <MirrorIcon size={120} />
+          <span>Freies Spiegeln</span>
         </button>
         {onDraw && (
           <button className="home-tile" onClick={onDraw}>

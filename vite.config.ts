@@ -59,8 +59,8 @@ export default defineConfig(({ mode }) => {
           scope: "./",
           display: "standalone",
           orientation: "any",
-          background_color: "#f6f1e7",
-          theme_color: "#f6f1e7",
+          background_color: "#e6f0f1",
+          theme_color: "#e6f0f1",
           icons: [
             { src: "pwa-192.png", sizes: "192x192", type: "image/png" },
             { src: "pwa-512.png", sizes: "512x512", type: "image/png" },

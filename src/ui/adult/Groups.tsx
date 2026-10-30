@@ -338,13 +338,13 @@ export function GroupPage(props: PageProps) {
           <>
             {props.onDrawingToggle && (
               <label className="access-row drawing-access">
-                <input type="checkbox" checked={!!group.drawingEnabled} onChange={(e) => props.onDrawingToggle!(e.target.checked)} />
+                <input type="checkbox" checked={group.drawingEnabled !== false} onChange={(e) => props.onDrawingToggle!(e.target.checked)} />
                 <span className="access-motif access-icon">
                   <PenIcon size={36} />
                 </span>
                 <span className="access-name">
                   Zeichnen
-                  <span className="row-meta">Die Kinder können eigene Bilder zeichnen; jedes sieht nur seine eigenen.</span>
+                  <span className="row-meta">Die Kinder können eigene Bilder zeichnen; jedes sieht nur seine eigenen. Häkchen entfernen schaltet es aus.</span>
                 </span>
               </label>
             )}

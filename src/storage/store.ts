@@ -40,7 +40,7 @@ export interface Group {
   createdAt: number;
   /** Für diese Gruppe ausgeblendete Herausforderungen (neue sind sichtbar). */
   hiddenChallenges?: string[];
-  /** Zeichnen-Editor für die Kinder dieser Gruppe freigeschaltet. */
+  /** Zeichnen für die Kinder dieser Gruppe; nur `false` schaltet es aus (Standard: an). */
   drawingEnabled?: boolean;
 }
 

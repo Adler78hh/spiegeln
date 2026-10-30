@@ -62,7 +62,7 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
               <Item icon={<PenIcon />}>
                 Zeichnen: Formen antippen, dann verschieben, an den Punkten strecken, am runden Griff drehen; Farbe, Umrandung, Kopieren,
                 Reihenfolge und Löschen für die gewählte Form. Gespeicherte Zeichnungen lassen sich später weiterbearbeiten. Unter
-                „Freischalten“ kann das Zeichnen für eine Gruppe eingeschaltet werden; jedes Kind sieht nur seine eigenen Bilder.
+                „Freischalten“ lässt sich das Zeichnen (Kachel auf der Startseite der Kinder) für eine Gruppe ausschalten; jedes Kind sieht nur seine eigenen Bilder.
               </Item>
             </>
           )}
