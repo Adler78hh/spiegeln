@@ -9,6 +9,7 @@
  * - photos:     Sicherungen (Fotoapparat) pro Profil × Herausforderung × Zielfigur
  * - challenges: Herausforderungen (vorinstalliert und selbst erstellt)
  * - inbox:      Posteingang: verschickte Herausforderungen für eine Gruppe oder ein Kind
+ * - sendlog:    Protokoll: welches Kind wem was geschickt hat (für die Lehrkraft)
  */
 import { GRATIS } from '../edition';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
@@ -122,6 +123,21 @@ export interface InboxItem extends Parcel {
   createdAt: number;
 }
 
+/** Ein Kind hat einem anderen eine Herausforderung geschickt. */
+export interface SendRecord {
+  id: string;
+  /** Eintrag im Posteingang des Empfängers. */
+  inboxId: string;
+  groupId: string;
+  from: Pick<Profile, 'id' | 'name' | 'animal'>;
+  to: Pick<Profile, 'id' | 'name' | 'animal'>;
+  challengeName: string;
+  /** Bild der Figur. */
+  image: string;
+  status: 'offen' | 'angenommen' | 'abgelehnt';
+  createdAt: number;
+}
+
 /** Datei zum Verschicken einer Herausforderung an ein anderes Gerät. */
 export interface ParcelFile {
   app: 'spiegeln';
@@ -162,6 +178,7 @@ interface SpiegelnSchema extends DBSchema {
   challenges: { key: string; value: StoredChallenge };
   motifs: { key: string; value: CustomMotif };
   inbox: { key: string; value: InboxItem };
+  sendlog: { key: string; value: SendRecord };
 }
 
 type StoredChallenge = Challenge & { builtin: boolean; order: number };
@@ -188,6 +205,7 @@ export interface Backup {
   builtinVersions: Record<string, number | null>;
   /** Posteingänge (fehlt in älteren Sicherungen). */
   inbox?: InboxItem[];
+  sendlog?: SendRecord[];
 }
 
 /**
@@ -207,7 +225,7 @@ export function checkBackup(raw: unknown, gratis: boolean): Backup {
 
 /** Eigene Datenbank je Ausgabe: Gratis- und Vollversion teilen sich keine Daten. */
 export const DB_NAME = GRATIS ? 'spiegeln-gratis' : 'spiegeln';
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 export function newId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -248,6 +266,9 @@ export class Store {
         if (oldVersion < 5) {
           db.createObjectStore('inbox', { keyPath: 'id' });
         }
+        if (oldVersion < 6) {
+          db.createObjectStore('sendlog', { keyPath: 'id' });
+        }
       },
     });
     return new Store(db);
@@ -275,6 +296,7 @@ export class Store {
       challenges: challenges.filter((c) => !c.builtin),
       builtinVersions: Object.fromEntries(challenges.filter((c) => c.builtin).map((c) => [c.id, c.version ?? null])),
       inbox: await this.db.getAll('inbox'),
+      sendlog: await this.db.getAll('sendlog'),
     };
   }
 
@@ -289,7 +311,7 @@ export class Store {
     const sameVersion = new Set(deviceBuiltins.filter((c) => (c.version ?? null) === b.builtinVersions[c.id]).map((c) => c.id));
     const keep = (challengeId: string) => customIds.has(challengeId) || sameVersion.has(challengeId);
 
-    const stores = ['groups', 'profiles', 'answers', 'photos', 'snapshots', 'motifs', 'challenges', 'inbox'] as const;
+    const stores = ['groups', 'profiles', 'answers', 'photos', 'snapshots', 'motifs', 'challenges', 'inbox', 'sendlog'] as const;
     const tx = this.db.transaction(stores, 'readwrite');
     for (const s of stores) if (s !== 'challenges') await tx.objectStore(s).clear();
     const ch = tx.objectStore('challenges');
@@ -306,6 +328,7 @@ export class Store {
     for (const m of b.motifs) await tx.objectStore('motifs').put(m);
     for (const c of b.challenges) await ch.put({ ...c, builtin: false });
     for (const i of b.inbox ?? []) await tx.objectStore('inbox').put(i);
+    for (const r of b.sendlog ?? []) await tx.objectStore('sendlog').put(r);
     await tx.done;
   }
 
@@ -390,6 +413,7 @@ export class Store {
     const profiles = (await this.listProfiles()).filter((p) => p.groupId === id);
     for (const p of profiles) await this.deleteProfile(p.id);
     for (const i of await this.db.getAll('inbox')) if (i.toGroupId === id) await this.db.delete('inbox', i.id);
+    for (const r of await this.db.getAll('sendlog')) if (r.groupId === id) await this.db.delete('sendlog', r.id);
     await this.db.delete('groups', id);
   }
 
@@ -465,7 +489,12 @@ export class Store {
   }
 
   private async clearProfile(id: string, removeProfile: boolean): Promise<void> {
-    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos', 'motifs', 'challenges', 'inbox'], 'readwrite');
+    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos', 'motifs', 'challenges', 'inbox', 'sendlog'], 'readwrite');
+    let log = await tx.objectStore('sendlog').openCursor();
+    while (log) {
+      if (log.value.from.id === id || log.value.to.id === id) await log.delete();
+      log = await log.continue();
+    }
     if (removeProfile) await tx.objectStore('profiles').delete(id);
     // Posteingang des Kindes
     let inbox = await tx.objectStore('inbox').openCursor();
@@ -610,6 +639,38 @@ export class Store {
     await this.deleteAnswersForChallenge(id);
   }
 
+  // ---------- Namen der Kinderbilder ----------
+
+  /** Name für das nächste Bild eines Kindes: „Bild von Affe 3“. */
+  async nextDrawingName(profile: Profile): Promise<string> {
+    const base = `Bild von ${profile.name}`;
+    const used = (await this.db.getAll('motifs'))
+      .filter((m) => m.ownerProfileId === profile.id && !m.received && m.name.startsWith(base))
+      .map((m) => Number(m.name.slice(base.length).trim()) || 0);
+    return `${base} ${Math.max(0, ...used) + 1}`;
+  }
+
+  /** Frühere Kinderbilder hießen alle „Mein Bild“: durchnummerieren (samt Herausforderung). */
+  async nameOldDrawings(): Promise<boolean> {
+    const profiles = new Map((await this.listProfiles()).map((p) => [p.id, p]));
+    const old = (await this.db.getAll('motifs')).filter((m) => m.ownerProfileId && !m.received && m.name === 'Mein Bild').sort((a, b) => a.createdAt - b.createdAt);
+    for (const m of old) {
+      const p = profiles.get(m.ownerProfileId!);
+      if (p) await this.renameDrawing(m.id, await this.nextDrawingName(p));
+    }
+    return old.length > 0;
+  }
+
+  /** Benennt ein Kinderbild und die Herausforderung dazu um. */
+  async renameDrawing(motifId: string, name: string): Promise<void> {
+    const m = await this.db.get('motifs', motifId);
+    if (!m || !name.trim()) return;
+    await this.db.put('motifs', { ...m, name: name.trim() });
+    for (const c of await this.db.getAll('challenges')) {
+      if (c.motifId === motifId && c.ownerProfileId) await this.db.put('challenges', { ...c, name: name.trim() });
+    }
+  }
+
   // ---------- Verschicken und Posteingang ----------
 
   /** Paket aus einer Herausforderung und ihrer Figur (nur eigene Motive). */
@@ -624,17 +685,44 @@ export class Store {
     return (await this.db.getAll('inbox')).sort((a, b) => a.createdAt - b.createdAt);
   }
 
-  async send(parcel: Parcel, to: { groupId: string } | { profileId: string }): Promise<void> {
+  /** Legt das Paket in einen Posteingang; liefert die ID des Eintrags. */
+  async send(parcel: Parcel, to: { groupId: string } | { profileId: string }): Promise<string> {
+    const id = newId();
     await this.db.put('inbox', {
       ...parcel,
-      id: newId(),
+      id,
       ...('groupId' in to ? { toGroupId: to.groupId } : { toProfileId: to.profileId }),
+      createdAt: Date.now(),
+    });
+    return id;
+  }
+
+  /** Ein Kind schickt einem anderen Kind seiner Gruppe eine Herausforderung (mit Protokoll). */
+  async sendToKid(challenge: Challenge, from: Profile, to: Profile, groupName?: string): Promise<void> {
+    const parcel = await this.pack(challenge, { name: from.name, animal: from.animal, groupName });
+    const inboxId = await this.send(parcel, { profileId: to.id });
+    const pick = (p: Profile) => ({ id: p.id, name: p.name, animal: p.animal });
+    await this.db.put('sendlog', {
+      id: newId(),
+      inboxId,
+      groupId: from.groupId,
+      from: pick(from),
+      to: pick(to),
+      challengeName: challenge.name,
+      image: parcel.motif.image,
+      status: 'offen',
       createdAt: Date.now(),
     });
   }
 
-  async deleteInbox(id: string): Promise<void> {
+  async listSendLog(groupId: string): Promise<SendRecord[]> {
+    return (await this.db.getAll('sendlog')).filter((r) => r.groupId === groupId).sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  /** Eintrag aus dem Posteingang entfernen (angenommen oder abgelehnt; im Protokoll vermerkt). */
+  async deleteInbox(id: string, status: 'angenommen' | 'abgelehnt' = 'abgelehnt'): Promise<void> {
     await this.db.delete('inbox', id);
+    for (const r of await this.db.getAll('sendlog')) if (r.inboxId === id) await this.db.put('sendlog', { ...r, status });
   }
 
   /**

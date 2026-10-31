@@ -180,6 +180,13 @@ export function AdultArea(props: Props) {
             profiles={profiles}
             challenges={props.challenges}
             onTest={setTesting}
+            figureOf={(id) => customMotifs.find((m) => m.id === id)?.image}
+            onSent={() => void reloadInbox()}
+            onRename={async (c, name) => {
+              await store.renameDrawing(c.motifId, name);
+              await reloadChallenges();
+              onCustomMotifsChange(await store.listMotifs());
+            }}
             onAdopted={async () => {
               await reloadChallenges();
               await reloadGroups();
@@ -258,7 +265,14 @@ export function AdultArea(props: Props) {
       }
       return (
         <>
-          <GroupList groups={groups} profiles={profiles} onOpen={openGroup} onNew={() => setCreatingGroup(true)} onBack={() => setSection(null)} />
+          <GroupList
+            groups={groups}
+            profiles={profiles}
+            inboxCounts={Object.fromEntries(groups.map((g) => [g.id, inbox.filter((i) => i.toGroupId === g.id).length]))}
+            onOpen={openGroup}
+            onNew={() => setCreatingGroup(true)}
+            onBack={() => setSection(null)}
+          />
           {creatingGroup && (
             <NewGroupDialog
               groups={groups}
@@ -318,6 +332,6 @@ export function AdultArea(props: Props) {
         />
       );
     default:
-      return <AdultHome onOpen={setSection} onExit={onExit} />;
+      return <AdultHome onOpen={setSection} onExit={onExit} inboxCount={inbox.filter((i) => i.toGroupId).length} />;
   }
 }

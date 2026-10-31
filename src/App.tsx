@@ -7,6 +7,7 @@ import type { Answer, Challenge, ChallengeAnswers } from './challenges/types';
 import { allMotifs, BUILTIN_MOTIF_INFOS } from './motifs/library';
 import { Store, type ChallengePhotos, type CustomMotif, type InboxItem, type Photo, type Group, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
 import { KidInbox } from './ui/KidInbox';
+import { useUndo } from './ui/useUndo';
 import { ChallengeList } from './ui/ChallengeList';
 import { ChallengePlay } from './ui/ChallengePlay';
 import { FreeMirror } from './ui/FreeMirror';
@@ -76,6 +77,7 @@ export default function App() {
     else ownChallenges[c.motifId] = c;
   }
   const [kidInbox, setKidInbox] = useState<InboxItem[]>([]);
+  const undo = useUndo();
   const [busyDrawing, setBusyDrawing] = useState<string | null>(null);
   const [askRegenerate, setAskRegenerate] = useState<CustomMotif | null>(null);
 
@@ -92,6 +94,7 @@ export default function App() {
         setGroups(data.groups);
         // Gratisversion: neu hinzugekommene Tiere ergänzen, Reihenfolge angleichen.
         setProfiles(GRATIS && data.groups[0] ? await s.syncAllAnimals(data.groups[0].id) : data.profiles);
+        await s.nameOldDrawings();
         setCustomMotifs(await s.listMotifs());
         const c = await loadChallenges(s);
         if (!alive) return;
@@ -162,7 +165,7 @@ export default function App() {
   const saveKidDrawing = async (motifId: string | undefined, r: DrawingResult) => {
     if (!store || !profile) return;
     if (motifId) await store.updateMotifDrawing(motifId, { image: r.image, width: r.width, height: r.height, drawing: r.doc });
-    else await store.addMotif({ name: 'Mein Bild', source: 'drawing', image: r.image, width: r.width, height: r.height, drawing: r.doc, ownerProfileId: profile.id });
+    else await store.addMotif({ name: await store.nextDrawingName(profile), source: 'drawing', image: r.image, width: r.width, height: r.height, drawing: r.doc, ownerProfileId: profile.id });
     const all = await store.listMotifs();
     setCustomMotifs(all);
     // Gibt es zum geänderten Bild schon eine Herausforderung, fragen, ob sie neu entstehen soll.
@@ -239,148 +242,162 @@ export default function App() {
   const classmates = profiles.filter((p) => p.groupId === profile.groupId && p.id !== profile.id);
   const visibleChallenges = challenges && challenges.filter((c) => !hidden.has(c.id) && !c.ownerProfileId);
 
-  switch (screen.name) {
-    case 'home':
-      return (
-        <Home
-          profile={profile}
-          group={groups.find((g) => g.id === profile.groupId)}
-          onSwitchProfile={switchProfile}
-          onFree={() => setScreen({ name: 'free-pick' })}
-          onChallenges={() => setScreen({ name: 'challenges' })}
-          onDraw={drawingOn ? () => setScreen({ name: 'drawings' }) : undefined}
-          onInbox={inboxOn ? () => setScreen({ name: 'kid-inbox' }) : undefined}
-          inboxCount={kidInbox.length}
-        />
-      );
-    case 'free-pick':
-      return (
-        <MotifPicker
-          motifs={kidMotifs}
-          onPick={(id) => {
-            setFreeMotifId(id);
-            setScreen({ name: 'free' });
-          }}
-          onBack={() => setScreen({ name: 'home' })}
-        />
-      );
-    case 'free':
-      return (
-        <FreeMirror
-          motifs={kidMotifs}
-          motifId={freeMotifId}
-          prefs={profile.prefs}
-          onPrefsChange={setPrefs}
-          snapshots={snapshots}
-          onSnapshot={addSnapshot}
-          onBack={() => setScreen({ name: 'free-pick' })}
-        />
-      );
-    case 'drawings':
-      return (
-        <KidDrawings
-          drawings={ownDrawings}
-          challenges={ownChallenges}
-          answers={answers}
-          busyId={busyDrawing}
-          askRegenerate={askRegenerate}
-          onRegenerate={(m, yes) => {
-            setAskRegenerate(null);
-            if (yes) makeKidChallenge(m);
-          }}
-          onNew={() => setScreen({ name: 'draw' })}
-          onEdit={(m) => setScreen({ name: 'draw', motifId: m.id })}
-          onCreate={makeKidChallenge}
-          onPlay={(c) => setScreen({ name: 'challenge', id: c.id, from: 'drawings' })}
-          onEditChallenge={(c) => setScreen({ name: 'kid-challenge-edit', id: c.id })}
-          received={received.map((c) => ({ challenge: c, image: customMotifs.find((m) => m.id === c.motifId)?.image ?? '' }))}
-          onDeleteReceived={async (c) => {
-            await store.deleteReceived(c);
-            setChallenges(await loadChallenges(store));
-            setCustomMotifs(await store.listMotifs());
-          }}
-          classmates={inboxOn ? classmates : undefined}
-          onSend={async (c, to) => {
-            await store.send(await store.pack(c, { name: profile.name, animal: profile.animal, groupName: myGroup?.name }), { profileId: to.id });
-          }}
-          onBack={() => setScreen({ name: 'home' })}
-        />
-      );
-    case 'draw': {
-      const motifId = screen.motifId;
-      const existing = ownDrawings.find((m) => m.id === motifId);
-      return (
-        <DrawingEditor
-          key={motifId ?? 'neu'}
-          initial={existing?.drawing}
-          onCancel={() => setScreen({ name: 'drawings' })}
-          onSave={(r) => saveKidDrawing(existing?.id, r)}
-        />
-      );
+  const content = (() => {
+    switch (screen.name) {
+      case 'home':
+        return (
+          <Home
+            profile={profile}
+            group={groups.find((g) => g.id === profile.groupId)}
+            onSwitchProfile={switchProfile}
+            onFree={() => setScreen({ name: 'free-pick' })}
+            onChallenges={() => setScreen({ name: 'challenges' })}
+            onDraw={drawingOn ? () => setScreen({ name: 'drawings' }) : undefined}
+            onInbox={inboxOn ? () => setScreen({ name: 'kid-inbox' }) : undefined}
+            inboxCount={kidInbox.length}
+          />
+        );
+      case 'free-pick':
+        return (
+          <MotifPicker
+            motifs={kidMotifs}
+            onPick={(id) => {
+              setFreeMotifId(id);
+              setScreen({ name: 'free' });
+            }}
+            onBack={() => setScreen({ name: 'home' })}
+          />
+        );
+      case 'free':
+        return (
+          <FreeMirror
+            motifs={kidMotifs}
+            motifId={freeMotifId}
+            prefs={profile.prefs}
+            onPrefsChange={setPrefs}
+            snapshots={snapshots}
+            onSnapshot={addSnapshot}
+            onBack={() => setScreen({ name: 'free-pick' })}
+          />
+        );
+      case 'drawings':
+        return (
+          <KidDrawings
+            drawings={ownDrawings}
+            challenges={ownChallenges}
+            answers={answers}
+            busyId={busyDrawing}
+            askRegenerate={askRegenerate}
+            onRegenerate={(m, yes) => {
+              setAskRegenerate(null);
+              if (yes) makeKidChallenge(m);
+            }}
+            onNew={() => setScreen({ name: 'draw' })}
+            onEdit={(m) => setScreen({ name: 'draw', motifId: m.id })}
+            onCreate={makeKidChallenge}
+            onPlay={(c) => setScreen({ name: 'challenge', id: c.id, from: 'drawings' })}
+            onEditChallenge={(c) => setScreen({ name: 'kid-challenge-edit', id: c.id })}
+            received={received
+              .filter((c) => !undo.hidden.has(c.id))
+              .map((c) => ({ challenge: c, image: customMotifs.find((m) => m.id === c.motifId)?.image ?? '' }))}
+            onDeleteReceived={(c) =>
+              undo.schedule(c.id, 'Gelöscht', async () => {
+                await store.deleteReceived(c);
+                setChallenges(await loadChallenges(store));
+                setCustomMotifs(await store.listMotifs());
+              })
+            }
+            classmates={inboxOn ? classmates : undefined}
+            onSend={async (c, to) => {
+              await store.sendToKid(c, profile, to, myGroup?.name);
+            }}
+            onBack={() => setScreen({ name: 'home' })}
+          />
+        );
+      case 'draw': {
+        const motifId = screen.motifId;
+        const existing = ownDrawings.find((m) => m.id === motifId);
+        return (
+          <DrawingEditor
+            key={motifId ?? 'neu'}
+            initial={existing?.drawing}
+            onCancel={() => setScreen({ name: 'drawings' })}
+            onSave={(r) => saveKidDrawing(existing?.id, r)}
+          />
+        );
+      }
+      case 'challenges':
+        return (
+          <ChallengeList
+            challenges={visibleChallenges}
+            motifs={motifs}
+            answers={answers}
+            onOpen={(id) => setScreen({ name: 'challenge', id })}
+            onBack={GRATIS ? switchProfile : () => setScreen({ name: 'home' })}
+          />
+        );
+      case 'challenge': {
+        const challenge = challenges?.find((c) => c.id === screen.id);
+        if (!challenge) return null;
+        return (
+          <ChallengePlay
+            key={`${profile.id}-${challenge.id}`}
+            challenge={challenge}
+            motif={kidMotifs.find((m) => m.id === challenge.motifId)}
+            answers={answers[challenge.id] ?? {}}
+            onAnswer={(targetId, a) => saveAnswer(challenge.id, targetId, a)}
+            photos={photos[challenge.id] ?? {}}
+            onPhoto={(targetId, p) => savePhoto(challenge.id, targetId, p)}
+            prefs={profile.prefs}
+            onPrefsChange={setPrefs}
+            onBack={() => setScreen(screen.from === 'drawings' ? { name: 'drawings' } : { name: 'challenges' })}
+          />
+        );
+      }
+      case 'kid-inbox':
+        return (
+          <KidInbox
+            items={kidInbox.filter((i) => !undo.hidden.has(i.id))}
+            onAccept={async (item) => {
+              await store.adopt(item, { ownerProfileId: profile.id, received: true });
+              await store.deleteInbox(item.id, 'angenommen');
+              setKidInbox((all) => all.filter((i) => i.id !== item.id));
+              setChallenges(await loadChallenges(store));
+              setCustomMotifs(await store.listMotifs());
+            }}
+            onReject={(item) =>
+              undo.schedule(item.id, 'Abgelehnt', async () => {
+                await store.deleteInbox(item.id);
+                setKidInbox((all) => all.filter((i) => i.id !== item.id));
+              })
+            }
+            onBack={() => setScreen({ name: 'home' })}
+          />
+        );
+      case 'kid-challenge-edit': {
+        const challenge = challenges?.find((c) => c.id === screen.id && c.ownerProfileId === profile.id);
+        const motif = challenge && kidMotifs.find((m) => m.id === challenge.motifId);
+        if (!challenge || !motif) return null;
+        return (
+          <ChallengeEditor
+            kid
+            draft={draftFromChallenge(challenge)}
+            motif={motif}
+            onCancel={() => setScreen({ name: 'drawings' })}
+            onSave={async (c) => {
+              await store.saveChallenge({ ...c, ownerProfileId: profile.id, createdAt: challenge.createdAt }, false, challenge.createdAt ?? Date.now());
+              setChallenges(await loadChallenges(store));
+              setScreen({ name: 'drawings' });
+            }}
+          />
+        );
+      }
     }
-    case 'challenges':
-      return (
-        <ChallengeList
-          challenges={visibleChallenges}
-          motifs={motifs}
-          answers={answers}
-          onOpen={(id) => setScreen({ name: 'challenge', id })}
-          onBack={GRATIS ? switchProfile : () => setScreen({ name: 'home' })}
-        />
-      );
-    case 'challenge': {
-      const challenge = challenges?.find((c) => c.id === screen.id);
-      if (!challenge) return null;
-      return (
-        <ChallengePlay
-          key={`${profile.id}-${challenge.id}`}
-          challenge={challenge}
-          motif={kidMotifs.find((m) => m.id === challenge.motifId)}
-          answers={answers[challenge.id] ?? {}}
-          onAnswer={(targetId, a) => saveAnswer(challenge.id, targetId, a)}
-          photos={photos[challenge.id] ?? {}}
-          onPhoto={(targetId, p) => savePhoto(challenge.id, targetId, p)}
-          prefs={profile.prefs}
-          onPrefsChange={setPrefs}
-          onBack={() => setScreen(screen.from === 'drawings' ? { name: 'drawings' } : { name: 'challenges' })}
-        />
-      );
-    }
-    case 'kid-inbox':
-      return (
-        <KidInbox
-          items={kidInbox}
-          onAccept={async (item) => {
-            await store.adopt(item, { ownerProfileId: profile.id, received: true });
-            await store.deleteInbox(item.id);
-            setKidInbox((all) => all.filter((i) => i.id !== item.id));
-            setChallenges(await loadChallenges(store));
-            setCustomMotifs(await store.listMotifs());
-          }}
-          onReject={async (item) => {
-            await store.deleteInbox(item.id);
-            setKidInbox((all) => all.filter((i) => i.id !== item.id));
-          }}
-          onBack={() => setScreen({ name: 'home' })}
-        />
-      );
-    case 'kid-challenge-edit': {
-      const challenge = challenges?.find((c) => c.id === screen.id && c.ownerProfileId === profile.id);
-      const motif = challenge && kidMotifs.find((m) => m.id === challenge.motifId);
-      if (!challenge || !motif) return null;
-      return (
-        <ChallengeEditor
-          kid
-          draft={draftFromChallenge(challenge)}
-          motif={motif}
-          onCancel={() => setScreen({ name: 'drawings' })}
-          onSave={async (c) => {
-            await store.saveChallenge({ ...c, ownerProfileId: profile.id, createdAt: challenge.createdAt }, false, challenge.createdAt ?? Date.now());
-            setChallenges(await loadChallenges(store));
-            setScreen({ name: 'drawings' });
-          }}
-        />
-      );
-    }
-  }
+  })();
+  return (
+    <>
+      {content}
+      {undo.toast}
+    </>
+  );
 }

@@ -373,7 +373,7 @@ describe('Verschicken und Posteingang', () => {
     const [item] = await store.listInbox();
     expect(item.toProfileId).toBe(hase.id);
     const got = await store.adopt(item, { ownerProfileId: hase.id, received: true });
-    await store.deleteInbox(item.id);
+    await store.deleteInbox(item.id, 'angenommen');
     expect(got.ownerProfileId).toBe(hase.id);
     expect(got.receivedFrom?.name).toBe(fuchs.name);
     expect(got.motifId).not.toBe(c.motifId);
@@ -407,5 +407,49 @@ describe('Verschicken und Posteingang', () => {
     expect((await store.listInbox()).map((i) => i.toGroupId)).toEqual([rot.id]);
     await store.deleteGroup(rot.id);
     expect(await store.listInbox()).toHaveLength(0);
+  });
+});
+
+describe('Namen der Kinderbilder', () => {
+  it('„Bild von Affe 1, 2 …“; alte „Mein Bild“ werden nummeriert, samt Herausforderung', async () => {
+    const { profiles } = await store.ensureDefaults();
+    const kid = profiles[0];
+    const add = async (name: string) =>
+      store.addMotif({ name, source: 'drawing', image: 'data:,', width: 1, height: 1, ownerProfileId: kid.id });
+    const a = await add('Mein Bild');
+    await store.saveChallenge({ id: 'kind-a', name: 'Mein Bild', motifId: a.id, targets: [], viewSize: 1, ownerProfileId: kid.id }, false, 1);
+    await add('Mein Bild');
+    expect(await store.nameOldDrawings()).toBe(true);
+    const names = (await store.listMotifs()).map((m) => m.name).sort();
+    expect(names).toEqual([`Bild von ${kid.name} 1`, `Bild von ${kid.name} 2`]);
+    expect(await store.nextDrawingName(kid)).toBe(`Bild von ${kid.name} 3`);
+    expect((await store.listChallenges()).find((c) => c.id === 'kind-a')!.name).toBe((await store.listMotifs()).find((m) => m.id === a.id)!.name);
+    expect(await store.nameOldDrawings()).toBe(false);
+  });
+});
+
+describe('Protokoll Verschicken', () => {
+  it('vermerkt Absender, Empfänger und ob angenommen oder abgelehnt', async () => {
+    const { groups, profiles } = await store.ensureDefaults();
+    const [a, b, c] = profiles;
+    const m = await store.addMotif({ name: 'Bild', source: 'drawing', image: 'data:,1', width: 1, height: 1, ownerProfileId: a.id });
+    const ch: Challenge = { id: 'kind-x', name: 'Bild', motifId: m.id, targets: [], viewSize: 1, ownerProfileId: a.id };
+    await store.saveChallenge(ch, false, 1);
+    await store.sendToKid(ch, a, b);
+    await store.sendToKid(ch, a, c);
+    const inbox = await store.listInbox();
+    const toB = inbox.find((i) => i.toProfileId === b.id)!;
+    const toC = inbox.find((i) => i.toProfileId === c.id)!;
+    await store.deleteInbox(toB.id, 'angenommen');
+    await store.deleteInbox(toC.id);
+    const log = await store.listSendLog(groups[0].id);
+    expect(log.map((r) => [r.from.name, r.to.name, r.status]).sort()).toEqual(
+      [
+        [a.name, b.name, 'angenommen'],
+        [a.name, c.name, 'abgelehnt'],
+      ].sort(),
+    );
+    await store.resetProfile(c.id);
+    expect(await store.listSendLog(groups[0].id)).toHaveLength(1);
   });
 });

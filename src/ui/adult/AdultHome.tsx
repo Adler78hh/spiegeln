@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ChallengeIcon, HelpIcon, PeopleIcon, PhotoIcon, SaveIcon } from '../icons';
+import { ChallengeIcon, HelpIcon, MailIcon, PeopleIcon, PhotoIcon, SaveIcon } from '../icons';
 import { StorageHint } from './BackupPage';
 
 export type AdultSection = 'groups' | 'motifs' | 'challenges' | 'backup' | 'help';
@@ -7,10 +7,12 @@ export type AdultSection = 'groups' | 'motifs' | 'challenges' | 'backup' | 'help
 interface Props {
   onOpen: (s: AdultSection) => void;
   onExit: () => void;
+  /** Wartende Einträge in den Posteingängen der Gruppen. */
+  inboxCount?: number;
 }
 
 /** Startseite des Erwachsenenbereichs. */
-export function AdultHome({ onOpen, onExit }: Props) {
+export function AdultHome({ onOpen, onExit, inboxCount = 0 }: Props) {
   const tiles: Array<{ id: AdultSection; label: string; icon: ReactNode; hint: string }> = [
     { id: 'groups', label: 'Gruppen', icon: <PeopleIcon size={56} />, hint: 'Kinder und Ergebnisse je Gruppe' },
     { id: 'challenges', label: 'Herausforderungen', icon: <ChallengeIcon size={56} />, hint: 'Eigene erstellen und bearbeiten' },
@@ -29,6 +31,11 @@ export function AdultHome({ onOpen, onExit }: Props) {
       <div className="adult-tiles">
         {tiles.map((t) => (
           <button key={t.id} className="adult-tile" onClick={() => onOpen(t.id)}>
+            {t.id === 'groups' && inboxCount > 0 && (
+              <span className="tile-count" aria-label={`${inboxCount} im Posteingang`}>
+                <MailIcon size={20} /> {inboxCount}
+              </span>
+            )}
             {t.icon}
             <strong>{t.label}</strong>
             <span>{t.hint}</span>

@@ -1,12 +1,14 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Answer, Challenge, ChallengeAnswers } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
-import { checkParcelFile, DEFAULT_PREFS, type ChallengePhotos, type Group, type InboxItem, type Parcel, type Photo, type Profile, type Store, type ToolPrefs } from '../../storage/store';
+import { checkParcelFile, DEFAULT_PREFS, type ChallengePhotos, type Group, type InboxItem, type Parcel, type Photo, type Profile, type SendRecord, type Store, type ToolPrefs } from '../../storage/store';
 import { ProfileImage } from '../Avatar';
 import { ChallengePlay } from '../ChallengePlay';
 import { downloadJson, safeFileName } from '../download';
-import { CheckIcon, ChallengeIcon, CrossIcon, MailIcon, SendIcon } from '../icons';
+import { CheckIcon, ChallengeIcon, CrossIcon, MailIcon, PrintIcon, SendIcon } from '../icons';
 import { AdultPage } from './AdultPage';
+import { useUndo } from '../useUndo';
+import { WorksheetPrint } from './Worksheet';
 
 /** Die ersten Zielfiguren als kleine Vorschau. */
 export function ParcelPreview({ challenge, count = 6 }: { challenge: Challenge; count?: number }) {
@@ -92,13 +94,24 @@ export function KidChallengesPage(props: {
   groups: Group[];
   profiles: Profile[];
   challenges: Challenge[];
+  /** Bild der Figur (für das Arbeitsblatt). */
+  figureOf: (motifId: string) => string | undefined;
   onTest: (c: Challenge) => void;
   onAdopted: () => Promise<void>;
+  /** Kinderbild samt Herausforderung umbenennen. */
+  onRename: (c: Challenge, name: string) => Promise<void>;
+  /** Nach dem Senden an eine Gruppe (Posteingänge neu laden). */
+  onSent: () => void;
   onBack: () => void;
 }) {
-  const { store, group, groups, profiles, challenges, onTest, onAdopted, onBack } = props;
+  const { store, group, groups, profiles, challenges, figureOf, onTest, onAdopted, onRename, onSent, onBack } = props;
   const [sending, setSending] = useState<{ c: Challenge; kid: Profile } | null>(null);
   const [notice, setNotice] = useState<{ id: string; text: string } | null>(null);
+  const [printing, setPrinting] = useState<Challenge | null>(null);
+  const [log, setLog] = useState<SendRecord[]>([]);
+  useEffect(() => {
+    store.listSendLog(group.id).then(setLog, console.error);
+  }, [store, group.id]);
   const kids = profiles.filter((p) => p.groupId === group.id);
   const own = (kid: Profile) => challenges.filter((c) => c.ownerProfileId === kid.id && !c.receivedFrom);
   const withChallenges = kids.filter((k) => own(k).length > 0);
@@ -113,6 +126,19 @@ export function KidChallengesPage(props: {
           </h2>
           {own(kid).map((c) => (
             <div key={c.id} className="parcel-row">
+              <input
+                key={c.name}
+                className="name-input parcel-name"
+                defaultValue={c.name}
+                maxLength={30}
+                aria-label="Name des Bildes"
+                onBlur={(e) => {
+                  const name = e.target.value.trim();
+                  if (!name) e.target.value = c.name;
+                  else if (name !== c.name) void onRename(c, name);
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+              />
               <ParcelPreview challenge={c} />
               <span className="parcel-actions">
                 <button className="text-btn" onClick={() => onTest(c)}>
@@ -132,12 +158,37 @@ export function KidChallengesPage(props: {
                 <button className="text-btn" onClick={() => setSending({ c, kid })}>
                   <SendIcon size={22} /> An Gruppe senden
                 </button>
+                <button className="text-btn" onClick={() => setPrinting(c)}>
+                  <PrintIcon size={22} /> Arbeitsblatt
+                </button>
               </span>
               {notice?.id === c.id && <p className="hint notice">{notice.text}</p>}
             </div>
           ))}
         </section>
       ))}
+      {log.length > 0 && (
+        <section className="send-log">
+          <h2>Verschickt (Kinder untereinander)</h2>
+          {log.map((r) => (
+            <div key={r.id} className="send-log-row">
+              <img className="send-log-img" src={r.image} alt="" />
+              <span className="send-log-kid">
+                <ProfileImage profile={r.from} /> {r.from.name}
+              </span>
+              <SendIcon size={20} />
+              <span className="send-log-kid">
+                <ProfileImage profile={r.to} /> {r.to.name}
+              </span>
+              <span className="row-meta">
+                {r.challengeName} · {new Date(r.createdAt).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <span className={`chip send-status ${r.status}`}>{r.status}</span>
+            </div>
+          ))}
+        </section>
+      )}
+      {printing && <WorksheetPrint challenge={printing} figure={figureOf(printing.motifId)} onDone={() => setPrinting(null)} />}
       {sending && (
         <SendDialog
           store={store}
@@ -148,6 +199,7 @@ export function KidChallengesPage(props: {
           onDone={(text) => {
             setNotice({ id: sending.c.id, text });
             setSending(null);
+            onSent();
           }}
         />
       )}
@@ -175,7 +227,8 @@ export function GroupInboxPage(props: { store: Store; group: Group; items: Inbox
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const mine = items.filter((i) => i.toGroupId === group.id);
+  const undo = useUndo();
+  const mine = items.filter((i) => i.toGroupId === group.id && !undo.hidden.has(i.id));
 
   const open = async (file: File | undefined) => {
     if (!file) return;
@@ -229,7 +282,7 @@ export function GroupInboxPage(props: { store: Store; group: Group; items: Inbox
               className="text-btn primary"
               onClick={async () => {
                 await store.adopt(item, { onlyGroupId: group.id, received: true });
-                await store.deleteInbox(item.id);
+                await store.deleteInbox(item.id, 'angenommen');
                 await onAccepted();
                 await onChanged();
                 setNotice(`„${item.challenge.name}“ angenommen.`);
@@ -239,16 +292,19 @@ export function GroupInboxPage(props: { store: Store; group: Group; items: Inbox
             </button>
             <button
               className="text-btn"
-              onClick={async () => {
-                await store.deleteInbox(item.id);
-                await onChanged();
-              }}
+              onClick={() =>
+                undo.schedule(item.id, `„${item.challenge.name}“ abgelehnt`, async () => {
+                  await store.deleteInbox(item.id);
+                  await onChanged();
+                })
+              }
             >
               <CrossIcon size={22} /> Ablehnen
             </button>
           </span>
         </div>
       ))}
+      {undo.toast}
     </AdultPage>
   );
 }

@@ -18,10 +18,12 @@ interface ListProps {
   onOpen: (id: string) => void;
   onNew: () => void;
   onBack: () => void;
+  /** Wartende Einträge im Posteingang je Gruppe. */
+  inboxCounts?: Record<string, number>;
 }
 
 /** Alle Gruppen mit Anzahl der Kinder. */
-export function GroupList({ groups, profiles, onOpen, onNew, onBack }: ListProps) {
+export function GroupList({ groups, profiles, onOpen, onNew, onBack, inboxCounts = {} }: ListProps) {
   return (
     <AdultPage
       title="Gruppen"
@@ -43,6 +45,11 @@ export function GroupList({ groups, profiles, onOpen, onNew, onBack }: ListProps
                   <span className="group-oval-name">{g.name}</span>
                 </span>
                 <span className="row-meta">{n === 1 ? '1 Kind' : `${n} Kinder`}</span>
+                {inboxCounts[g.id] > 0 && (
+                  <span className="row-count" aria-label={`${inboxCounts[g.id]} im Posteingang`}>
+                    <MailIcon size={18} /> {inboxCounts[g.id]}
+                  </span>
+                )}
               </button>
             </li>
           );

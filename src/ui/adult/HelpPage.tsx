@@ -83,6 +83,14 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
                 anderen Gerät herein. Die Kinder haben oben rechts einen eigenen Posteingang und können sich ihre Herausforderungen innerhalb der Gruppe
                 zuschicken (auf demselben Gerät). Unter „Freischalten“ lässt sich das je Gruppe ausschalten.
               </Item>
+              <Item>
+                Unten auf der Seite „Herausforderungen der Kinder“ steht, wer wem etwas geschickt hat und ob es angenommen wurde. Die Bilder heißen
+                automatisch „Bild von Affe 1“ usw.; dort lässt sich der Name ändern. Nach Löschen oder Ablehnen gibt es einige Sekunden lang „Rückgängig“.
+              </Item>
+              <Item>
+                Arbeitsblatt: unter „Herausforderungen“ (Druckersymbol) oder bei den Herausforderungen der Kinder. A4, oben die Ausgangsfigur, je Zielfigur ein
+                Achtel der Seite zum Ankreuzen „passt“ oder „geht nicht“.
+              </Item>
             </>
           )}
         </ul>
