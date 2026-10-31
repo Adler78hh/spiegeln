@@ -104,9 +104,9 @@ export const HAUS_LAYOUT: PlannedTarget[] = [
   // nach oben rechts); nur eine Ecke der Wand bleibt, ein gerades gelbes
   // Quadrat mit Fenster- und Türstücken.
   t('mirror', 180, -0.0314, 0.1146, 135, 0.5, 0.5, 1),
-  // 7 Erstes „Geht nicht“: ganzes Haus neben dem ganzen Haus.
+  // 7 Erstes „Unlösbar“: ganzes Haus neben dem ganzen Haus.
   wholeBeside(0, -0.2, 0, 90, [0.51, 0.5], [100, 100]),
-  // 8 Geht nicht: Tür und Fenster vertauscht (Tutor: „Hier ist etwas seltsam.“).
+  // 8 Unlösbar: Tür und Fenster vertauscht (Tutor: „Hier ist etwas seltsam.“).
   t('swap', 285, -0.0145, 0.0937, 45, 0.3863, 0.6137, -1),
   // 9 Winkel einrasten: schräge Achse bei 30°.
   t('mirror', 0, -0.0458, -0.0887, 30, 0.5, 0.4717, -1),
@@ -114,7 +114,7 @@ export const HAUS_LAYOUT: PlannedTarget[] = [
   throughPoint('mirror', 180, -0.0755, -0.0653, ...WINDOW_CENTER, 1, 0),
   // 11 Achse ausblenden: die gelben Wände bilden zusammen ein Quadrat.
   throughPoint('mirror', 225, 0.0753, -0.0267, ...WALL_CORNER, -1, 45),
-  // 12 Geht nicht: Drehung statt Spiegelung.
+  // 12 Unlösbar: Drehung statt Spiegelung.
   t('rotate', 225, 0.015, 0.0863, 15, 0.5, 0.5265, 1),
 ];
 

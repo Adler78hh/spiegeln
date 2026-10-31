@@ -42,7 +42,7 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
             Fotoapparat: sichert Figur und Spiegel dieser Zielfigur (grün). Beim Zurückkehren steht alles wieder so da. Erneut antippen hebt die Sicherung auf.
           </Item>
           <Item icon={<CheckIcon />}>Passt: Die Zielfigur lässt sich spiegeln. Am besten erst sichern, dann „Passt“.</Item>
-          <Item icon={<CrossIcon />}>Geht nicht: Die Zielfigur lässt sich nicht spiegeln. Ein Hinweis zeigt, wie viele nicht gehen.</Item>
+          <Item icon={<CrossIcon />}>Unlösbar: Die Zielfigur lässt sich nicht spiegeln. Ein Hinweis zeigt, wie viele unlösbar sind.</Item>
           <Item icon={<ThumbsUpIcon />}>Sind alle bearbeitet, zeigt der Daumen, wie viele Entscheidungen richtig sind – nicht welche.</Item>
         </ul>
       </section>
@@ -100,7 +100,7 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
               </Item>
               <Item>
                 „Arbeitsblatt drucken“ (unter „Herausforderungen“ und bei den Herausforderungen der Kinder) erzeugt eine PDF-Datei: A4, je Seite 8 Zielfiguren
-                zum Ankreuzen „passt“ oder „geht nicht“; auf Seite 1 nimmt oben die Ausgangsfigur den Platz von 4 Zielfiguren ein.
+                zum Ankreuzen „passt“ oder „unlösbar“; auf Seite 1 nimmt oben die Ausgangsfigur den Platz von 4 Zielfiguren ein.
               </Item>
             </>
           )}

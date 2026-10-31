@@ -274,12 +274,12 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
           <div className="hint-row">
             {/* Ohne unlösbare Figuren (z. B. Tetraktys) entfällt der Hinweis. */}
             {unsolvable > 0 && (
-              <div className="unsolvable-hint" aria-label={unsolvable === 1 ? '1 Figur geht nicht' : `${unsolvable} Figuren gehen nicht`}>
+              <div className="unsolvable-hint" aria-label={unsolvable === 1 ? '1 Figur unlösbar' : `${unsolvable} Figuren unlösbar`}>
                 <span className="hint-icon">
                   <CrossIcon size={22} />
                 </span>
                 <span className="hint-count">{unsolvable}</span>
-                <span className="hint-text">{unsolvable === 1 ? 'geht nicht' : 'gehen nicht'}</span>
+                <span className="hint-text">unlösbar</span>
               </div>
             )}
             {checkCurrent && check && (
@@ -300,7 +300,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
                   key={t.id}
                   role="option"
                   aria-selected={t.id === selected.id}
-                  aria-label={`Figur ${i + 1}${a ? (a.decision === 'fits' ? ', passt' : ', geht nicht') : ''}`}
+                  aria-label={`Figur ${i + 1}${a ? (a.decision === 'fits' ? ', passt' : ', unlösbar') : ''}`}
                   className={`target-thumb ${t.id === selected.id ? 'selected' : ''}`}
                   onClick={() => select(t.id)}
                 >
@@ -342,7 +342,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
             onClick={() => decide('impossible')}
           >
             <CrossIcon size={36} />
-            <span>Geht nicht</span>
+            <span>Unlösbar</span>
           </button>
         </div>
       </aside>

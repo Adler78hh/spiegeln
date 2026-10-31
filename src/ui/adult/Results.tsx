@@ -128,7 +128,7 @@ export function Results({ store, group, profiles, challenges, motifs, open, onOp
           </tbody>
         </table>
       </div>
-      <p className="hint">„richtig“ zählt die Entscheidungen „Passt“/„Geht nicht“, die stimmen; offene Figuren zählen als nicht richtig. Ein Kind antippen für seine Detailansicht mit allen Herausforderungen, ein Feld antippen für die Einzelheiten.</p>
+      <p className="hint">„richtig“ zählt die Entscheidungen „Passt“/„Unlösbar“, die stimmen; offene Figuren zählen als nicht richtig. Ein Kind antippen für seine Detailansicht mit allen Herausforderungen, ein Feld antippen für die Einzelheiten.</p>
     </>
   );
 }
@@ -185,7 +185,7 @@ function ChallengeResult(props: {
                   )}
                   {ans?.decision === 'impossible' && (
                     <span className="answer impossible">
-                      <CrossIcon size={20} /> Geht nicht
+                      <CrossIcon size={20} /> Unlösbar
                     </span>
                   )}
                 </td>
@@ -234,7 +234,7 @@ function ResultDetail(props: { motif: MotifInfo; answer?: Answer; photo?: Photo;
           <div className="result-target">
             <p>Zielfigur {number}</p>
             <img src={targetImage} alt="" />
-            {answer && <p className={`answer ${answer.decision}`}>{answer.decision === 'fits' ? 'Passt' : 'Geht nicht'}</p>}
+            {answer && <p className={`answer ${answer.decision}`}>{answer.decision === 'fits' ? 'Passt' : 'Unlösbar'}</p>}
             <p>{photo ? 'gesicherte Lage' : 'Lage beim Antworten'}</p>
           </div>
         </div>

@@ -24,7 +24,7 @@ describe('Selbstkontrolle', () => {
     expect(canCheck({ ...challenge, targets: [] }, {})).toBe(false);
   });
 
-  it('richtig: Passt bei lösbar, Geht nicht bei unlösbar', () => {
+  it('richtig: Passt bei lösbar, Unlösbar bei unlösbar', () => {
     const r = checkAnswers(challenge, {
       t1: ans('fits'),
       t2: ans('impossible'),

@@ -74,7 +74,7 @@ export async function worksheetPdf(challenge: Challenge, figure: string | undefi
       page.image(images[num], x + 10, y + 3, CW - 20, CH - 15);
       const by = y + CH - 9;
       page.rect(x + CW / 2 - 34, by, 4.5, 4.5, 0.35, 0.2).text(x + CW / 2 - 27.5, by + 3.8, 12, 'passt');
-      page.rect(x + CW / 2 + 2, by, 4.5, 4.5, 0.35, 0.2).text(x + CW / 2 + 8.5, by + 3.8, 12, 'geht nicht');
+      page.rect(x + CW / 2 + 2, by, 4.5, 4.5, 0.35, 0.2).text(x + CW / 2 + 8.5, by + 3.8, 12, 'unlösbar');
       num++;
       cell++;
     }
