@@ -77,18 +77,26 @@ export function textOn(hex: string): string {
  * bei schon vergebener Farbe mit Nummer („Gelb2“, „Gelb3“ …).
  */
 export function suggestGroupName(colorId: string, usedColorIds: string[]): string {
-  const name = findColor(colorId).name;
+  const name = `Gruppe ${findColor(colorId).name}`;
   const n = usedColorIds.filter((c) => c === colorId).length;
-  return n === 0 ? name : `${name}${n + 1}`;
+  return n === 0 ? name : `${name} ${n + 1}`;
 }
 
 /**
  * Trägt die Gruppe noch den automatisch vorgeschlagenen Namen ihrer Farbe
- * („Gelb“, „Gelb2“ …)? Dann wechselt der Name beim Umfärben mit.
+ * („Gruppe Gelb“, „Gruppe Gelb 2“ …, früher „Gelb“, „Gelb2“)? Dann wechselt
+ * der Name beim Umfärben mit.
  */
 export function isColorName(name: string, colorId: string): boolean {
   const base = findColor(colorId).name;
-  return name === base || (name.startsWith(base) && /^\d+$/.test(name.slice(base.length)));
+  return new RegExp(`^(Gruppe )?${base}( ?\\d+)?$`).test(name);
+}
+
+/** Früherer Vorschlag („Gelb“, „Gelb2“) → heutiger („Gruppe Gelb“, „Gruppe Gelb 2“); sonst null. */
+export function upgradedGroupName(name: string, colorId: string): string | null {
+  const base = findColor(colorId).name;
+  const m = new RegExp(`^${base}(\\d+)?$`).exec(name);
+  return m ? `Gruppe ${base}${m[1] ? ` ${m[1]}` : ''}` : null;
 }
 
 /** Erste Farbe, die noch keine Gruppe hat (sonst die am seltensten benutzte). */

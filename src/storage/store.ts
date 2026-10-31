@@ -16,7 +16,7 @@ import type { Scene } from '../geometry';
 import type { InvertMode } from '../render/composite';
 import type { DrawingDoc } from '../drawing/elements';
 import { ANIMAL_ORDER, ANIMALS, DEFAULT_ANIMALS, type Animal, type AnimalId } from '../profiles/animals';
-import { findColor } from '../profiles/colors';
+import { findColor, suggestGroupName, upgradedGroupName } from '../profiles/colors';
 
 export interface ToolPrefs {
   snap: boolean;
@@ -280,13 +280,19 @@ export class Store {
     let groups = await this.listGroups();
     if (groups.length === 0) {
       const weiss = findColor('weiss');
-      const group: Group = { id: newId(), name: weiss.name, color: weiss.id, order: 0, createdAt: Date.now() };
+      const group: Group = { id: newId(), name: suggestGroupName(weiss.id, []), color: weiss.id, order: 0, createdAt: Date.now() };
       await this.db.put('groups', group);
       groups = [group];
       if ((await this.db.count('profiles')) === 0) {
         await this.addProfiles(group.id, animals.map((a) => a.id), 0);
       }
     }
+    // Früher hießen Gruppen nur wie ihre Farbe („Weiß“); jetzt „Gruppe Weiß“.
+    for (const g of groups) {
+      const upgraded = upgradedGroupName(g.name, g.color);
+      if (upgraded) await this.db.put('groups', { ...g, name: upgraded });
+    }
+    groups = await this.listGroups();
     const tx = this.db.transaction('profiles', 'readwrite');
     let cursor = await tx.store.openCursor();
     while (cursor) {
@@ -301,7 +307,7 @@ export class Store {
   async createGroup(name: string, color: string, count: number): Promise<Group> {
     const groups = await this.listGroups();
     const order = groups.reduce((m, g) => Math.max(m, g.order), -1) + 1;
-    const group: Group = { id: newId(), name: name.trim() || findColor(color).name, color, order, createdAt: Date.now() };
+    const group: Group = { id: newId(), name: name.trim() || suggestGroupName(color, groups.map((g) => g.color)), color, order, createdAt: Date.now() };
     await this.db.put('groups', group);
     const n = Math.max(1, Math.min(ANIMAL_ORDER.length, Math.round(count)));
     await this.addProfiles(group.id, ANIMAL_ORDER.slice(0, n).map((a) => a.id), 0);

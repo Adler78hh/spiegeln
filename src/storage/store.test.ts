@@ -19,7 +19,7 @@ const answer = (decision: 'fits' | 'impossible') => ({ decision, scene: initialS
 describe('Profile', () => {
   it('legt beim ersten Start Gruppe Weiß mit 10 Tierprofilen an, nur einmal', async () => {
     const first = await store.ensureDefaults();
-    expect(first.groups.map((g) => [g.name, g.color])).toEqual([['Weiß', 'weiss']]);
+    expect(first.groups.map((g) => [g.name, g.color])).toEqual([['Gruppe Weiß', 'weiss']]);
     expect(first.profiles.map((p) => p.name)).toEqual([
       'Mathe-Waschbär', 'Affe', 'Bär', 'Biene', 'Eichhörnchen', 'Elefant', 'Ente', 'Eule', 'Fledermaus', 'Frosch',
     ]);
@@ -56,7 +56,7 @@ describe('Gruppen', () => {
     expect(kids.map((p) => p.animal)).toEqual([
       'mathewaschbaer', 'affe', 'baer', 'biene', 'eichhoernchen', 'elefant', 'ente', 'eule', 'fledermaus', 'frosch', 'fuchs', 'giraffe',
     ]);
-    expect((await store.listGroups()).map((x) => x.name)).toEqual(['Weiß', 'Gelb']);
+    expect((await store.listGroups()).map((x) => x.name)).toEqual(['Gruppe Weiß', 'Gelb']);
   });
 
   it('umbenennen behält die Farbe, löschen entfernt Kinder und Antworten', async () => {
@@ -92,7 +92,7 @@ describe('Gruppen', () => {
 
     const s2 = await Store.open(name);
     const { groups, profiles } = await s2.ensureDefaults();
-    expect(groups.map((g) => g.name)).toEqual(['Weiß']);
+    expect(groups.map((g) => g.name)).toEqual(['Gruppe Weiß']);
     expect(profiles.map((p) => [p.name, p.groupId])).toEqual([['Lotta', groups[0].id]]);
     expect((await s2.getAnswers('p1'))['haus-1']['haus-1-1'].decision).toBe('fits');
     s2.close();

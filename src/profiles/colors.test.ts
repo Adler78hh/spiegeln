@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { firstFreeColor, isColorName, GROUP_COLORS, initialsOf, suggestGroupName, textOn, tintOf } from './colors';
+import { firstFreeColor, isColorName, upgradedGroupName, GROUP_COLORS, initialsOf, suggestGroupName, textOn, tintOf } from './colors';
 
 describe('Gruppenfarben', () => {
   it('32 verschiedene Farben', () => {
@@ -9,9 +9,9 @@ describe('Gruppenfarben', () => {
   });
 
   it('Name mit Nummer, wenn die Farbe schon vergeben ist', () => {
-    expect(suggestGroupName('gelb', ['weiss'])).toBe('Gelb');
-    expect(suggestGroupName('gelb', ['weiss', 'gelb'])).toBe('Gelb2');
-    expect(suggestGroupName('gelb', ['gelb', 'gelb'])).toBe('Gelb3');
+    expect(suggestGroupName('gelb', ['weiss'])).toBe('Gruppe Gelb');
+    expect(suggestGroupName('gelb', ['weiss', 'gelb'])).toBe('Gruppe Gelb 2');
+    expect(suggestGroupName('gelb', ['gelb', 'gelb'])).toBe('Gruppe Gelb 3');
   });
 
   it('erste freie Farbe, danach wieder von vorn', () => {
@@ -49,8 +49,17 @@ describe('isColorName', () => {
   it('erkennt den vorgeschlagenen Farbnamen, auch mit Nummer', () => {
     expect(isColorName('Gelb', 'gelb')).toBe(true);
     expect(isColorName('Gelb2', 'gelb')).toBe(true);
+    expect(isColorName('Gruppe Gelb', 'gelb')).toBe(true);
+    expect(isColorName('Gruppe Gelb 2', 'gelb')).toBe(true);
     expect(isColorName('Gelbe Gruppe', 'gelb')).toBe(false);
     expect(isColorName('Klasse 1b', 'gelb')).toBe(false);
     expect(isColorName('Rot', 'gelb')).toBe(false);
+  });
+
+  it('alte Vorschläge werden zu „Gruppe …“', () => {
+    expect(upgradedGroupName('Weiß', 'weiss')).toBe('Gruppe Weiß');
+    expect(upgradedGroupName('Gelb2', 'gelb')).toBe('Gruppe Gelb 2');
+    expect(upgradedGroupName('Gruppe Gelb', 'gelb')).toBe(null);
+    expect(upgradedGroupName('Klasse 1b', 'gelb')).toBe(null);
   });
 });
