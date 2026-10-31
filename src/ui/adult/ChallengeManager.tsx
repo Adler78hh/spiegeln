@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { unsolvableCount, type Challenge } from '../../challenges/types';
 import type { MotifInfo } from '../../motifs/library';
-import { EditIcon, PenIcon, PhotoIcon, PlusIcon, PrintIcon, TrashIcon } from '../icons';
-import { WorksheetPrint } from './Worksheet';
+import { EditIcon, PenIcon, PhotoIcon, PlusIcon, TrashIcon } from '../icons';
+import { WorksheetButton } from './WorksheetButton';
 import { AdultPage, ConfirmRow } from './AdultPage';
 
 export interface ManagedChallenge extends Challenge {
@@ -29,7 +29,6 @@ interface Props {
 export function ChallengeManager(props: Props) {
   const { challenges, motifs, onNew, onEdit, onDelete, onBack, picking, onPickingChange: setPicking, onCreateMotif, highlightMotifId } = props;
   const [confirmId, setConfirmId] = useState<string | null>(null);
-  const [printing, setPrinting] = useState<Challenge | null>(null);
   const motifOf = (id: string) => motifs.find((m) => m.id === id);
   // Eigene Motive zuerst, das neueste vorne.
   const custom = motifs.filter((m) => !m.builtin).reverse();
@@ -88,9 +87,7 @@ export function ChallengeManager(props: Props) {
             <span className="row-meta">
               {c.targets.length} Figuren, {unsolvableCount(c)} unlösbar{c.builtin ? ' · vorinstalliert' : ''}
             </span>
-            <button className="tool-btn" aria-label={`Arbeitsblatt zu ${c.name} drucken`} title="Arbeitsblatt drucken" onClick={() => setPrinting(c)}>
-              <PrintIcon />
-            </button>
+            <WorksheetButton challenge={c} figure={motifOf(c.motifId)?.src} />
             {!c.builtin && (
               <>
                 <button className="tool-btn" aria-label={`${c.name} bearbeiten`} onClick={() => onEdit(c)}>
@@ -115,7 +112,6 @@ export function ChallengeManager(props: Props) {
           </li>
         ))}
       </ul>
-      {printing && <WorksheetPrint challenge={printing} figure={motifOf(printing.motifId)?.src} onDone={() => setPrinting(null)} />}
     </AdultPage>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { Challenge } from '../../challenges/types';
+import { WorksheetButton } from './WorksheetButton';
 import type { MotifInfo } from '../../motifs/library';
 import { ANIMAL_ORDER } from '../../profiles/animals';
 import { findColor, firstFreeColor, GROUP_COLORS, suggestGroupName, textOn } from '../../profiles/colors';
@@ -410,6 +411,20 @@ export function GroupPage(props: PageProps) {
               </label>
             )}
             <ChallengeAccess group={group} challenges={challenges} motifs={motifs} onChange={props.onHiddenChange} />
+            {/* Gratisversion: ohne Seite „Herausforderungen“, daher die Arbeitsblätter hier. */}
+            {limited && (
+              <section className="worksheet-list">
+                <h2>Arbeitsblätter</h2>
+                <ul className="manage-list">
+                  {challenges.map((c) => (
+                    <li key={c.id} className="manage-row">
+                      <strong className="row-title">{c.name}</strong>
+                      <WorksheetButton challenge={c} figure={motifs.find((m) => m.id === c.motifId)?.src} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </>
         ) : (
           <Results

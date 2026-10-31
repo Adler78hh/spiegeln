@@ -61,6 +61,12 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
           <Item>Freischalten: festlegen, welche Herausforderungen die Kinder einer Gruppe sehen. Ergebnisse und Druck zeigen nur diese; Antworten bleiben beim Ausblenden erhalten.</Item>
           <Item>Ergebnisse: Tabelle Kind × Herausforderung. Ein Kind antippen zeigt seine Detailansicht mit Zielfigur, Sicherung und Antwort.</Item>
           <Item>Drucken: in der Detailansicht ein Kind, über der Tabelle alle Kinder. Herausforderungen auswählen, im Druckfenster geht auch „Als PDF sichern“.</Item>
+          {GRATIS && (
+            <Item>
+              „Arbeitsblatt drucken“ (unter „Freischalten“ → Arbeitsblätter) erzeugt eine PDF-Datei: A4, je Seite 8 Zielfiguren zum Ankreuzen; auf Seite 1 nimmt
+              oben die Ausgangsfigur den Platz von 4 Zielfiguren ein.
+            </Item>
+          )}
           {!GRATIS && (
             <>
               <Item>Eigene Motive (Foto oder Zeichnung) und eigene Herausforderungen lassen sich im Erwachsenenbereich anlegen.</Item>
@@ -93,8 +99,8 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
                 automatisch „Bild von Affe 1“ usw.; dort lässt sich der Name ändern. Nach Löschen oder Ablehnen gibt es einige Sekunden lang „Rückgängig“.
               </Item>
               <Item>
-                Arbeitsblatt: unter „Herausforderungen“ (Druckersymbol) oder bei den Herausforderungen der Kinder. A4, oben die Ausgangsfigur, je Zielfigur ein
-                Achtel der Seite zum Ankreuzen „passt“ oder „geht nicht“.
+                „Arbeitsblatt drucken“ (unter „Herausforderungen“ und bei den Herausforderungen der Kinder) erzeugt eine PDF-Datei: A4, je Seite 8 Zielfiguren
+                zum Ankreuzen „passt“ oder „geht nicht“; auf Seite 1 nimmt oben die Ausgangsfigur den Platz von 4 Zielfiguren ein.
               </Item>
             </>
           )}

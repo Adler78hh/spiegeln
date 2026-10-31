@@ -1,6 +1,10 @@
 /** Bietet Daten als JSON-Datei zum Speichern an (Download bzw. „Teilen“ auf dem iPad). */
 export function downloadJson(data: unknown, fileName: string): void {
-  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  downloadBlob(new Blob([JSON.stringify(data)], { type: 'application/json' }), fileName);
+}
+
+/** Bietet eine Datei zum Speichern an. */
+export function downloadBlob(blob: Blob, fileName: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

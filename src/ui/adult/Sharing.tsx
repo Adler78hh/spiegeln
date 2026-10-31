@@ -5,10 +5,10 @@ import { checkParcelFile, DEFAULT_PREFS, type ChallengePhotos, type Group, type 
 import { ProfileImage } from '../Avatar';
 import { ChallengePlay } from '../ChallengePlay';
 import { downloadJson, safeFileName } from '../download';
-import { CheckIcon, ChallengeIcon, CrossIcon, MailIcon, PrintIcon, SendIcon } from '../icons';
+import { CheckIcon, ChallengeIcon, CrossIcon, MailIcon, SendIcon } from '../icons';
 import { AdultPage } from './AdultPage';
 import { useUndo } from '../useUndo';
-import { WorksheetPrint } from './Worksheet';
+import { WorksheetButton } from './WorksheetButton';
 
 /** Die ersten Zielfiguren als kleine Vorschau. */
 export function ParcelPreview({ challenge, count = 6 }: { challenge: Challenge; count?: number }) {
@@ -108,7 +108,6 @@ export function KidChallengesPage(props: {
   const { store, group, groups, profiles, challenges, figureOf, onTest, onAdopted, onRename, onSent, onBack } = props;
   const [sending, setSending] = useState<{ c: Challenge; kid: Profile } | null>(null);
   const [notice, setNotice] = useState<{ id: string; text: string } | null>(null);
-  const [printing, setPrinting] = useState<Challenge | null>(null);
   const [log, setLog] = useState<SendRecord[]>([]);
   useEffect(() => {
     store.listSendLog(group.id).then(setLog, console.error);
@@ -159,9 +158,7 @@ export function KidChallengesPage(props: {
                 <button className="text-btn" onClick={() => setSending({ c, kid })}>
                   <SendIcon size={22} /> An Gruppe senden
                 </button>
-                <button className="text-btn" onClick={() => setPrinting(c)}>
-                  <PrintIcon size={22} /> Arbeitsblatt
-                </button>
+                <WorksheetButton challenge={c} figure={figureOf(c.motifId)} />
               </span>
               {notice?.id === c.id && <p className="hint notice">{notice.text}</p>}
             </div>
@@ -189,7 +186,6 @@ export function KidChallengesPage(props: {
           ))}
         </section>
       )}
-      {printing && <WorksheetPrint challenge={printing} figure={figureOf(printing.motifId)} onDone={() => setPrinting(null)} />}
       {sending && (
         <SendDialog
           store={store}
