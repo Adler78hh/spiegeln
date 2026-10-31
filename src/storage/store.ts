@@ -8,10 +8,11 @@
  * - snapshots:  gemerkte Figuren aus dem freien Spiegeln, pro Profil
  * - photos:     Sicherungen (Fotoapparat) pro Profil × Herausforderung × Zielfigur
  * - challenges: Herausforderungen (vorinstalliert und selbst erstellt)
+ * - inbox:      Posteingang: verschickte Herausforderungen für eine Gruppe oder ein Kind
  */
 import { GRATIS } from '../edition';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { Answer, Challenge, ChallengeAnswers } from '../challenges/types';
+import type { Answer, Challenge, ChallengeAnswers, Sender } from '../challenges/types';
 import type { Scene } from '../geometry';
 import type { InvertMode } from '../render/composite';
 import type { DrawingDoc } from '../drawing/elements';
@@ -42,6 +43,8 @@ export interface Group {
   hiddenChallenges?: string[];
   /** Zeichnen für die Kinder dieser Gruppe; nur `false` schaltet es aus (Standard: an). */
   drawingEnabled?: boolean;
+  /** Verschicken und Posteingang der Kinder; nur `false` schaltet es aus (Standard: an). */
+  inboxEnabled?: boolean;
 }
 
 export interface Profile {
@@ -93,6 +96,8 @@ export interface CustomMotif {
   source: 'photo' | 'drawing';
   /** Kind, das die Zeichnung angelegt hat (nur es sieht sie). */
   ownerProfileId?: string;
+  /** Mit einer Herausforderung bekommen (nicht selbst gezeichnet, nicht änderbar). */
+  received?: boolean;
   /** Formen und Striche der Zeichnung, zum Weiterbearbeiten. */
   drawing?: DrawingDoc;
   /** Bild als Daten-URL (Foto: JPEG, Zeichnung: PNG mit Transparenz). */
@@ -100,6 +105,38 @@ export interface CustomMotif {
   width: number;
   height: number;
   createdAt: number;
+}
+
+/** Was verschickt wird: die Herausforderung samt Figur (Motiv). */
+export interface Parcel {
+  challenge: Challenge;
+  motif: Pick<CustomMotif, 'name' | 'source' | 'image' | 'width' | 'height'>;
+  from: Sender;
+}
+
+/** Eintrag im Posteingang einer Gruppe (Lehrkraft) oder eines Kindes. */
+export interface InboxItem extends Parcel {
+  id: string;
+  toGroupId?: string;
+  toProfileId?: string;
+  createdAt: number;
+}
+
+/** Datei zum Verschicken einer Herausforderung an ein anderes Gerät. */
+export interface ParcelFile {
+  app: 'spiegeln';
+  type: 'herausforderung';
+  format: 1;
+  parcel: Parcel;
+}
+
+export function checkParcelFile(raw: unknown): Parcel {
+  const f = raw as Partial<ParcelFile> | null;
+  if (!f || f.app !== 'spiegeln' || f.type !== 'herausforderung') throw new Error('Das ist keine Herausforderung von Spiegeln.');
+  if (typeof f.format !== 'number' || f.format > 1) throw new Error('Diese Datei stammt aus einer neueren Version der App. Bitte die App zuerst aktualisieren.');
+  const p = f.parcel;
+  if (!p || !p.challenge || !Array.isArray(p.challenge.targets) || !p.motif?.image) throw new Error('Die Datei ist unvollständig.');
+  return p;
 }
 
 export interface AnswerRecord extends Answer {
@@ -124,6 +161,7 @@ interface SpiegelnSchema extends DBSchema {
   };
   challenges: { key: string; value: StoredChallenge };
   motifs: { key: string; value: CustomMotif };
+  inbox: { key: string; value: InboxItem };
 }
 
 type StoredChallenge = Challenge & { builtin: boolean; order: number };
@@ -148,6 +186,8 @@ export interface Backup {
   challenges: StoredChallenge[];
   /** Mitgelieferte Herausforderungen: ID → Version. */
   builtinVersions: Record<string, number | null>;
+  /** Posteingänge (fehlt in älteren Sicherungen). */
+  inbox?: InboxItem[];
 }
 
 /**
@@ -167,7 +207,7 @@ export function checkBackup(raw: unknown, gratis: boolean): Backup {
 
 /** Eigene Datenbank je Ausgabe: Gratis- und Vollversion teilen sich keine Daten. */
 export const DB_NAME = GRATIS ? 'spiegeln-gratis' : 'spiegeln';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 export function newId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -205,6 +245,9 @@ export class Store {
           const photos = db.createObjectStore('photos', { keyPath: ['profileId', 'challengeId', 'targetId'] });
           photos.createIndex('byProfile', 'profileId');
         }
+        if (oldVersion < 5) {
+          db.createObjectStore('inbox', { keyPath: 'id' });
+        }
       },
     });
     return new Store(db);
@@ -231,6 +274,7 @@ export class Store {
       motifs: await this.db.getAll('motifs'),
       challenges: challenges.filter((c) => !c.builtin),
       builtinVersions: Object.fromEntries(challenges.filter((c) => c.builtin).map((c) => [c.id, c.version ?? null])),
+      inbox: await this.db.getAll('inbox'),
     };
   }
 
@@ -245,7 +289,7 @@ export class Store {
     const sameVersion = new Set(deviceBuiltins.filter((c) => (c.version ?? null) === b.builtinVersions[c.id]).map((c) => c.id));
     const keep = (challengeId: string) => customIds.has(challengeId) || sameVersion.has(challengeId);
 
-    const stores = ['groups', 'profiles', 'answers', 'photos', 'snapshots', 'motifs', 'challenges'] as const;
+    const stores = ['groups', 'profiles', 'answers', 'photos', 'snapshots', 'motifs', 'challenges', 'inbox'] as const;
     const tx = this.db.transaction(stores, 'readwrite');
     for (const s of stores) if (s !== 'challenges') await tx.objectStore(s).clear();
     const ch = tx.objectStore('challenges');
@@ -261,6 +305,7 @@ export class Store {
     for (const s of b.snapshots) await tx.objectStore('snapshots').put(s);
     for (const m of b.motifs) await tx.objectStore('motifs').put(m);
     for (const c of b.challenges) await ch.put({ ...c, builtin: false });
+    for (const i of b.inbox ?? []) await tx.objectStore('inbox').put(i);
     await tx.done;
   }
 
@@ -330,6 +375,11 @@ export class Store {
     if (g) await this.db.put('groups', { ...g, drawingEnabled: enabled });
   }
 
+  async setInboxEnabled(id: string, enabled: boolean): Promise<void> {
+    const g = await this.db.get('groups', id);
+    if (g) await this.db.put('groups', { ...g, inboxEnabled: enabled });
+  }
+
   async recolorGroup(id: string, color: string, name: string): Promise<void> {
     const g = await this.db.get('groups', id);
     if (g) await this.db.put('groups', { ...g, color, name: name.trim() || g.name });
@@ -339,6 +389,7 @@ export class Store {
   async deleteGroup(id: string): Promise<void> {
     const profiles = (await this.listProfiles()).filter((p) => p.groupId === id);
     for (const p of profiles) await this.deleteProfile(p.id);
+    for (const i of await this.db.getAll('inbox')) if (i.toGroupId === id) await this.db.delete('inbox', i.id);
     await this.db.delete('groups', id);
   }
 
@@ -414,8 +465,14 @@ export class Store {
   }
 
   private async clearProfile(id: string, removeProfile: boolean): Promise<void> {
-    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos', 'motifs', 'challenges'], 'readwrite');
+    const tx = this.db.transaction(['profiles', 'answers', 'snapshots', 'photos', 'motifs', 'challenges', 'inbox'], 'readwrite');
     if (removeProfile) await tx.objectStore('profiles').delete(id);
+    // Posteingang des Kindes
+    let inbox = await tx.objectStore('inbox').openCursor();
+    while (inbox) {
+      if (inbox.value.toProfileId === id) await inbox.delete();
+      inbox = await inbox.continue();
+    }
     // Eigene Herausforderungen des Kindes
     let c = await tx.objectStore('challenges').openCursor();
     while (c) {
@@ -551,5 +608,70 @@ export class Store {
   async deleteChallenge(id: string): Promise<void> {
     await this.db.delete('challenges', id);
     await this.deleteAnswersForChallenge(id);
+  }
+
+  // ---------- Verschicken und Posteingang ----------
+
+  /** Paket aus einer Herausforderung und ihrer Figur (nur eigene Motive). */
+  async pack(challenge: Challenge, from: Sender): Promise<Parcel> {
+    const m = await this.db.get('motifs', challenge.motifId);
+    if (!m) throw new Error('Die Figur dieser Herausforderung fehlt.');
+    const { ownerProfileId: _o, receivedFrom: _r, ...c } = challenge;
+    return { challenge: c, motif: { name: m.name, source: m.source, image: m.image, width: m.width, height: m.height }, from };
+  }
+
+  async listInbox(): Promise<InboxItem[]> {
+    return (await this.db.getAll('inbox')).sort((a, b) => a.createdAt - b.createdAt);
+  }
+
+  async send(parcel: Parcel, to: { groupId: string } | { profileId: string }): Promise<void> {
+    await this.db.put('inbox', {
+      ...parcel,
+      id: newId(),
+      ...('groupId' in to ? { toGroupId: to.groupId } : { toProfileId: to.profileId }),
+      createdAt: Date.now(),
+    });
+  }
+
+  async deleteInbox(id: string): Promise<void> {
+    await this.db.delete('inbox', id);
+  }
+
+  /**
+   * Macht aus einem Paket eine eigene Herausforderung mit neuer Figur:
+   * - für ein Kind (`ownerProfileId`): nur dieses Kind sieht sie, nicht änderbar
+   * - für die Lehrkraft: zunächst nur in `onlyGroupId` freigeschaltet
+   */
+  async adopt(parcel: Parcel, opts: { ownerProfileId?: string; onlyGroupId?: string; name?: string; received: boolean }): Promise<Challenge> {
+    const now = Date.now();
+    const motif: CustomMotif = { ...parcel.motif, id: `eigen-${newId()}`, createdAt: now };
+    if (opts.ownerProfileId) {
+      motif.ownerProfileId = opts.ownerProfileId;
+      motif.received = true;
+    }
+    await this.db.put('motifs', motif);
+    const challenge: Challenge = {
+      ...parcel.challenge,
+      id: `${opts.ownerProfileId ? 'kind' : 'eigen'}-${newId()}`,
+      name: opts.name?.trim() || parcel.challenge.name,
+      motifId: motif.id,
+      createdAt: now,
+      ...(opts.ownerProfileId ? { ownerProfileId: opts.ownerProfileId } : {}),
+      ...(opts.received ? { receivedFrom: parcel.from } : {}),
+    };
+    await this.db.put('challenges', { ...challenge, builtin: false, order: now });
+    if (opts.onlyGroupId) {
+      for (const g of await this.listGroups()) {
+        if (g.id !== opts.onlyGroupId) await this.db.put('groups', { ...g, hiddenChallenges: [...(g.hiddenChallenges ?? []), challenge.id] });
+      }
+    }
+    return challenge;
+  }
+
+  /** Löscht eine bekommene Herausforderung eines Kindes samt ihrer Figur. */
+  async deleteReceived(challenge: Challenge): Promise<void> {
+    await this.deleteChallenge(challenge.id);
+    const m = await this.db.get('motifs', challenge.motifId);
+    if (m?.received) await this.db.delete('motifs', m.id);
   }
 }

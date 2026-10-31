@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { Challenge, ChallengeAnswers } from '../challenges/types';
-import type { CustomMotif } from '../storage/store';
-import { BackIcon, ChallengeIcon, EditIcon, PenIcon, SparkleIcon } from './icons';
+import type { CustomMotif, Profile } from '../storage/store';
+import { ProfileImage } from './Avatar';
+import { BackIcon, ChallengeEditIcon, ChallengeIcon, CheckIcon, PenIcon, SendIcon, SparkleIcon, TrashIcon } from './icons';
 
 interface Props {
   /** Nur die eigenen Zeichnungen des Kindes. */
@@ -19,13 +20,23 @@ interface Props {
   onCreate: (m: CustomMotif) => void;
   onPlay: (c: Challenge) => void;
   onEditChallenge: (c: Challenge) => void;
+  /** Bekommene Herausforderungen (Posteingang) mit dem Bild ihrer Figur. */
+  received: Array<{ challenge: Challenge; image: string }>;
+  onDeleteReceived: (c: Challenge) => void;
+  /** Andere Kinder der Gruppe zum Verschicken (fehlt, wenn ausgeschaltet). */
+  classmates?: Profile[];
+  onSend: (c: Challenge, to: Profile) => Promise<void>;
   onBack: () => void;
 }
 
 /** Eigene Herausforderungen eines Kindes: Bilder zeichnen und daraus Herausforderungen machen. */
 export function KidDrawings(props: Props) {
-  const { drawings, challenges, answers, busyId, askRegenerate, onRegenerate, onNew, onEdit, onCreate, onPlay, onEditChallenge, onBack } = props;
+  const { drawings, challenges, answers, busyId, askRegenerate, onRegenerate, onNew, onEdit, onCreate, onPlay, onEditChallenge, received, onDeleteReceived, classmates, onSend, onBack } = props;
   const [chosen, setChosen] = useState<CustomMotif | null>(null);
+  const [chosenReceived, setChosenReceived] = useState<Challenge | null>(null);
+  const [sending, setSending] = useState<Challenge | null>(null);
+  const [sent, setSent] = useState<Profile | null>(null);
+  const progress = (c: Challenge) => c.targets.filter((t) => answers[c.id]?.[t.id]).length;
   const challenge = chosen ? challenges[chosen.id] : undefined;
   const act = (f: () => void) => {
     setChosen(null);
@@ -46,7 +57,7 @@ export function KidDrawings(props: Props) {
         </button>
         {drawings.map((m) => {
           const c = challenges[m.id];
-          const done = c ? c.targets.filter((t) => answers[c.id]?.[t.id]).length : 0;
+          const done = c ? progress(c) : 0;
           return (
             <button key={m.id} className="motif-tile kid-drawing" role="listitem" aria-label={`${m.name} auswählen`} onClick={() => setChosen(m)} disabled={busyId !== null}>
               <img src={m.image} alt="" />
@@ -63,7 +74,24 @@ export function KidDrawings(props: Props) {
             </button>
           );
         })}
+        {received.map(({ challenge: c, image }) => (
+          <button key={c.id} className="motif-tile kid-drawing received" role="listitem" aria-label={`Von ${c.receivedFrom?.name}`} onClick={() => setChosenReceived(c)}>
+            <img src={image} alt="" />
+            <span className="from-badge">
+              <ProfileImage profile={{ name: c.receivedFrom?.name ?? '', animal: (c.receivedFrom?.animal ?? null) as Profile['animal'] }} />
+            </span>
+            <span className="challenge-badge">
+              <ChallengeIcon size={20} /> {progress(c)}/{c.targets.length}
+            </span>
+          </button>
+        ))}
       </div>
+
+      {sent && (
+        <div className="sent-toast" role="status" onAnimationEnd={() => setSent(null)}>
+          <CheckIcon size={28} /> <ProfileImage profile={sent} /> {sent.name}
+        </div>
+      )}
 
       {chosen && (
         <div className="dialog-backdrop" role="dialog" aria-modal="true" aria-label="Was möchtest du tun?" onClick={() => setChosen(null)}>
@@ -81,9 +109,15 @@ export function KidDrawings(props: Props) {
                     <span>Spielen</span>
                   </button>
                   <button className="kid-action" onClick={() => act(() => onEditChallenge(challenge))}>
-                    <EditIcon size={56} />
+                    <ChallengeEditIcon size={56} />
                     <span>Herausforderung ändern</span>
                   </button>
+                  {classmates && classmates.length > 0 && (
+                    <button className="kid-action" onClick={() => act(() => setSending(challenge))}>
+                      <SendIcon size={56} />
+                      <span>Verschicken</span>
+                    </button>
+                  )}
                 </>
               ) : (
                 <button className="kid-action primary" onClick={() => act(() => onCreate(chosen))}>
@@ -93,6 +127,65 @@ export function KidDrawings(props: Props) {
               )}
             </div>
             <button className="text-btn" onClick={() => setChosen(null)}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {chosenReceived && (
+        <div className="dialog-backdrop" role="dialog" aria-modal="true" aria-label="Was möchtest du tun?" onClick={() => setChosenReceived(null)}>
+          <div className="dialog kid-actions" onClick={(e) => e.stopPropagation()}>
+            <span className="kid-from-line">
+              <ProfileImage profile={{ name: chosenReceived.receivedFrom?.name ?? '', animal: (chosenReceived.receivedFrom?.animal ?? null) as Profile['animal'] }} />
+              {chosenReceived.receivedFrom?.name}
+            </span>
+            <div className="kid-action-row">
+              <button className="kid-action primary" onClick={() => {
+                  setChosenReceived(null);
+                  onPlay(chosenReceived);
+                }}>
+                <ChallengeIcon size={56} />
+                <span>Spielen</span>
+              </button>
+              <button className="kid-action" onClick={() => {
+                  setChosenReceived(null);
+                  onDeleteReceived(chosenReceived);
+                }}>
+                <TrashIcon size={56} />
+                <span>Löschen</span>
+              </button>
+            </div>
+            <button className="text-btn" onClick={() => setChosenReceived(null)}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {sending && classmates && (
+        <div className="dialog-backdrop" role="dialog" aria-modal="true" aria-label="An wen verschicken?" onClick={() => setSending(null)}>
+          <div className="dialog kid-actions send-pick" onClick={(e) => e.stopPropagation()}>
+            <SendIcon size={40} />
+            <div className="classmates">
+              {classmates.map((p) => (
+                <button
+                  key={p.id}
+                  className="classmate"
+                  aria-label={`An ${p.name} verschicken`}
+                  onClick={async () => {
+                    const c = sending;
+                    setSending(null);
+                    await onSend(c, p);
+                    setSent(p);
+                  }}
+                >
+                  <ProfileImage profile={p} />
+                  <span>{p.name}</span>
+                </button>
+              ))}
+            </div>
+            <button className="text-btn" onClick={() => setSending(null)}>
               Abbrechen
             </button>
           </div>

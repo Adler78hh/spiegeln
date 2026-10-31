@@ -73,6 +73,16 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
                 Herausforderung machen (12 Zielfiguren, davon 3 unlösbar). Es kann sie im selben Editor wie hier ändern. Jedes Kind sieht nur seine
                 eigenen; sie stehen in der Detailansicht des Kindes. Unter „Freischalten“ lässt sich der Bereich für eine Gruppe ausschalten.
               </Item>
+              <Item>
+                Herausforderungen der Kinder (unter „Freischalten“): alle Herausforderungen, die die Kinder der Gruppe gemacht haben. „Testen“ spielt sie,
+                ohne etwas zu speichern. „Übernehmen“ macht daraus eine eigene Herausforderung, zunächst nur für diese Gruppe freigeschaltet. „An Gruppe
+                senden“ legt sie in den Posteingang einer anderen Gruppe auf diesem Gerät oder speichert sie als Datei für ein anderes Gerät.
+              </Item>
+              <Item>
+                Posteingang (neben „Gruppe löschen“): Zugeschickte Herausforderungen annehmen oder ablehnen; „Datei öffnen“ holt eine Datei von einem
+                anderen Gerät herein. Die Kinder haben oben rechts einen eigenen Posteingang und können sich ihre Herausforderungen innerhalb der Gruppe
+                zuschicken (auf demselben Gerät). Unter „Freischalten“ lässt sich das je Gruppe ausschalten.
+              </Item>
             </>
           )}
         </ul>

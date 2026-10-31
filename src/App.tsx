@@ -5,7 +5,8 @@ import { draftFromChallenge } from './challenges/draft';
 import { ChallengeEditor } from './ui/adult/ChallengeEditor';
 import type { Answer, Challenge, ChallengeAnswers } from './challenges/types';
 import { allMotifs, BUILTIN_MOTIF_INFOS } from './motifs/library';
-import { Store, type ChallengePhotos, type CustomMotif, type Photo, type Group, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
+import { Store, type ChallengePhotos, type CustomMotif, type InboxItem, type Photo, type Group, type Profile, type Snapshot, type ToolPrefs } from './storage/store';
+import { KidInbox } from './ui/KidInbox';
 import { ChallengeList } from './ui/ChallengeList';
 import { ChallengePlay } from './ui/ChallengePlay';
 import { FreeMirror } from './ui/FreeMirror';
@@ -45,7 +46,8 @@ type ScreenState =
   | { name: 'draw'; motifId?: string }
   | { name: 'challenges' }
   | { name: 'challenge'; id: string; from?: 'drawings' }
-  | { name: 'kid-challenge-edit'; id: string };
+  | { name: 'kid-challenge-edit'; id: string }
+  | { name: 'kid-inbox' };
 
 export default function App() {
   const [store, setStore] = useState<Store | null>(null);
@@ -63,11 +65,17 @@ export default function App() {
   const [freeMotifId, setFreeMotifId] = useState(BUILTIN_MOTIF_INFOS[0].id);
   // Motive der Lehrkraft für alle; Zeichnungen eines Kindes nur für dieses Kind.
   const motifs = allMotifs(customMotifs.filter((m) => !m.ownerProfileId));
-  const ownDrawings = profile ? customMotifs.filter((m) => m.ownerProfileId === profile.id) : [];
-  const kidMotifs = [...motifs, ...allMotifs(ownDrawings).filter((m) => !m.builtin)];
+  const ownDrawings = profile ? customMotifs.filter((m) => m.ownerProfileId === profile.id && !m.received) : [];
+  const kidMotifs = [...motifs, ...allMotifs(profile ? customMotifs.filter((m) => m.ownerProfileId === profile.id) : []).filter((m) => !m.builtin)];
   // Eigene Herausforderungen des Kindes, je Zeichnung.
   const ownChallenges: Record<string, Challenge> = {};
-  for (const c of challenges ?? []) if (profile && c.ownerProfileId === profile.id) ownChallenges[c.motifId] = c;
+  const received: Challenge[] = [];
+  for (const c of challenges ?? []) {
+    if (!profile || c.ownerProfileId !== profile.id) continue;
+    if (c.receivedFrom) received.push(c);
+    else ownChallenges[c.motifId] = c;
+  }
+  const [kidInbox, setKidInbox] = useState<InboxItem[]>([]);
   const [busyDrawing, setBusyDrawing] = useState<string | null>(null);
   const [askRegenerate, setAskRegenerate] = useState<CustomMotif | null>(null);
 
@@ -112,6 +120,7 @@ export default function App() {
     setAnswers(await store.getAnswers(p.id));
     setPhotos(await store.getPhotos(p.id));
     setSnapshots(await store.listSnapshots(p.id));
+    setKidInbox((await store.listInbox()).filter((i) => i.toProfileId === p.id));
     // Gratisversion ohne freies Spiegeln: gleich zu den Herausforderungen.
     setScreen(GRATIS ? { name: 'challenges' } : { name: 'home' });
   };
@@ -222,7 +231,12 @@ export default function App() {
   }
 
   // Die Lehrkraft kann Herausforderungen für eine Gruppe ausblenden.
-  const hidden = new Set(groups.find((g) => g.id === profile.groupId)?.hiddenChallenges ?? []);
+  const myGroup = groups.find((g) => g.id === profile.groupId);
+  const hidden = new Set(myGroup?.hiddenChallenges ?? []);
+  const drawingOn = !GRATIS && myGroup?.drawingEnabled !== false;
+  // Verschicken und Posteingang der Kinder (gehört zu den eigenen Herausforderungen).
+  const inboxOn = drawingOn && myGroup?.inboxEnabled !== false;
+  const classmates = profiles.filter((p) => p.groupId === profile.groupId && p.id !== profile.id);
   const visibleChallenges = challenges && challenges.filter((c) => !hidden.has(c.id) && !c.ownerProfileId);
 
   switch (screen.name) {
@@ -234,7 +248,9 @@ export default function App() {
           onSwitchProfile={switchProfile}
           onFree={() => setScreen({ name: 'free-pick' })}
           onChallenges={() => setScreen({ name: 'challenges' })}
-          onDraw={!GRATIS && groups.find((g) => g.id === profile.groupId)?.drawingEnabled !== false ? () => setScreen({ name: 'drawings' }) : undefined}
+          onDraw={drawingOn ? () => setScreen({ name: 'drawings' }) : undefined}
+          onInbox={inboxOn ? () => setScreen({ name: 'kid-inbox' }) : undefined}
+          inboxCount={kidInbox.length}
         />
       );
     case 'free-pick':
@@ -277,6 +293,16 @@ export default function App() {
           onCreate={makeKidChallenge}
           onPlay={(c) => setScreen({ name: 'challenge', id: c.id, from: 'drawings' })}
           onEditChallenge={(c) => setScreen({ name: 'kid-challenge-edit', id: c.id })}
+          received={received.map((c) => ({ challenge: c, image: customMotifs.find((m) => m.id === c.motifId)?.image ?? '' }))}
+          onDeleteReceived={async (c) => {
+            await store.deleteReceived(c);
+            setChallenges(await loadChallenges(store));
+            setCustomMotifs(await store.listMotifs());
+          }}
+          classmates={inboxOn ? classmates : undefined}
+          onSend={async (c, to) => {
+            await store.send(await store.pack(c, { name: profile.name, animal: profile.animal, groupName: myGroup?.name }), { profileId: to.id });
+          }}
           onBack={() => setScreen({ name: 'home' })}
         />
       );
@@ -320,6 +346,24 @@ export default function App() {
         />
       );
     }
+    case 'kid-inbox':
+      return (
+        <KidInbox
+          items={kidInbox}
+          onAccept={async (item) => {
+            await store.adopt(item, { ownerProfileId: profile.id, received: true });
+            await store.deleteInbox(item.id);
+            setKidInbox((all) => all.filter((i) => i.id !== item.id));
+            setChallenges(await loadChallenges(store));
+            setCustomMotifs(await store.listMotifs());
+          }}
+          onReject={async (item) => {
+            await store.deleteInbox(item.id);
+            setKidInbox((all) => all.filter((i) => i.id !== item.id));
+          }}
+          onBack={() => setScreen({ name: 'home' })}
+        />
+      );
     case 'kid-challenge-edit': {
       const challenge = challenges?.find((c) => c.id === screen.id && c.ownerProfileId === profile.id);
       const motif = challenge && kidMotifs.find((m) => m.id === challenge.motifId);

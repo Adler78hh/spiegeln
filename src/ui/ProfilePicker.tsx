@@ -74,7 +74,7 @@ function GroupOval({ group, onLongPress }: { group: Group; onLongPress: () => vo
     <button
       className="group-oval"
       style={{ background: hex, color: textOn(hex) }}
-      aria-label={`Gruppe ${group.name} (3 Sekunden gedrückt halten zum Wechseln)`}
+      aria-label={`${group.name} (3 Sekunden gedrückt halten zum Wechseln)`}
       {...handlers}
     >
       <span className="group-oval-progress" style={{ transform: `scaleX(${progress})`, opacity: progress > 0 ? 1 : 0 }} />

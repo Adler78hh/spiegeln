@@ -346,3 +346,66 @@ describe('Herausforderungen', () => {
     expect(await store.getAnswers(p.id)).toEqual({});
   });
 });
+
+describe('Verschicken und Posteingang', () => {
+  const setup = async () => {
+    const { groups, profiles } = await store.ensureDefaults();
+    const rot = await store.createGroup('', 'rot', 2);
+    const [fuchs, hase] = profiles;
+    const motif = await store.addMotif({ name: 'Mein Bild', source: 'drawing', image: 'data:image/png;base64,AA', width: 10, height: 10, ownerProfileId: fuchs.id });
+    const c: Challenge = {
+      id: 'kind-1',
+      name: 'Mein Bild',
+      motifId: motif.id,
+      targets: [{ id: 't1', image: 'x', solvable: true, kind: 'mirror' }],
+      viewSize: 1,
+      ownerProfileId: fuchs.id,
+    };
+    await store.saveChallenge(c, false, 1);
+    return { weiss: groups[0], rot, fuchs, hase, c };
+  };
+
+  it('Kind schickt an Kind: Paket ohne Besitzer, beim Annehmen eigene Kopie mit Absender', async () => {
+    const { fuchs, hase, c } = await setup();
+    const parcel = await store.pack(c, { name: fuchs.name, animal: fuchs.animal });
+    expect(parcel.challenge.ownerProfileId).toBeUndefined();
+    await store.send(parcel, { profileId: hase.id });
+    const [item] = await store.listInbox();
+    expect(item.toProfileId).toBe(hase.id);
+    const got = await store.adopt(item, { ownerProfileId: hase.id, received: true });
+    await store.deleteInbox(item.id);
+    expect(got.ownerProfileId).toBe(hase.id);
+    expect(got.receivedFrom?.name).toBe(fuchs.name);
+    expect(got.motifId).not.toBe(c.motifId);
+    const motifs = await store.listMotifs();
+    expect(motifs.find((m) => m.id === got.motifId)).toMatchObject({ ownerProfileId: hase.id, received: true });
+    expect(await store.listInbox()).toHaveLength(0);
+    // Löschen der bekommenen entfernt auch die Figur; das Original bleibt.
+    await store.deleteReceived(got);
+    expect((await store.listMotifs()).some((m) => m.id === got.motifId)).toBe(false);
+    expect((await store.listChallenges()).some((x) => x.id === c.id)).toBe(true);
+  });
+
+  it('Übernehmen durch die Lehrkraft: nur in der eigenen Gruppe freigeschaltet', async () => {
+    const { weiss, rot, fuchs, c } = await setup();
+    const got = await store.adopt(await store.pack(c, { name: fuchs.name }), { onlyGroupId: weiss.id, name: 'Mein Bild (Fuchs)', received: false });
+    expect(got.ownerProfileId).toBeUndefined();
+    expect(got.name).toBe('Mein Bild (Fuchs)');
+    const groups = await store.listGroups();
+    expect(groups.find((g) => g.id === weiss.id)!.hiddenChallenges ?? []).not.toContain(got.id);
+    expect(groups.find((g) => g.id === rot.id)!.hiddenChallenges).toContain(got.id);
+    const motif = (await store.listMotifs()).find((m) => m.id === got.motifId)!;
+    expect(motif.ownerProfileId).toBeUndefined();
+  });
+
+  it('Kind zurücksetzen leert seinen Posteingang; Gruppe löschen den der Gruppe', async () => {
+    const { rot, fuchs, hase, c } = await setup();
+    const parcel = await store.pack(c, { name: fuchs.name });
+    await store.send(parcel, { profileId: hase.id });
+    await store.send(parcel, { groupId: rot.id });
+    await store.resetProfile(hase.id);
+    expect((await store.listInbox()).map((i) => i.toGroupId)).toEqual([rot.id]);
+    await store.deleteGroup(rot.id);
+    expect(await store.listInbox()).toHaveLength(0);
+  });
+});

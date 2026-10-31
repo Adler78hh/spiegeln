@@ -1,7 +1,7 @@
 import { findColor, tintOf } from '../profiles/colors';
 import type { Group, Profile } from '../storage/store';
 import { ProfileImage } from './Avatar';
-import { ChallengeIcon, MirrorIcon, PenIcon } from './icons';
+import { ChallengeIcon, MailIcon, MirrorIcon, PenIcon } from './icons';
 
 interface Props {
   profile: Profile;
@@ -11,10 +11,13 @@ interface Props {
   onChallenges: () => void;
   /** Eigene Herausforderungen (zeichnen und daraus Herausforderungen machen), außer die Lehrkraft schaltet sie aus. */
   onDraw?: () => void;
+  /** Posteingang (außer die Lehrkraft schaltet ihn aus). */
+  onInbox?: () => void;
+  inboxCount?: number;
 }
 
 /** Startbildschirm: zwei (mit eigenen Herausforderungen drei) große Kacheln, oben das eigene Tier. */
-export function Home({ profile, group, onSwitchProfile, onFree, onChallenges, onDraw }: Props) {
+export function Home({ profile, group, onSwitchProfile, onFree, onChallenges, onDraw, onInbox, inboxCount = 0 }: Props) {
   const tint = tintOf(findColor(group?.color ?? 'weiss').hex);
   return (
     <div className="home-screen">
@@ -23,6 +26,12 @@ export function Home({ profile, group, onSwitchProfile, onFree, onChallenges, on
           <ProfileImage profile={profile} />
           <span>{profile.name}</span>
         </button>
+        {onInbox && (
+          <button className="tool-btn inbox-kid" aria-label={inboxCount ? `Posteingang: ${inboxCount} neu` : 'Posteingang'} onClick={onInbox}>
+            <MailIcon size={36} />
+            {inboxCount > 0 && <span className="inbox-count">{inboxCount}</span>}
+          </button>
+        )}
       </div>
       <div className="home">
         <button className="home-tile" onClick={onChallenges}>

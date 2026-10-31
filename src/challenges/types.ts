@@ -41,6 +41,18 @@ export interface Challenge {
   createdAt?: number;
   /** Eigene Herausforderung eines Kindes (zu seiner Zeichnung); nur dieses Kind sieht sie. */
   ownerProfileId?: string;
+  /** Von jemand anderem bekommen (Posteingang): Absender. */
+  receivedFrom?: Sender;
+}
+
+/** Absender einer verschickten Herausforderung. */
+export interface Sender {
+  /** Name des Kindes oder der Gruppe. */
+  name: string;
+  /** Tier des Kindes (für das Bild), falls ein Kind sie gemacht hat. */
+  animal?: string | null;
+  /** Gruppe, aus der sie kommt. */
+  groupName?: string;
 }
 
 export const unsolvableCount = (c: Challenge): number => c.targets.filter((t) => !t.solvable).length;

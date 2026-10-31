@@ -261,8 +261,8 @@ export const UndoIcon = () => (
   </Icon>
 );
 
-export const TrashIcon = () => (
-  <Icon>
+export const TrashIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
     <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
   </Icon>
 );
@@ -310,6 +310,32 @@ export const ShuffleIcon = () => (
   <Icon>
     <path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4" />
     <path d="M18 4l3 3-3 3M18 14l3 3-3 3" />
+  </Icon>
+);
+
+/** Herausforderung ändern: Kacheln mit Stift. */
+export const ChallengeEditIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="13" y="3" width="7" height="7" rx="1.5" />
+    <rect x="3" y="13" width="7" height="7" rx="1.5" />
+    <path d="M13 21l.6-3 5.4-5.4 2.4 2.4L16 20.4z" />
+  </Icon>
+);
+
+/** Briefumschlag: Posteingang. */
+export const MailIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="M3 7l9 6 9-6" />
+  </Icon>
+);
+
+/** Papierflieger: verschicken. */
+export const SendIcon = ({ size = 32 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M21 3L3 10.5l7 2.5 2.5 7z" />
+    <path d="M21 3L10 13" />
   </Icon>
 );
 

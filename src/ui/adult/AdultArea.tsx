@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GRATIS } from '../../edition';
 import { isColorName, suggestGroupName } from '../../profiles/colors';
 import { BUILTIN_CHALLENGES, loadChallenges } from '../../challenges/builtin';
 import { draftFromChallenge, newDraft, type Draft } from '../../challenges/draft';
 import type { Challenge } from '../../challenges/types';
-import type { MotifInfo } from '../../motifs/library';
-import { newId, type CustomMotif, type Group, type Profile, type Store } from '../../storage/store';
+import { allMotifs, type MotifInfo } from '../../motifs/library';
+import { newId, type CustomMotif, type Group, type InboxItem, type Profile, type Store } from '../../storage/store';
 import { MotifCreator } from '../MotifCreator';
 import { DrawingEditor } from '../DrawingEditor';
 import { AdultHome, type AdultSection } from './AdultHome';
@@ -17,6 +17,7 @@ import { HelpIcon, SaveIcon } from '../icons';
 import { HelpPage } from './HelpPage';
 import { GroupList, GroupPage, NewGroupDialog, type GroupTab } from './Groups';
 import type { ResultCell } from './Results';
+import { GroupInboxPage, KidChallengesPage, TestPlay } from './Sharing';
 
 interface Props {
   store: Store;
@@ -51,6 +52,13 @@ export function AdultArea(props: Props) {
   const [resultCell, setResultCell] = useState<ResultCell | null>(null);
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [backup, setBackup] = useState(false);
+  const [sharing, setSharing] = useState<null | 'kids' | 'inbox'>(null);
+  const [testing, setTesting] = useState<Challenge | null>(null);
+  const [inbox, setInbox] = useState<InboxItem[]>([]);
+  const reloadInbox = async () => setInbox(await store.listInbox());
+  useEffect(() => {
+    if (!GRATIS) store.listInbox().then(setInbox, console.error);
+  }, [store]);
   const [help, setHelp] = useState(false);
 
   const reloadGroups = async () => {
@@ -60,6 +68,7 @@ export function AdultArea(props: Props) {
 
   const openGroup = (id: string | null) => {
     setGroupId(id);
+    setSharing(null);
     setGroupTab('kids');
     setResultCell(null);
   };
@@ -158,6 +167,44 @@ export function AdultArea(props: Props) {
   switch (section) {
     case 'groups': {
       const group = groups.find((g) => g.id === groupId);
+      if (group && testing) {
+        const m = customMotifs.find((x) => x.id === testing.motifId);
+        return <TestPlay challenge={testing} motif={m ? allMotifs([m]).find((x) => x.id === m.id) : undefined} onBack={() => setTesting(null)} />;
+      }
+      if (group && sharing === 'kids') {
+        return (
+          <KidChallengesPage
+            store={store}
+            group={group}
+            groups={groups}
+            profiles={profiles}
+            challenges={props.challenges}
+            onTest={setTesting}
+            onAdopted={async () => {
+              await reloadChallenges();
+              await reloadGroups();
+              onCustomMotifsChange(await store.listMotifs());
+            }}
+            onBack={() => setSharing(null)}
+          />
+        );
+      }
+      if (group && sharing === 'inbox') {
+        return (
+          <GroupInboxPage
+            store={store}
+            group={group}
+            items={inbox}
+            onChanged={reloadInbox}
+            onAccepted={async () => {
+              await reloadChallenges();
+              await reloadGroups();
+              onCustomMotifsChange(await store.listMotifs());
+            }}
+            onBack={() => setSharing(null)}
+          />
+        );
+      }
       if (group) {
         return (
           <GroupPage
@@ -199,6 +246,13 @@ export function AdultArea(props: Props) {
               await store.setDrawingEnabled(group.id, enabled);
               await reloadGroups();
             }}
+            onInboxToggle={async (enabled) => {
+              await store.setInboxEnabled(group.id, enabled);
+              await reloadGroups();
+            }}
+            onKidChallenges={() => setSharing('kids')}
+            onInbox={() => setSharing('inbox')}
+            inboxCount={inbox.filter((i) => i.toGroupId === group.id).length}
           />
         );
       }

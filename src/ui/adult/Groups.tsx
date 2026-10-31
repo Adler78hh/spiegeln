@@ -4,7 +4,7 @@ import type { MotifInfo } from '../../motifs/library';
 import { ANIMAL_ORDER } from '../../profiles/animals';
 import { findColor, firstFreeColor, GROUP_COLORS, suggestGroupName, textOn } from '../../profiles/colors';
 import type { Group, Profile, Store } from '../../storage/store';
-import { CheckIcon, PenIcon, PlusIcon, TrashIcon } from '../icons';
+import { ChallengeIcon, CheckIcon, MailIcon, PenIcon, PlusIcon, TrashIcon } from '../icons';
 import { AdultPage, ConfirmRow } from './AdultPage';
 import { ProfileManager } from './ProfileManager';
 import { Results, type ResultCell } from './Results';
@@ -202,6 +202,13 @@ interface PageProps {
   onHiddenChange: (hidden: string[]) => void;
   /** Zeichnen-Editor für die Kinder ein- oder ausschalten (fehlt in der Gratisversion). */
   onDrawingToggle?: (enabled: boolean) => void;
+  /** Verschicken und Posteingang der Kinder ein- oder ausschalten. */
+  onInboxToggle?: (enabled: boolean) => void;
+  /** Seite „Herausforderungen der Kinder“ öffnen. */
+  onKidChallenges?: () => void;
+  /** Posteingang der Gruppe öffnen (mit Anzahl der Einträge). */
+  onInbox?: () => void;
+  inboxCount?: number;
 }
 
 /** Freischalten: welche Herausforderungen die Kinder der Gruppe sehen. */
@@ -262,7 +269,7 @@ export function GroupPage(props: PageProps) {
   const isLast = groups.length <= 1;
 
   return (
-    <AdultPage title={limited ? 'Klasse' : `Gruppe ${group.name}`} onBack={onBack} actions={props.actions}>
+    <AdultPage title={limited ? 'Klasse' : group.name} onBack={onBack} actions={props.actions}>
       {/* Gratisversion: keine Startseite, also den Speicher-Hinweis hier zeigen. */}
       {limited && <StorageHint />}
       {!limited && (
@@ -301,13 +308,18 @@ export function GroupPage(props: PageProps) {
             onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
           />
         </label>
+        {props.onInbox && (
+          <button className="text-btn inbox-btn" onClick={props.onInbox}>
+            <MailIcon size={22} /> Posteingang{props.inboxCount ? ` (${props.inboxCount})` : ''}
+          </button>
+        )}
         <button className="text-btn" onClick={() => setConfirm(true)} disabled={isLast} title={isLast ? 'Die letzte Gruppe kann nicht gelöscht werden.' : undefined}>
           <TrashIcon /> Gruppe löschen
         </button>
         {isLast && <p className="hint group-last-hint">Die letzte Gruppe kann nicht gelöscht werden.</p>}
         {confirm && (
           <ConfirmRow
-            text={`Gruppe „${group.name}“ mit ${kids.length === 1 ? '1 Kind' : `${kids.length} Kindern`} und allen Ergebnissen löschen?`}
+            text={`„${group.name}“ mit ${kids.length === 1 ? '1 Kind' : `${kids.length} Kindern`} und allen Ergebnissen löschen?`}
             confirmLabel="Löschen"
             onConfirm={() => {
               setConfirm(false);
@@ -347,6 +359,29 @@ export function GroupPage(props: PageProps) {
                   <span className="row-meta">
                     Die Kinder zeichnen eigene Bilder und machen daraus Herausforderungen; jedes sieht nur seine eigenen. Häkchen entfernen schaltet es aus.
                   </span>
+                </span>
+              </label>
+            )}
+            {props.onKidChallenges && (
+              <button className="access-row kid-challenges-btn" onClick={props.onKidChallenges}>
+                <span className="access-motif access-icon">
+                  <ChallengeIcon size={36} />
+                </span>
+                <span className="access-name">
+                  Herausforderungen der Kinder
+                  <span className="row-meta">Ansehen, testen, als eigene übernehmen oder an eine andere Gruppe senden.</span>
+                </span>
+              </button>
+            )}
+            {props.onInboxToggle && (
+              <label className="access-row drawing-access">
+                <input type="checkbox" checked={group.inboxEnabled !== false} onChange={(e) => props.onInboxToggle!(e.target.checked)} />
+                <span className="access-motif access-icon">
+                  <MailIcon size={36} />
+                </span>
+                <span className="access-name">
+                  Verschicken und Posteingang (Kinder)
+                  <span className="row-meta">Die Kinder schicken sich ihre Herausforderungen innerhalb der Gruppe zu. Häkchen entfernen schaltet es aus.</span>
                 </span>
               </label>
             )}
