@@ -103,6 +103,10 @@ export function AdultArea(props: Props) {
           await store.setHiddenChallenges(groups[0].id, hidden);
           await reloadGroups();
         }}
+        onTutorToggle={async (enabled) => {
+          await store.setTutorEnabled(groups[0].id, enabled);
+          await reloadGroups();
+        }}
         limited
         actions={
           <>
@@ -251,6 +255,10 @@ export function AdultArea(props: Props) {
             }}
             onDrawingToggle={async (enabled) => {
               await store.setDrawingEnabled(group.id, enabled);
+              await reloadGroups();
+            }}
+            onTutorToggle={async (enabled) => {
+              await store.setTutorEnabled(group.id, enabled);
               await reloadGroups();
             }}
             onInboxToggle={async (enabled) => {

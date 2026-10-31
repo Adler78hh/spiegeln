@@ -26,6 +26,11 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
           <Item icon={<HideLineIcon />}>Spiegelachse ausblenden.</Item>
           <Item icon={<OutlineIcon />}>Umriss der Figur zeigen.</Item>
           <Item icon={<ResetIcon />}>Alles zurück an den Anfang.</Item>
+          <Item>
+            Tutor: Öffnet ein Kind „Haus“ zum ersten Mal, führt sein Tier mit kurzen, vorgelesenen Befehlen und einem blinkenden Finger durch die Figuren 1–6.
+            Danach hilft es nur, wenn das Kind das Tier neben „Zurücksetzen“ antippt. Unter „Freischalten“ lässt sich der Tutor je Gruppe ausschalten. Vorgelesen
+            wird mit der Stimme des Geräts (iPad: Bedienungshilfen → Gesprochene Inhalte → Stimmen, z. B. „Anna (Premium)“ laden).
+          </Item>
         </ul>
       </section>
 

@@ -3336,3 +3336,165 @@ button.matrix-kid:active {
   color: #fff;
   font-size: 15px;
 }
+
+/* Tutor: Finger, Sprechblase, Markierung von Knöpfen */
+.mirror-stage {
+  position: relative;
+  line-height: 0;
+}
+.guide-tap,
+.guide-rotate {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.guide-ring {
+  position: absolute;
+  left: -26px;
+  top: -26px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 4px solid #f28c28;
+  animation: guide-pulse 1.1s ease-out infinite;
+}
+.guide-finger {
+  position: absolute;
+  left: -20px;
+  top: -3px;
+  animation: guide-blink 1.1s ease-in-out infinite;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+}
+.guide-hand {
+  display: block;
+}
+@keyframes guide-pulse {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+@keyframes guide-blink {
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50% { opacity: 0.35; transform: translateY(6px); }
+}
+/* Drehen: zwei Finger kreisen drei Mal, dann eine kurze Pause. */
+.guide-rotor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: guide-turn 3.6s ease-in-out infinite;
+}
+.guide-rotor .guide-finger {
+  left: 22px;
+  top: -3px;
+  animation: none;
+}
+.guide-rotor .guide-finger.second {
+  left: -62px;
+  top: -3px;
+}
+@keyframes guide-turn {
+  0%, 90%, 100% { transform: rotate(0deg); }
+  15%, 45%, 75% { transform: rotate(80deg); }
+  30%, 60% { transform: rotate(0deg); }
+}
+/* Knopf, auf den der Tutor zeigt */
+.tutor-target {
+  position: relative;
+  overflow: visible !important;
+  box-shadow: 0 0 0 4px #f28c28;
+  animation: tutor-btn 1.1s ease-in-out infinite;
+}
+@keyframes tutor-btn {
+  0%, 100% { box-shadow: 0 0 0 4px #f28c28; }
+  50% { box-shadow: 0 0 0 8px rgba(242, 140, 40, 0.35); }
+}
+.btn-guide {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  pointer-events: none;
+  z-index: 3;
+  line-height: 0;
+}
+
+/* Tutor: Sprechblase rechts neben der großen Zielfigur */
+.target-row {
+  flex: 1 1 0;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.target-row .target-big {
+  height: 100%;
+  min-height: 0;
+}
+.target-row.with-tutor .target-big {
+  width: 55%;
+  flex: none;
+}
+.tutor-bubble {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+}
+.tutor-say {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  border: 3px solid #f28c28;
+  border-radius: 18px;
+  background: #fff7ee;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+.tutor-say .profile-image {
+  width: 52px;
+  height: 52px;
+}
+.tutor-say::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 40%;
+  border: 8px solid transparent;
+  border-right-color: #f28c28;
+  border-left: 0;
+}
+.tutor-close {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.tutor-btn .profile-image {
+  width: 40px;
+  height: 40px;
+}
+.tutor-btn.on {
+  box-shadow: 0 0 0 3px #f28c28;
+}
+.tutor-btn.is-hidden {
+  visibility: hidden;
+}

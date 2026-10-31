@@ -18,6 +18,7 @@ import {
 import { isTap, movedDistance, type PointerSample } from '../input/tap';
 import type { InvertMode } from '../render/composite';
 import { MirrorRenderer } from '../render/MirrorRenderer';
+import { Hand } from './GuideHand';
 
 /** Radius der Touch-Fläche eines Anfasspunkts (CSS-Pixel), Durchmesser ≥ 48 px. */
 const HANDLE_TOUCH_RADIUS = 34;
@@ -46,6 +47,8 @@ export interface MirrorCanvasProps {
   invert?: InvertMode;
   /** Farbe der zweifarbigen Umkehr. */
   invertColor?: string;
+  /** Tutor: blinkender Finger an dieser Stelle (normierte Koordinaten). */
+  guide?: { p: Vec2; kind: 'tap' | 'rotate' } | null;
 }
 
 type Gesture =
@@ -258,14 +261,44 @@ export function MirrorCanvas(props: MirrorCanvasProps) {
 
   return (
     <div ref={wrapRef} className="mirror-wrap">
-      <canvas
-        ref={canvasRef}
-        className="mirror-canvas"
-        onPointerDown={props.interactive === false ? undefined : onPointerDown}
-        onPointerMove={props.interactive === false ? undefined : onPointerMove}
-        onPointerUp={props.interactive === false ? undefined : (e) => finish(e, false)}
-        onPointerCancel={props.interactive === false ? undefined : (e) => finish(e, true)}
-      />
+      <div className="mirror-stage">
+        <canvas
+          ref={canvasRef}
+          className="mirror-canvas"
+          onPointerDown={props.interactive === false ? undefined : onPointerDown}
+          onPointerMove={props.interactive === false ? undefined : onPointerMove}
+          onPointerUp={props.interactive === false ? undefined : (e) => finish(e, false)}
+          onPointerCancel={props.interactive === false ? undefined : (e) => finish(e, true)}
+        />
+        {props.guide && <GuideFinger p={props.guide.p} kind={props.guide.kind} />}
+      </div>
     </div>
+  );
+}
+
+/** Zeigefinger des Tutors: blinkt an der Stelle, wo das Kind anfassen soll. */
+function GuideFinger({ p, kind }: { p: Vec2; kind: 'tap' | 'rotate' }) {
+  const at = (v: number) => `calc(${PAD}px + ${v} * (100% - ${2 * PAD}px))`;
+  if (kind === 'rotate') {
+    return (
+      <span className="guide-rotate" style={{ left: at(p.x), top: at(p.y) }} aria-hidden="true">
+        <span className="guide-rotor">
+          <span className="guide-finger">
+            <Hand />
+          </span>
+          <span className="guide-finger second">
+            <Hand />
+          </span>
+        </span>
+      </span>
+    );
+  }
+  return (
+    <span className="guide-tap" style={{ left: at(p.x), top: at(p.y) }} aria-hidden="true">
+      <span className="guide-ring" />
+      <span className="guide-finger">
+        <Hand />
+      </span>
+    </span>
   );
 }

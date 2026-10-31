@@ -4,7 +4,7 @@ import type { MotifInfo } from '../../motifs/library';
 import { ANIMAL_ORDER } from '../../profiles/animals';
 import { findColor, firstFreeColor, GROUP_COLORS, suggestGroupName, textOn } from '../../profiles/colors';
 import type { Group, Profile, Store } from '../../storage/store';
-import { ChallengeIcon, CheckIcon, MailIcon, PenIcon, PlusIcon, TrashIcon } from '../icons';
+import { ChallengeIcon, CheckIcon, HelpIcon, MailIcon, PenIcon, PlusIcon, TrashIcon } from '../icons';
 import { AdultPage, ConfirmRow } from './AdultPage';
 import { ProfileManager } from './ProfileManager';
 import { Results, type ResultCell } from './Results';
@@ -211,6 +211,8 @@ interface PageProps {
   onDrawingToggle?: (enabled: boolean) => void;
   /** Verschicken und Posteingang der Kinder ein- oder ausschalten. */
   onInboxToggle?: (enabled: boolean) => void;
+  /** Tutor (Einführung bei „Haus“) ein- oder ausschalten. */
+  onTutorToggle?: (enabled: boolean) => void;
   /** Seite „Herausforderungen der Kinder“ öffnen. */
   onKidChallenges?: () => void;
   /** Posteingang der Gruppe öffnen (mit Anzahl der Einträge). */
@@ -365,6 +367,21 @@ export function GroupPage(props: PageProps) {
                   Eigene Herausforderungen
                   <span className="row-meta">
                     Die Kinder zeichnen eigene Bilder und machen daraus Herausforderungen; jedes sieht nur seine eigenen. Häkchen entfernen schaltet es aus.
+                  </span>
+                </span>
+              </label>
+            )}
+            {props.onTutorToggle && (
+              <label className="access-row drawing-access">
+                <input type="checkbox" checked={group.tutorEnabled !== false} onChange={(e) => props.onTutorToggle!(e.target.checked)} />
+                <span className="access-motif access-icon">
+                  <HelpIcon size={36} />
+                </span>
+                <span className="access-name">
+                  Tutor
+                  <span className="row-meta">
+                    Das Tier des Kindes führt mit kurzen Befehlen und einem Zeigefinger durch die ersten sechs Figuren von „Haus“. Häkchen entfernen schaltet ihn
+                    aus.
                   </span>
                 </span>
               </label>

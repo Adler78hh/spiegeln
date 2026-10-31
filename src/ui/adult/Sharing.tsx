@@ -39,6 +39,7 @@ export function TestPlay({ challenge, motif, onBack }: { challenge: Challenge; m
       prefs={prefs}
       onPrefsChange={setPrefs}
       onBack={onBack}
+      tutor={{ name: 'Mathe-Waschbär', animal: 'mathewaschbaer' }}
     />
   );
 }

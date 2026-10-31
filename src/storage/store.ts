@@ -29,6 +29,8 @@ export interface ToolPrefs {
   invert: InvertMode;
   /** Farbe der zweifarbigen Umkehr (neben Schwarz). */
   invertColor: string;
+  /** Herausforderungen, in die der Tutor das Kind schon einmal eingeführt hat. */
+  tutorSeen?: string[];
 }
 
 export const DEFAULT_PREFS: ToolPrefs = { snap: false, showOutline: false, hideLine: false, invert: 'none', invertColor: '#f28c28' };
@@ -46,6 +48,8 @@ export interface Group {
   drawingEnabled?: boolean;
   /** Verschicken und Posteingang der Kinder; nur `false` schaltet es aus (Standard: an). */
   inboxEnabled?: boolean;
+  /** Tutor bei der Herausforderung „Haus“; nur `false` schaltet ihn aus (Standard: an). */
+  tutorEnabled?: boolean;
 }
 
 export interface Profile {
@@ -396,6 +400,11 @@ export class Store {
   async setDrawingEnabled(id: string, enabled: boolean): Promise<void> {
     const g = await this.db.get('groups', id);
     if (g) await this.db.put('groups', { ...g, drawingEnabled: enabled });
+  }
+
+  async setTutorEnabled(id: string, enabled: boolean): Promise<void> {
+    const g = await this.db.get('groups', id);
+    if (g) await this.db.put('groups', { ...g, tutorEnabled: enabled });
   }
 
   async setInboxEnabled(id: string, enabled: boolean): Promise<void> {

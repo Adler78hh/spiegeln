@@ -4,6 +4,12 @@ import { unsolvableCount, type Answer, type Challenge, type ChallengeAnswers, ty
 import { boundsCenter } from '../challenges/generate';
 import { contentBounds, createFigureBuffer, cropSquare, renderComposite } from '../render/composite';
 import { BackIcon, CameraIcon, CheckIcon, CrossIcon, ThumbsUpIcon } from './icons';
+import { COMMANDS, INTRO, pointerFor, sceneClose, scriptFor, stepDone, TUTOR_CHALLENGE, type FinalStep, type Step } from '../tutor/script';
+import { createMatcher, type Matcher } from '../tutor/match';
+import { speak, stopSpeaking } from '../tutor/speech';
+import { ProfileImage } from './Avatar';
+import { ButtonGuide } from './GuideHand';
+import type { Profile } from '../storage/store';
 import { checkAnswers } from '../challenges/check';
 import { MirrorCanvas } from './MirrorCanvas';
 import type { ChallengePhotos, Photo, ToolPrefs } from '../storage/store';
@@ -29,10 +35,23 @@ interface Props {
   prefs: ToolPrefs;
   onPrefsChange: (p: ToolPrefs) => void;
   onBack: () => void;
+  /** Tutor (Tier des Kindes); fehlt, wenn die Lehrkraft ihn ausgeschaltet hat. */
+  tutor?: Pick<Profile, 'name' | 'animal'>;
+}
+
+/** Laufende Führung des Tutors zu einer Zielfigur. */
+interface Guide {
+  targetId: string;
+  steps: Step[];
+  /** Nächster auszuführender Befehl. */
+  index: number;
+  /** Lage beim Erteilen des Befehls (zum Erkennen, ob er ausgeführt wurde). */
+  base: Scene;
+  intro: boolean;
 }
 
 /** Modus 2: Startfigur drehen/spiegeln und zu jeder Zielfigur entscheiden. */
-export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onPhoto, prefs, onPrefsChange, onBack }: Props) {
+export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onPhoto, prefs, onPrefsChange, onBack, tutor }: Props) {
   const image = useMotifImage(motif);
   const aspect = motif?.aspect ?? 1;
   const targets = challenge.targets;
@@ -45,7 +64,11 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
   // (solange das Kind noch nichts verändert hat).
   const touched = useRef(false);
   useEffect(() => {
-    if (image && !touched.current && !photos[selectedId]) setScene(startScene());
+    if (image && !touched.current && !photos[selectedId]) {
+      const s = startScene();
+      setScene(s);
+      setGuide((g) => (g ? { ...g, base: s } : g));
+    }
   }, [image]);
   const changeScene = (s: Scene) => {
     touched.current = true;
@@ -64,9 +87,31 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
   const check = useMemo(() => (checkedAt === null ? null : checkAnswers(challenge, answers)), [checkedAt, challenge, answers]);
   const checkCurrent = check !== null && checkedAt !== null && targets.every((t) => (answers[t.id]?.updatedAt ?? Infinity) <= checkedAt);
 
+  // ---------- Tutor (nur Haus, Zielfiguren 1–6) ----------
+  // Beim ersten Öffnen führt er automatisch, danach nur auf Antippen seines Symbols.
+  const tutorOn = !!tutor && challenge.id === TUTOR_CHALLENGE;
+  const [autoTutor] = useState(() => tutorOn && !prefs.tutorSeen?.includes(challenge.id));
+  const [guide, setGuide] = useState<Guide | null>(null);
+  const [matched, setMatched] = useState(false);
+  const matcher = useRef<Matcher | null>(null);
+  const stepsAt = (id: string) => (tutorOn ? scriptFor(challenge.id, targets.findIndex((t) => t.id === id)) : null);
+  const startGuide = (id: string, s: Scene, intro = false) => {
+    const steps = stepsAt(id);
+    setGuide(steps ? { targetId: id, steps, index: 0, base: s, intro } : null);
+  };
+  useEffect(() => {
+    if (!autoTutor) return;
+    onPrefsChange({ ...prefs, tutorSeen: [...(prefs.tutorSeen ?? []), challenge.id] });
+    if (!answers[selectedId]) startGuide(selectedId, scene, targets[0].id === selectedId);
+  }, []);
+  useEffect(() => () => stopSpeaking(), []);
+
   const select = (id: string) => {
     setSelectedId(id);
-    setScene(photos[id]?.scene ?? startScene());
+    const s = photos[id]?.scene ?? startScene();
+    setScene(s);
+    if (autoTutor && !answers[id]) startGuide(id, s);
+    else setGuide(null);
   };
 
   const renderPhoto = (s: Scene): string | undefined => {
@@ -96,6 +141,51 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
   const current = answers[selected.id]?.decision;
   const photo = photos[selected.id];
 
+  // Vergleich mit der Zielfigur, solange der Tutor führt.
+  useEffect(() => {
+    matcher.current = null;
+    setMatched(false);
+    if (!guide || !image) return;
+    let alive = true;
+    createMatcher(image, aspect, selected.image, challenge.viewSize).then((m) => {
+      if (alive) matcher.current = m;
+    }, console.error);
+    return () => {
+      alive = false;
+    };
+  }, [guide?.targetId, image]);
+
+  useEffect(() => {
+    if (!guide) return;
+    const ok = (selected.scene && sceneClose(selected.scene, scene)) || !!matcher.current?.matches(scene);
+    setMatched(ok);
+    // Befehl ausgeführt → nächster (die Lage von jetzt ist der neue Ausgangspunkt).
+    const step = guide.steps[guide.index];
+    if (step && stepDone(step, guide.base, scene, prefs.snap)) setGuide({ ...guide, index: guide.index + 1, base: scene });
+  }, [scene, prefs.snap, guide?.targetId, guide?.index]);
+
+  // Was sagt der Tutor gerade? Passt das Bild: Foto, dann „Passt“. Sonst der
+  // nächste Befehl (sind alle ausgeführt, bleibt der letzte stehen).
+  const phase: Step | FinalStep | null = !guide
+    ? null
+    : matched || photo
+    ? photo
+      ? 'fits'
+      : 'photo'
+    : guide.steps[Math.min(guide.index, guide.steps.length - 1)];
+  // „Ich helfe dir.“ nur vor dem ersten Befehl der ersten Figur.
+  const withIntro = !!guide?.intro && guide.index === 0 && phase === guide.steps[0];
+  const said = phase ? `${withIntro ? `${INTRO} ` : ''}${COMMANDS[phase]}` : '';
+  useEffect(() => {
+    if (said) speak(said);
+  }, [said, guide?.targetId]);
+  // Hat das Kind entschieden, ist die Führung zu dieser Figur vorbei.
+  useEffect(() => {
+    if (guide && answers[guide.targetId] && guide.targetId === selectedId) setGuide(null);
+  }, [answers]);
+  const canvasGuide = phase && phase !== 'photo' && phase !== 'fits' ? pointerFor(phase, scene) : null;
+  const toolHighlight = phase === 'snap' || phase === 'flip' ? phase : null;
+
   // Fotoapparat: sichern bzw. die Sicherung wieder aufheben. Weiterbewegen
   // ändert eine Sicherung nicht; neu sichern heißt erst entsichern.
   const togglePhoto = () => {
@@ -124,15 +214,60 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
           snap={prefs.snap}
           showOutline={prefs.showOutline}
           hideLine={prefs.hideLine}
+          guide={canvasGuide}
         />
       </main>
       <aside className="side challenge-side">
         <div className="side-top">
-          <MirrorTools prefs={prefs} onPrefsChange={onPrefsChange} onReset={() => setScene(startScene())} onFlip={() => setScene(flipSide)} />
+          <MirrorTools
+            prefs={prefs}
+            onPrefsChange={onPrefsChange}
+            onReset={() => {
+              const s = startScene();
+              setScene(s);
+              setGuide((g) => (g ? { ...g, index: 0, base: s } : g));
+            }}
+            onFlip={() => setScene(flipSide)}
+            highlight={toolHighlight}
+            tutor={
+              // Bei „Haus“ bleibt der Platz immer frei, damit die Knöpfe nicht springen.
+              tutorOn && tutor ? (
+                <button
+                  className={`tool-btn tutor-btn ${guide ? 'on' : ''} ${stepsAt(selected.id) ? '' : 'is-hidden'}`}
+                  disabled={!stepsAt(selected.id)}
+                  aria-label="Tutor: Hilfe"
+                  aria-pressed={!!guide}
+                  onClick={() => (guide ? (setGuide(null), stopSpeaking()) : startGuide(selected.id, scene))}
+                >
+                  <ProfileImage profile={tutor} />
+                </button>
+              ) : undefined
+            }
+          />
         </div>
 
-        <div className="target-big">
-          <img src={selected.image} alt="Ausgewählte Zielfigur" />
+        <div className={`target-row ${guide && tutor ? 'with-tutor' : ''}`}>
+          <div className="target-big">
+            <img src={selected.image} alt="Ausgewählte Zielfigur" />
+          </div>
+          {guide && tutor && phase && (
+            <div className="tutor-bubble" role="status">
+              <button className="tutor-say" aria-label="Noch einmal vorlesen" onClick={() => speak(said)}>
+                <ProfileImage profile={tutor} />
+                <span>{said}</span>
+              </button>
+              <button
+                className="tutor-close"
+                aria-label="Tutor schließen"
+                onClick={() => {
+                  setGuide(null);
+                  stopSpeaking();
+                }}
+              >
+                <CrossIcon size={18} />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="target-area">
@@ -189,16 +324,18 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
 
         <div className="decide">
           <button
-            className={`photo-btn ${photo ? 'saved' : ''}`}
+            className={`photo-btn ${photo ? 'saved' : ''} ${phase === 'photo' ? 'tutor-target' : ''}`}
             aria-pressed={!!photo}
             aria-label={photo ? 'Gesichert – antippen zum Entsichern' : 'Sichern'}
             onClick={togglePhoto}
           >
             <CameraIcon size={36} />
+            {phase === 'photo' && <ButtonGuide />}
           </button>
-          <button className={`decide-btn fits ${current === 'fits' ? 'chosen' : ''}`} onClick={() => decide('fits')}>
+          <button className={`decide-btn fits ${current === 'fits' ? 'chosen' : ''} ${phase === 'fits' ? 'tutor-target' : ''}`} onClick={() => decide('fits')}>
             <CheckIcon size={36} />
             <span>Passt</span>
+            {phase === 'fits' && <ButtonGuide />}
           </button>
           <button
             className={`decide-btn impossible ${current === 'impossible' ? 'chosen' : ''}`}

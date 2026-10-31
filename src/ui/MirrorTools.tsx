@@ -1,5 +1,7 @@
 import { INVERT_PALETTE } from '../render/composite';
 import type { ToolPrefs } from '../storage/store';
+import type { ReactNode } from 'react';
+import { ButtonGuide } from './GuideHand';
 import { FlipIcon, HideLineIcon, InvertNegativeIcon, InvertTwoToneIcon, OutlineIcon, ResetIcon, SnapIcon } from './icons';
 
 interface Props {
@@ -10,6 +12,10 @@ interface Props {
   onFlip: () => void;
   /** Knöpfe für die Farbumkehr anbieten (nur freies Spiegeln). */
   withInvert?: boolean;
+  /** Tutor-Knopf (neben Zurücksetzen). */
+  tutor?: ReactNode;
+  /** Tutor zeigt auf diesen Knopf. */
+  highlight?: 'snap' | 'flip' | null;
 }
 
 /**
@@ -19,7 +25,7 @@ interface Props {
  * Farbauswahl hat einen festen Platz, damit beim Ein- und Ausschalten kein
  * Knopf springt.
  */
-export function MirrorTools({ prefs, onPrefsChange, onReset, onFlip, withInvert }: Props) {
+export function MirrorTools({ prefs, onPrefsChange, onReset, onFlip, withInvert, tutor, highlight }: Props) {
   const invert = prefs.invert ?? 'none';
   const toggleInvert = (mode: 'silhouette' | 'negative') => onPrefsChange({ ...prefs, invert: invert === mode ? 'none' : mode });
   const colorsShown = invert === 'silhouette';
@@ -27,12 +33,13 @@ export function MirrorTools({ prefs, onPrefsChange, onReset, onFlip, withInvert 
     <div className={`tools ${withInvert ? 'tools-free' : ''}`}>
       <div className="tool-group tool-group-view">
         <button
-          className={`tool-btn ${prefs.snap ? 'on' : ''}`}
+          className={`tool-btn ${prefs.snap ? 'on' : ''} ${highlight === 'snap' ? 'tutor-target' : ''}`}
           aria-pressed={prefs.snap}
           aria-label="Einrasten auf 15 Grad"
           onClick={() => onPrefsChange({ ...prefs, snap: !prefs.snap })}
         >
           <SnapIcon />
+          {highlight === 'snap' && <ButtonGuide />}
         </button>
         <button
           className={`tool-btn ${prefs.hideLine ? 'on' : ''}`}
@@ -72,12 +79,14 @@ export function MirrorTools({ prefs, onPrefsChange, onReset, onFlip, withInvert 
         </div>
       )}
       <div className="tool-group tool-group-actions">
-        <button className="tool-btn" aria-label="Spiegel umdrehen" onClick={onFlip}>
+        <button className={`tool-btn ${highlight === 'flip' ? 'tutor-target' : ''}`} aria-label="Spiegel umdrehen" onClick={onFlip}>
           <FlipIcon />
+          {highlight === 'flip' && <ButtonGuide />}
         </button>
         <button className="tool-btn" aria-label="Zurücksetzen" onClick={onReset}>
           <ResetIcon />
         </button>
+        {tutor}
       </div>
       {withInvert && (
         <div

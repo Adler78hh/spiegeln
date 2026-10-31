@@ -350,6 +350,7 @@ export default function App() {
             onPhoto={(targetId, p) => savePhoto(challenge.id, targetId, p)}
             prefs={profile.prefs}
             onPrefsChange={setPrefs}
+            tutor={myGroup?.tutorEnabled !== false ? profile : undefined}
             onBack={() => setScreen(screen.from === 'drawings' ? { name: 'drawings' } : { name: 'challenges' })}
           />
         );
