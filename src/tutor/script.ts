@@ -17,7 +17,8 @@ export const HAUS_SCRIPT: Step[][] = [
   ['axis'],
   ['lower'],
   ['rotate', 'axis'],
-  ['snap', 'upper', 'move'],
+  // Achse schräg über zwei Ecken der Wand: beide Punkte ziehen.
+  ['upper', 'lower'],
   // Nach dem Umdrehen ist die Originalseite leer: Umriss zeigt, wo das Haus ist.
   ['flip', 'outline', 'axis'],
   ['rotate', 'upper', 'axis'],
