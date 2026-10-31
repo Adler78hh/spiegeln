@@ -15,7 +15,7 @@ interface Props {
   /** Tutor-Knopf (neben Zurücksetzen). */
   tutor?: ReactNode;
   /** Tutor zeigt auf diesen Knopf. */
-  highlight?: 'snap' | 'flip' | null;
+  highlight?: 'snap' | 'flip' | 'outline' | null;
 }
 
 /**
@@ -50,12 +50,13 @@ export function MirrorTools({ prefs, onPrefsChange, onReset, onFlip, withInvert,
           <HideLineIcon />
         </button>
         <button
-          className={`tool-btn ${prefs.showOutline ? 'on' : ''}`}
+          className={`tool-btn ${prefs.showOutline ? 'on' : ''} ${highlight === 'outline' ? 'tutor-target' : ''}`}
           aria-pressed={prefs.showOutline}
           aria-label="Umriss der Figur"
           onClick={() => onPrefsChange({ ...prefs, showOutline: !prefs.showOutline })}
         >
           <OutlineIcon />
+          {highlight === 'outline' && <ButtonGuide />}
         </button>
       </div>
       {withInvert && (

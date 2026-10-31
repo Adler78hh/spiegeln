@@ -12,17 +12,20 @@ describe('Tutor', () => {
   });
 
   it('erkennt ausgeführte Befehle', () => {
+    const off = { snap: false, showOutline: false };
     const s = initialScene();
     const shifted = { ...s, mirror: createMirror(UNIT_RECT, 90, { x: 0.6, y: 0.5 }, 1) };
-    expect(stepDone('axis', s, s, false)).toBe(false);
-    expect(stepDone('axis', s, shifted, false)).toBe(true);
+    expect(stepDone('axis', s, s, off)).toBe(false);
+    expect(stepDone('axis', s, shifted, off)).toBe(true);
     const rotated = { ...s, figure: { ...s.figure, rotation: 0.3 } };
-    expect(stepDone('rotate', s, rotated, false)).toBe(true);
-    expect(stepDone('rotate', s, shifted, false)).toBe(false);
-    expect(stepDone('flip', s, flipSide(s), false)).toBe(true);
-    expect(stepDone('snap', s, s, true)).toBe(true);
+    expect(stepDone('rotate', s, rotated, off)).toBe(true);
+    expect(stepDone('rotate', s, shifted, off)).toBe(false);
+    expect(stepDone('flip', s, flipSide(s), off)).toBe(true);
+    expect(stepDone('snap', s, s, { snap: true, showOutline: false })).toBe(true);
+    expect(stepDone('outline', s, s, off)).toBe(false);
+    expect(stepDone('outline', s, s, { snap: false, showOutline: true })).toBe(true);
     const tilted = { ...s, mirror: { ...s.mirror, [s.mirror.a.y > s.mirror.b.y ? 'a' : 'b']: { x: 0.4, y: 1 } } };
-    expect(stepDone('lower', s, tilted, false)).toBe(true);
+    expect(stepDone('lower', s, tilted, off)).toBe(true);
   });
 
   it('Finger: Mitte der Achse, unterer Punkt unten, Drehen auf dem Haus', () => {

@@ -5,7 +5,7 @@
  */
 import { figureCenter, lineOf, normal, signedDistance, UNIT_RECT, type Scene, type Vec2 } from '../geometry';
 
-export type Step = 'axis' | 'lower' | 'upper' | 'rotate' | 'move' | 'snap' | 'flip';
+export type Step = 'axis' | 'lower' | 'upper' | 'rotate' | 'move' | 'snap' | 'flip' | 'outline';
 /** Abschluss, wenn das Bild zur Zielfigur passt. */
 export type FinalStep = 'photo' | 'fits';
 
@@ -18,7 +18,8 @@ export const HAUS_SCRIPT: Step[][] = [
   ['lower'],
   ['rotate', 'axis'],
   ['snap', 'upper', 'move'],
-  ['flip', 'axis'],
+  // Nach dem Umdrehen ist die Originalseite leer: Umriss zeigt, wo das Haus ist.
+  ['flip', 'outline', 'axis'],
   ['rotate', 'upper', 'axis'],
 ];
 
@@ -30,6 +31,7 @@ export const COMMANDS: Record<Step | FinalStep, string> = {
   move: 'Verschiebe das Haus.',
   snap: 'Schalte das Einrasten ein.',
   flip: 'Drehe den Spiegel um.',
+  outline: 'Schalte den Umriss ein.',
   photo: 'Mach ein Foto.',
   fits: 'Tippe auf Passt.',
 };
@@ -49,7 +51,7 @@ export function handlePoint(scene: Scene, which: 'lower' | 'upper'): Vec2 {
 }
 
 /** Hat das Kind den Befehl ausgeführt (verglichen mit der Lage beim Erteilen)? */
-export function stepDone(step: Step, start: Scene, now: Scene, snapOn: boolean): boolean {
+export function stepDone(step: Step, start: Scene, now: Scene, tools: { snap: boolean; showOutline: boolean }): boolean {
   const ms = start.mirror;
   const mn = now.mirror;
   const mid = (m: Scene['mirror']) => ({ x: (m.a.x + m.b.x) / 2, y: (m.a.y + m.b.y) / 2 });
@@ -64,7 +66,9 @@ export function stepDone(step: Step, start: Scene, now: Scene, snapOn: boolean):
     case 'move':
       return moved(start.figure.offset, now.figure.offset);
     case 'snap':
-      return snapOn;
+      return tools.snap;
+    case 'outline':
+      return tools.showOutline;
     case 'flip':
       return ms.originalSide !== mn.originalSide;
   }

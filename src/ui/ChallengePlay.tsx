@@ -161,8 +161,8 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
     setMatched(ok);
     // Befehl ausgeführt → nächster (die Lage von jetzt ist der neue Ausgangspunkt).
     const step = guide.steps[guide.index];
-    if (step && stepDone(step, guide.base, scene, prefs.snap)) setGuide({ ...guide, index: guide.index + 1, base: scene });
-  }, [scene, prefs.snap, guide?.targetId, guide?.index]);
+    if (step && stepDone(step, guide.base, scene, prefs)) setGuide({ ...guide, index: guide.index + 1, base: scene });
+  }, [scene, prefs.snap, prefs.showOutline, guide?.targetId, guide?.index]);
 
   // Was sagt der Tutor gerade? Passt das Bild: Foto, dann „Passt“. Sonst der
   // nächste Befehl (sind alle ausgeführt, bleibt der letzte stehen).
@@ -184,7 +184,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
     if (guide && answers[guide.targetId] && guide.targetId === selectedId) setGuide(null);
   }, [answers]);
   const canvasGuide = phase && phase !== 'photo' && phase !== 'fits' ? pointerFor(phase, scene) : null;
-  const toolHighlight = phase === 'snap' || phase === 'flip' ? phase : null;
+  const toolHighlight = phase === 'snap' || phase === 'flip' || phase === 'outline' ? phase : null;
 
   // Fotoapparat: sichern bzw. die Sicherung wieder aufheben. Weiterbewegen
   // ändert eine Sicherung nicht; neu sichern heißt erst entsichern.
