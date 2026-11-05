@@ -381,7 +381,7 @@ export function GroupPage(props: PageProps) {
                 <span className="access-name">
                   Tutor
                   <span className="row-meta">
-                    Das Tier des Kindes führt mit kurzen Befehlen und einem Zeigefinger durch die ersten sechs Figuren von „Haus“. Häkchen entfernen schaltet ihn
+                    Das Kind kann bei „Haus“ sein Tier antippen; es führt mit kurzen Befehlen und einem Zeigefinger durch die ersten sechs Figuren. Häkchen entfernen schaltet ihn
                     aus.
                   </span>
                 </span>

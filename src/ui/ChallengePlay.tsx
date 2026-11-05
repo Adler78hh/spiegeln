@@ -47,7 +47,6 @@ interface Guide {
   index: number;
   /** Lage beim Erteilen des Befehls (zum Erkennen, ob er ausgeführt wurde). */
   base: Scene;
-  intro: boolean;
 }
 
 /** Modus 2: Startfigur drehen/spiegeln und zu jeder Zielfigur entscheiden. */
@@ -88,29 +87,30 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
   const checkCurrent = check !== null && checkedAt !== null && targets.every((t) => (answers[t.id]?.updatedAt ?? Infinity) <= checkedAt);
 
   // ---------- Tutor (nur Haus, Zielfiguren 1–6) ----------
-  // Beim ersten Öffnen führt er automatisch, danach nur auf Antippen seines Symbols.
+  // Zu Beginn aus; daneben steht „Ich helfe dir.“. Antippen schaltet ihn ein,
+  // dann führt er auch bei den nächsten Figuren 1–6, bis das Kind ihn ausschaltet.
   const tutorOn = !!tutor && challenge.id === TUTOR_CHALLENGE;
-  const [autoTutor] = useState(() => tutorOn && !prefs.tutorSeen?.includes(challenge.id));
+  const [tutorMode, setTutorMode] = useState(false);
   const [guide, setGuide] = useState<Guide | null>(null);
   const [matched, setMatched] = useState(false);
   const matcher = useRef<Matcher | null>(null);
   const stepsAt = (id: string) => (tutorOn ? scriptFor(challenge.id, targets.findIndex((t) => t.id === id)) : null);
-  const startGuide = (id: string, s: Scene, intro = false) => {
+  const startGuide = (id: string, s: Scene) => {
     const steps = stepsAt(id);
-    setGuide(steps ? { targetId: id, steps, index: 0, base: s, intro } : null);
+    setGuide(steps ? { targetId: id, steps, index: 0, base: s } : null);
   };
-  useEffect(() => {
-    if (!autoTutor) return;
-    onPrefsChange({ ...prefs, tutorSeen: [...(prefs.tutorSeen ?? []), challenge.id] });
-    if (!answers[selectedId]) startGuide(selectedId, scene, targets[0].id === selectedId);
-  }, []);
+  const tutorOff = () => {
+    setTutorMode(false);
+    setGuide(null);
+    stopSpeaking();
+  };
   useEffect(() => () => stopSpeaking(), []);
 
   const select = (id: string) => {
     setSelectedId(id);
     const s = photos[id]?.scene ?? startScene();
     setScene(s);
-    if (autoTutor && !answers[id]) startGuide(id, s);
+    if (tutorMode && !answers[id]) startGuide(id, s);
     else setGuide(null);
   };
 
@@ -173,9 +173,7 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
       ? 'fits'
       : 'photo'
     : guide.steps[Math.min(guide.index, guide.steps.length - 1)];
-  // „Ich helfe dir.“ nur vor dem ersten Befehl der ersten Figur.
-  const withIntro = !!guide?.intro && guide.index === 0 && phase === guide.steps[0];
-  const said = phase ? `${withIntro ? `${INTRO} ` : ''}${COMMANDS[phase]}` : '';
+  const said = phase ? COMMANDS[phase] : '';
   useEffect(() => {
     if (said) speak(said);
   }, [said, guide?.targetId]);
@@ -232,15 +230,28 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
             tutor={
               // Bei „Haus“ bleibt der Platz immer frei, damit die Knöpfe nicht springen.
               tutorOn && tutor ? (
-                <button
-                  className={`tool-btn tutor-btn ${guide ? 'on' : ''} ${stepsAt(selected.id) ? '' : 'is-hidden'}`}
-                  disabled={!stepsAt(selected.id)}
-                  aria-label="Tutor: Hilfe"
-                  aria-pressed={!!guide}
-                  onClick={() => (guide ? (setGuide(null), stopSpeaking()) : startGuide(selected.id, scene))}
-                >
-                  <ProfileImage profile={tutor} />
-                </button>
+                <span className={`tutor-slot ${stepsAt(selected.id) ? '' : 'is-hidden'}`}>
+                  <button
+                    className={`tool-btn tutor-btn ${tutorMode ? 'on' : ''}`}
+                    disabled={!stepsAt(selected.id)}
+                    aria-label={tutorMode ? 'Tutor ausschalten' : 'Tutor einschalten: Ich helfe dir.'}
+                    aria-pressed={tutorMode}
+                    onClick={() => {
+                      if (tutorMode) tutorOff();
+                      else {
+                        setTutorMode(true);
+                        startGuide(selected.id, scene);
+                      }
+                    }}
+                  >
+                    <ProfileImage profile={tutor} />
+                  </button>
+                  {!tutorMode && stepsAt(selected.id) && (
+                    <span className="tutor-hint" aria-hidden="true">
+                      {INTRO}
+                    </span>
+                  )}
+                </span>
               ) : undefined
             }
           />
@@ -258,11 +269,8 @@ export function ChallengePlay({ challenge, motif, answers, onAnswer, photos, onP
               </button>
               <button
                 className="tutor-close"
-                aria-label="Tutor schließen"
-                onClick={() => {
-                  setGuide(null);
-                  stopSpeaking();
-                }}
+                aria-label="Tutor ausschalten"
+                onClick={tutorOff}
               >
                 <CrossIcon size={18} />
               </button>

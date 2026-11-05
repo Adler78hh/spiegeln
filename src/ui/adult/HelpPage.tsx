@@ -27,9 +27,10 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
           <Item icon={<OutlineIcon />}>Umriss der Figur zeigen.</Item>
           <Item icon={<ResetIcon />}>Alles zurück an den Anfang.</Item>
           <Item>
-            Tutor: Öffnet ein Kind „Haus“ zum ersten Mal, führt sein Tier mit kurzen, vorgelesenen Befehlen und einem blinkenden Finger durch die Figuren 1–6.
-            Danach hilft es nur, wenn das Kind das Tier neben „Zurücksetzen“ antippt. Unter „Freischalten“ lässt sich der Tutor je Gruppe ausschalten. Vorgelesen
-            wird mit der Stimme des Geräts (iPad: Bedienungshilfen → Gesprochene Inhalte → Stimmen, z. B. „Anna (Premium)“ laden).
+            Tutor: Bei „Haus“ steht neben „Zurücksetzen“ das Tier des Kindes mit dem Hinweis „Ich helfe dir.“. Tippt das Kind es an, führt das Tier mit kurzen,
+            vorgelesenen Befehlen und einem blinkenden Finger durch die Figuren 1–6, bis das Kind es wieder ausschaltet. Zu Beginn ist der Tutor immer aus. Unter
+            „Freischalten“ lässt er sich je Gruppe ganz ausschalten. Vorgelesen wird mit der Stimme des Geräts (iPad: Bedienungshilfen → Gesprochene Inhalte →
+            Stimmen, z. B. „Anna (Premium)“ laden).
           </Item>
         </ul>
       </section>

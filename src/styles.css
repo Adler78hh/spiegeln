@@ -1,5 +1,11 @@
 :root {
   --bg: #e6f0f1;
+  /* Karopapier: weißes Papier, blasse petrolblaue Linien, Kästchen etwa 5 mm (iPad). */
+  --karo-paper: #fbfdfd;
+  --karo-line: #c9e0e2;
+  --karo-size: 28px;
+  --karo: linear-gradient(to right, var(--karo-line) 1px, transparent 1px) 0 0 / var(--karo-size) var(--karo-size),
+    linear-gradient(to bottom, var(--karo-line) 1px, transparent 1px) 0 0 / var(--karo-size) var(--karo-size), var(--karo-paper);
   --panel: #ffffff;
   --paper: #fffdf8;
   --ink: #4a3b2f;
@@ -15,7 +21,7 @@
   --touch: 64px;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--ink);
-  background: var(--bg);
+  background: var(--karo);
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
@@ -35,7 +41,8 @@ body,
 }
 
 body {
-  background: var(--bg);
+  background: var(--karo);
+  background-attachment: fixed;
 }
 
 button {
@@ -1077,7 +1084,7 @@ button:disabled {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
+  background: transparent;
   padding: max(12px, env(safe-area-inset-top)) 16px 16px;
   gap: 16px;
   -webkit-user-select: text;
@@ -3446,4 +3453,36 @@ button.matrix-kid:active {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+}
+/* Tutor aus: kleiner Hinweis neben dem Tier */
+.tutor-slot {
+  position: relative;
+  display: inline-flex;
+}
+.tutor-slot.is-hidden {
+  visibility: hidden;
+}
+.tutor-hint {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -4px;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 2px solid #f28c28;
+  background: #fff7ee;
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 2;
+}
+.tutor-hint::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 22px;
+  border: 6px solid transparent;
+  border-bottom-color: #f28c28;
+  border-top: 0;
 }
