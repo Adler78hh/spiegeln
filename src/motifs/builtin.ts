@@ -231,35 +231,40 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     // die beiden Fellbögen als Nüstern.
     svg: svg(`
       <g stroke="${INK}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-        <path d="M114,172 C152,178 190,152 186,110 C182,74 148,76 152,52 C155,34 174,28 186,38 C178,18 142,16 132,44 C122,74 154,94 152,122 C150,148 130,154 114,150 Z" fill="#d9822b"/>
-        <ellipse cx="96" cy="136" rx="36" ry="42" fill="#e8994a"/>
-        <path d="M66,118 C60,150 72,176 98,176 C122,176 126,148 120,124 C112,100 72,100 66,118 Z" fill="#fbe2c4"/>
-        <path d="M97,138 q5,-6 10,0" fill="none" transform="rotate(-30 102 137)"/>
-        <path d="M58,24 L66,56 L80,48 Z" fill="#e8994a"/>
-        <path d="M106,22 L88,50 L102,58 Z" fill="#e8994a"/>
-        <circle cx="80" cy="78" r="27" fill="#e8994a"/>
-        <ellipse cx="58" cy="88" rx="15" ry="12" fill="#e8994a"/>
-        <circle cx="44" cy="86" r="4.5" fill="${INK}"/>
-        <circle cx="70" cy="72" r="7" fill="#fff"/>
-        <circle cx="68" cy="73" r="3.5" fill="${INK}" stroke="none"/>
-        <path d="M58,24 L54,15 M58,24 L62,14 M106,22 L104,12 M106,22 L112,14"/>
-        <ellipse cx="44" cy="122" rx="12" ry="10" fill="#b5835a"/>
-        <path d="M34,118 Q44,108 54,118" fill="#8a5a3c"/>
-        <ellipse cx="58" cy="124" rx="8" ry="6" fill="#e8994a"/>
-        <ellipse cx="74" cy="176" rx="16" ry="7" fill="#e8994a"/>
+        <path d="M118,180 C150,190 194,172 189,138 C185,110 161,98 159,76 C157,60 164,46 178,42 C185,41 190,45 193,50 C194,30 180,17 160,19 C136,21 117,44 117,70 C117,100 132,128 124,156 Z" fill="#d9822b"/>
+        <ellipse cx="88" cy="140" rx="36" ry="42" fill="#e8994a"/>
+        <path d="M60,128 C56,160 66,180 88,180 C110,180 114,154 110,130 C104,106 66,104 60,128 Z" fill="#fbe2c4"/>
+        <path d="M84,140 q6,-6 12,-2" fill="none"/>
+        <ellipse cx="62" cy="177" rx="17" ry="7" fill="#e8994a"/>
+        <path d="M52,52 L59,22 L77,44 Z" fill="#e8994a"/>
+        <path d="M57,47 L60,32 L69,44 Z" fill="#fbe2c4" stroke="none"/>
+        <path d="M80,46 L97,20 L99,58 Z" fill="#e8994a"/>
+        <path d="M85,46 L95,30 L96,52 Z" fill="#fbe2c4" stroke="none"/>
+        <ellipse cx="68" cy="75" rx="32" ry="28" fill="#e8994a"/>
+        <path d="M48,70 C38,72 29,77 24,83 C30,92 44,96 58,92 Z" fill="#e8994a"/>
+        <path d="M30,84 C34,92 46,95 56,91 C58,84 52,79 44,79 C38,79 33,81 30,84 Z" fill="#fbe2c4" stroke="none"/>
+        <ellipse cx="26" cy="83" rx="5" ry="4" fill="${INK}"/>
+        <circle cx="57" cy="69" r="8" fill="#fff"/>
+        <circle cx="55" cy="70" r="4.5" fill="${INK}" stroke="none"/>
+        <circle cx="53.5" cy="68.3" r="1.5" fill="#fff" stroke="none"/>
+        <path d="M59,22 L55,13 M59,22 L63,12 M97,20 L94,11 M97,20 L102,12"/>
+        <ellipse cx="41" cy="125" rx="10" ry="11" fill="#b5835a"/>
+        <path d="M30,119 Q41,106 52,119 Z" fill="#8a5a3c"/>
+        <path d="M41,110 L43,105"/>
+        <ellipse cx="57" cy="125" rx="9" ry="6" fill="#e8994a"/>
       </g>`),
     errorVariants: [
       // Schwanz blau.
       [['fill="#d9822b"', 'fill="#8fb8de"']],
       // Ohne Fellbögen (bei der Kuh: ohne Nüstern).
-      [['<path d="M97,138 q5,-6 10,0" fill="none" transform="rotate(-30 102 137)"/>', '']],
+      [['<path d="M84,140 q6,-6 12,-2" fill="none"/>', '']],
       // Ohne Pinsel an den Ohren.
-      [['<path d="M58,24 L54,15 M58,24 L62,14 M106,22 L104,12 M106,22 L112,14"/>', '']],
+      [['<path d="M59,22 L55,13 M59,22 L63,12 M97,20 L94,11 M97,20 L102,12"/>', '']],
       // Zusätzliches Auge mitten in der hinteren Kopfhälfte, Blick geradeaus.
       [
         [
-          '<circle cx="70" cy="72" r="7" fill="#fff"/>',
-          `<circle cx="70" cy="72" r="7" fill="#fff"/><circle cx="90" cy="74" r="7" fill="#fff"/><circle cx="90" cy="74" r="3.5" fill="${INK}" stroke="none"/>`,
+          '<circle cx="57" cy="69" r="8" fill="#fff"/>',
+          `<circle cx="57" cy="69" r="8" fill="#fff"/><circle cx="80" cy="70" r="8" fill="#fff"/><circle cx="80" cy="71" r="4.5" fill="${INK}" stroke="none"/>`,
         ],
       ],
     ],
@@ -274,44 +279,48 @@ export const BUILTIN_MOTIFS: BuiltinMotif[] = [
     svg: svg(`
       <g stroke="${INK}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
         <g transform="translate(130 104)">
-          <ellipse cx="-14" cy="-58" rx="11" ry="27" fill="#c8007f" transform="rotate(-8 -14 -58)"/>
-          <ellipse cx="14" cy="-58" rx="11" ry="27" fill="#c8007f" transform="rotate(8 14 -58)"/>
-          <ellipse cx="-14" cy="-56" rx="5.5" ry="19" fill="#e982bd" stroke="none" transform="rotate(-8 -14 -56)"/>
-          <ellipse cx="14" cy="-56" rx="5.5" ry="19" fill="#e982bd" stroke="none" transform="rotate(8 14 -56)"/>
-          <ellipse cx="-37" cy="30" rx="11" ry="23" fill="#c8007f" transform="rotate(14 -37 30)"/>
-          <ellipse cx="37" cy="30" rx="11" ry="23" fill="#c8007f" transform="rotate(-14 37 30)"/>
+          <ellipse cx="-15" cy="-58" rx="12" ry="30" fill="#c8007f" transform="rotate(-10 -15 -58)"/>
+          <ellipse cx="15" cy="-58" rx="12" ry="30" fill="#c8007f" transform="rotate(10 15 -58)"/>
+          <ellipse cx="-15" cy="-56" rx="6" ry="21" fill="#e982bd" stroke="none" transform="rotate(-10 -15 -56)"/>
+          <ellipse cx="15" cy="-56" rx="6" ry="21" fill="#e982bd" stroke="none" transform="rotate(10 15 -56)"/>
+          <ellipse cx="-38" cy="30" rx="12" ry="23" fill="#c8007f" transform="rotate(16 -38 30)"/>
+          <ellipse cx="38" cy="30" rx="12" ry="23" fill="#c8007f" transform="rotate(-16 38 30)"/>
           <ellipse cx="0" cy="36" rx="36" ry="34" fill="#c8007f"/>
           <ellipse cx="0" cy="38" rx="19" ry="23" fill="#e982bd"/>
-          <ellipse cx="-29" cy="62" rx="18" ry="15" fill="#c8007f"/>
-          <ellipse cx="29" cy="62" rx="18" ry="15" fill="#c8007f"/>
-          <ellipse cx="-29" cy="63" rx="10" ry="10" fill="#e982bd"/>
-          <ellipse cx="29" cy="63" rx="10" ry="10" fill="#e982bd"/>
-          <ellipse cx="0" cy="-16" rx="31" ry="27" fill="#c8007f"/>
-          <ellipse cx="0" cy="-7" rx="14" ry="11" fill="#e982bd"/>
-          <circle cx="-11" cy="-21" r="3.2" fill="${INK}" stroke="none"/>
-          <circle cx="11" cy="-21" r="3.2" fill="${INK}" stroke="none"/>
-          <path d="M-4,-12 L4,-12 L0,-8 Z" fill="${INK}"/>
-          <path d="M0,-8 L0,-4 M0,-4 Q-5,0 -8,-3 M0,-4 Q5,0 8,-3" fill="none"/>
+          <circle cx="-27" cy="62" r="17" fill="#c8007f"/>
+          <circle cx="27" cy="62" r="17" fill="#c8007f"/>
+          <circle cx="-27" cy="63" r="10" fill="#e982bd"/>
+          <circle cx="27" cy="63" r="10" fill="#e982bd"/>
+          <ellipse cx="0" cy="-15" rx="33" ry="28" fill="#c8007f"/>
+          <ellipse cx="0" cy="-5" rx="15" ry="11" fill="#e982bd"/>
+          <circle cx="-12" cy="-22" r="3.4" fill="${INK}" stroke="none"/>
+          <circle cx="12" cy="-22" r="3.4" fill="${INK}" stroke="none"/>
+          <circle cx="-11" cy="-23.2" r="1.1" fill="#fff" stroke="none"/>
+          <circle cx="13" cy="-23.2" r="1.1" fill="#fff" stroke="none"/>
+          <path d="M-4,-10 L4,-10 L0,-6 Z" fill="${INK}"/>
+          <path d="M0,-6 L0,-3 M0,-3 Q-4,1 -7,-2 M0,-3 Q4,1 7,-2" fill="none"/>
         </g>
         <g transform="translate(70 116)">
-          <ellipse cx="-14" cy="-58" rx="11" ry="27" fill="#f7a8c4" transform="rotate(-8 -14 -58)"/>
-          <ellipse cx="14" cy="-58" rx="11" ry="27" fill="#f7a8c4" transform="rotate(8 14 -58)"/>
-          <ellipse cx="-14" cy="-56" rx="5.5" ry="19" fill="#fde0ea" stroke="none" transform="rotate(-8 -14 -56)"/>
-          <ellipse cx="14" cy="-56" rx="5.5" ry="19" fill="#fde0ea" stroke="none" transform="rotate(8 14 -56)"/>
-          <ellipse cx="-37" cy="30" rx="11" ry="23" fill="#f7a8c4" transform="rotate(14 -37 30)"/>
-          <ellipse cx="37" cy="30" rx="11" ry="23" fill="#f7a8c4" transform="rotate(-14 37 30)"/>
+          <ellipse cx="-15" cy="-58" rx="12" ry="30" fill="#f7a8c4" transform="rotate(-10 -15 -58)"/>
+          <ellipse cx="15" cy="-58" rx="12" ry="30" fill="#f7a8c4" transform="rotate(10 15 -58)"/>
+          <ellipse cx="-15" cy="-56" rx="6" ry="21" fill="#fde0ea" stroke="none" transform="rotate(-10 -15 -56)"/>
+          <ellipse cx="15" cy="-56" rx="6" ry="21" fill="#fde0ea" stroke="none" transform="rotate(10 15 -56)"/>
+          <ellipse cx="-38" cy="30" rx="12" ry="23" fill="#f7a8c4" transform="rotate(16 -38 30)"/>
+          <ellipse cx="38" cy="30" rx="12" ry="23" fill="#f7a8c4" transform="rotate(-16 38 30)"/>
           <ellipse cx="0" cy="36" rx="36" ry="34" fill="#f7a8c4"/>
           <ellipse cx="0" cy="38" rx="19" ry="23" fill="#fde0ea"/>
-          <ellipse cx="-29" cy="62" rx="18" ry="15" fill="#f7a8c4"/>
-          <ellipse cx="29" cy="62" rx="18" ry="15" fill="#f7a8c4"/>
-          <ellipse cx="-29" cy="63" rx="10" ry="10" fill="#fde0ea"/>
-          <ellipse cx="29" cy="63" rx="10" ry="10" fill="#fde0ea"/>
-          <ellipse cx="0" cy="-16" rx="31" ry="27" fill="#f7a8c4"/>
-          <ellipse cx="0" cy="-7" rx="14" ry="11" fill="#fde0ea"/>
-          <circle cx="-11" cy="-21" r="3.2" fill="${INK}" stroke="none"/>
-          <circle cx="11" cy="-21" r="3.2" fill="${INK}" stroke="none"/>
-          <path d="M-4,-12 L4,-12 L0,-8 Z" fill="${INK}"/>
-          <path d="M0,-8 L0,-4 M0,-4 Q-5,0 -8,-3 M0,-4 Q5,0 8,-3" fill="none"/>
+          <circle cx="-27" cy="62" r="17" fill="#f7a8c4"/>
+          <circle cx="27" cy="62" r="17" fill="#f7a8c4"/>
+          <circle cx="-27" cy="63" r="10" fill="#fde0ea"/>
+          <circle cx="27" cy="63" r="10" fill="#fde0ea"/>
+          <ellipse cx="0" cy="-15" rx="33" ry="28" fill="#f7a8c4"/>
+          <ellipse cx="0" cy="-5" rx="15" ry="11" fill="#fde0ea"/>
+          <circle cx="-12" cy="-22" r="3.4" fill="${INK}" stroke="none"/>
+          <circle cx="12" cy="-22" r="3.4" fill="${INK}" stroke="none"/>
+          <circle cx="-11" cy="-23.2" r="1.1" fill="#fff" stroke="none"/>
+          <circle cx="13" cy="-23.2" r="1.1" fill="#fff" stroke="none"/>
+          <path d="M-4,-10 L4,-10 L0,-6 Z" fill="${INK}"/>
+          <path d="M0,-6 L0,-3 M0,-3 Q-4,1 -7,-2 M0,-3 Q4,1 7,-2" fill="none"/>
           <path d="M-28,10 Q-18,4 -9,6 L-8,44 Q-20,50 -32,42 Q-36,26 -28,10 Z" fill="#8fb8de"/>
           <path d="M28,10 Q18,4 9,6 L8,44 Q20,50 32,42 Q36,26 28,10 Z" fill="#8fb8de"/>
           <circle cx="-19" cy="25" r="5" fill="#f2c14e"/>

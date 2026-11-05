@@ -272,12 +272,12 @@ export const AUTO_LAYOUT: PlannedTarget[] = [
 ];
 
 /** Eichhörnchen: Nase, Augen-, Kopf- und Körpermitte, Punkte am Rand (Motivkoordinaten). */
-const SQ_NOSE: [number, number] = [44, 86];
-const SQ_NUT: [number, number] = [44, 122];
-const SQ_EYE: [number, number] = [70, 72];
-const SQ_HEAD: [number, number] = [80, 78];
-const SQ_BODY: [number, number] = [96, 136];
-const SQ_TAIL: [number, number] = [150, 130];
+const SQ_NOSE: [number, number] = [28, 84];
+const SQ_NUT: [number, number] = [41, 123];
+const SQ_EYE: [number, number] = [57, 69];
+const SQ_HEAD: [number, number] = [68, 75];
+const SQ_BODY: [number, number] = [88, 140];
+const SQ_TAIL: [number, number] = [155, 120];
 
 /**
  * Die „Kuh“: um 30° gedreht, Achse senkrecht durch die Nase, um `dx`
@@ -310,7 +310,7 @@ export const EICHHOERNCHEN_LAYOUT: PlannedTarget[] = [
   // Die Kuh, Achse etwas weiter im Gesicht: Augen enger.
   cow(0.03),
   // Waagrecht knapp unter dem Kopf, unten bleibt: nur die beiden Unterteile.
-  keeping(0, 0, -0.05, [96, 110], 0, [96, 190]),
+  keeping(0, 0, -0.05, [88, 106], 0, [88, 190]),
   // Wie Nr. 1, aber die Ohren ohne Pinsel.
   { ...keeping(0, 0.05, 0, SQ_BODY, 90, [10, 100], 'error', 2), variantBoth: true },
   // Diagonale durch die Kopfmitte.
@@ -388,7 +388,7 @@ export const TETRAKTYS_LAYOUT: PlannedTarget[] = [
 /** Stoffhasen: Mitte des vorderen und des hinteren Hasen, rechter Fuß des hinteren (Motivkoordinaten). */
 const FRONT_BUNNY: [number, number] = [70, 120];
 const BACK_BUNNY: [number, number] = [130, 120];
-const BACK_RIGHT_FOOT: [number, number] = [159, 166];
+const BACK_RIGHT_FOOT: [number, number] = [157, 166];
 
 export const HASEN_LAYOUT: PlannedTarget[] = [
   // Senkrecht durch den vorderen Hasen, links bleibt: nur der vordere, mit zwei Broschen.
@@ -417,7 +417,7 @@ export const HASEN_LAYOUT: PlannedTarget[] = [
   keeping(0, -0.05, 0, BACK_BUNNY, 90, LEFT),
   // 30° durch den linken Fuß des vorderen Hasen: ein zweites Hasenpaar
   // purzelt schräg nach unten weg.
-  { ...keeping(0, 0.12, -0.14, [41, 178], 30, [150, 20]), ownScale: true },
+  { ...keeping(0, 0.12, -0.14, [43, 178], 30, [150, 20]), ownScale: true },
 ];
 
 /** Würfel: Ecken des Sechsecks und Mitte (Motivkoordinaten). */
