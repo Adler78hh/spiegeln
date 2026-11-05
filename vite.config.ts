@@ -20,12 +20,20 @@ const CSP = [
 ].join("; ");
 
 export default defineConfig(({ mode }) => {
-  // „Spiegeln gratis“ landet im Unterordner gratis/ der Vollversion.
+  // „Spiegeln gratis“ und „Zerlegen“ landen in Unterordnern der Vollversion
+  // (gratis/, zerlegen/), jede Ausgabe mit eigenem Service Worker.
   const gratis = mode === "gratis";
-  const name = gratis ? "Spiegeln gratis" : "Spiegeln";
+  const zerlegen = mode === "zerlegen";
+  const sub = gratis || zerlegen;
+  const name = zerlegen ? "Zerlegen" : gratis ? "Spiegeln gratis" : "Spiegeln";
+  const description = zerlegen
+    ? "Blitzsehen, Zerlegen und Muster – Lern-App für die Grundschule"
+    : "Achsensymmetrie entdecken – Lern-App für Klasse 1 und 2";
   return {
     base: "./",
-    build: { outDir: gratis ? "dist/gratis" : "dist" },
+    build: { outDir: sub ? `dist/${mode}` : "dist" },
+    // Zerlegen hat eigene App-Symbole.
+    publicDir: zerlegen ? "public-zerlegen" : "public",
     plugins: [
       react(),
       {
@@ -42,18 +50,21 @@ export default defineConfig(({ mode }) => {
         transformIndexHtml: (html) =>
           html
             .replace("<title>Spiegeln</title>", `<title>${name}</title>`)
-            .replace('content="Spiegeln"', `content="${name}"`),
+            .replace('content="Spiegeln"', `content="${name}"`)
+            .replace(
+              'content="Achsensymmetrie entdecken – Lern-App für Klasse 1 und 2"',
+              `content="${description}"`,
+            ),
       },
       VitePWA({
         registerType: "autoUpdate",
         injectRegister: "auto",
         includeAssets: ["icon.svg", "apple-touch-icon.png"],
         manifest: {
-          id: gratis ? "./gratis" : "./",
+          id: sub ? `./${mode}` : "./",
           name,
           short_name: name,
-          description:
-            "Achsensymmetrie entdecken – Lern-App für Klasse 1 und 2",
+          description,
           lang: "de",
           start_url: "./",
           scope: "./",
@@ -76,9 +87,9 @@ export default defineConfig(({ mode }) => {
           // Alles, was die App braucht, wird beim ersten Besuch gespeichert.
           globPatterns: ["**/*.{js,css,html,svg,png,webmanifest}"],
           navigateFallback: "index.html",
-          // Die Gratisversion unter gratis/ hat ihren eigenen Service Worker.
-          navigateFallbackDenylist: gratis ? [] : [/\/gratis\//],
-          globIgnores: gratis ? [] : ["gratis/**"],
+          // Gratisversion und Zerlegen haben ihren eigenen Service Worker.
+          navigateFallbackDenylist: sub ? [] : [/\/gratis\//, /\/zerlegen\//],
+          globIgnores: sub ? [] : ["gratis/**", "zerlegen/**"],
           cleanupOutdatedCaches: true,
         },
       }),

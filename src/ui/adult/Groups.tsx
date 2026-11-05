@@ -269,76 +269,102 @@ function ChallengeAccess(props: { group: Group; challenges: Challenge[]; motifs:
 
 export type GroupTab = 'kids' | 'results' | 'access';
 
-/** Eine Gruppe: Name, Farbe, Löschen; Reiter „Kinder“ und „Ergebnisse“. */
-export function GroupPage(props: PageProps) {
-  const { store, group, groups, profiles, onProfilesChange, onRename, onRecolor, onDelete, challenges, motifs, tab, onTabChange, onBack, limited } = props;
+/** Kopf einer Gruppe: Farbe ändern, Name, Posteingang (optional), Löschen. */
+export function GroupHead(props: {
+  group: Group;
+  groups: Group[];
+  kidCount: number;
+  onRename: (name: string) => void;
+  onRecolor: (color: string) => void;
+  onDelete: () => void;
+  onInbox?: () => void;
+  inboxCount?: number;
+}) {
+  const { group, groups, kidCount, onRename, onRecolor, onDelete, onInbox, inboxCount } = props;
   const [confirm, setConfirm] = useState(false);
   const [recolor, setRecolor] = useState(false);
   const color = findColor(group.color);
-  const kids = profiles.filter((p) => p.groupId === group.id);
   const isLast = groups.length <= 1;
+  return (
+    <div className="group-head">
+      <button
+        className="group-swatch"
+        style={{ background: color.hex }}
+        aria-label={`Farbe ändern (jetzt ${color.name})`}
+        title="Farbe ändern"
+        onClick={() => setRecolor(true)}
+      />
+      {recolor && (
+        <RecolorDialog
+          group={group}
+          groups={groups}
+          onPick={(id) => {
+            setRecolor(false);
+            if (id !== group.color) onRecolor(id);
+          }}
+          onCancel={() => setRecolor(false)}
+        />
+      )}
+      <label className="name-field" htmlFor="group-name">
+        <span>Name der Gruppe (Farbe: {color.name})</span>
+        <input
+          key={group.name}
+          id="group-name"
+          className="name-input"
+          defaultValue={group.name}
+          maxLength={24}
+          onBlur={(e) => {
+            const name = e.target.value.trim();
+            if (!name) e.target.value = group.name;
+            else if (name !== group.name) onRename(name);
+          }}
+          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        />
+      </label>
+      {onInbox && (
+        <button className="text-btn inbox-btn" onClick={onInbox}>
+          <MailIcon size={22} /> Posteingang{inboxCount ? ` (${inboxCount})` : ''}
+        </button>
+      )}
+      <button className="text-btn" onClick={() => setConfirm(true)} disabled={isLast} title={isLast ? 'Die letzte Gruppe kann nicht gelöscht werden.' : undefined}>
+        <TrashIcon /> Gruppe löschen
+      </button>
+      {isLast && <p className="hint group-last-hint">Die letzte Gruppe kann nicht gelöscht werden.</p>}
+      {confirm && (
+        <ConfirmRow
+          text={`„${group.name}“ mit ${kidCount === 1 ? '1 Kind' : `${kidCount} Kindern`} und allen Ergebnissen löschen?`}
+          confirmLabel="Löschen"
+          onConfirm={() => {
+            setConfirm(false);
+            onDelete();
+          }}
+          onCancel={() => setConfirm(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+/** Eine Gruppe: Name, Farbe, Löschen; Reiter „Kinder“ und „Ergebnisse“. */
+export function GroupPage(props: PageProps) {
+  const { store, group, groups, profiles, onProfilesChange, onRename, onRecolor, onDelete, challenges, motifs, tab, onTabChange, onBack, limited } = props;
+  const kids = profiles.filter((p) => p.groupId === group.id);
 
   return (
     <AdultPage title={limited ? 'Klasse' : group.name} onBack={onBack} actions={props.actions}>
       {/* Gratisversion: keine Startseite, also den Speicher-Hinweis hier zeigen. */}
       {limited && <StorageHint />}
       {!limited && (
-      <div className="group-head">
-        <button
-          className="group-swatch"
-          style={{ background: color.hex }}
-          aria-label={`Farbe ändern (jetzt ${color.name})`}
-          title="Farbe ändern"
-          onClick={() => setRecolor(true)}
+        <GroupHead
+          group={group}
+          groups={groups}
+          kidCount={kids.length}
+          onRename={onRename}
+          onRecolor={onRecolor}
+          onDelete={onDelete}
+          onInbox={props.onInbox}
+          inboxCount={props.inboxCount}
         />
-        {recolor && (
-          <RecolorDialog
-            group={group}
-            groups={groups}
-            onPick={(id) => {
-              setRecolor(false);
-              if (id !== group.color) onRecolor(id);
-            }}
-            onCancel={() => setRecolor(false)}
-          />
-        )}
-        <label className="name-field" htmlFor="group-name">
-          <span>Name der Gruppe (Farbe: {color.name})</span>
-          <input
-            key={group.name}
-            id="group-name"
-            className="name-input"
-            defaultValue={group.name}
-            maxLength={24}
-            onBlur={(e) => {
-              const name = e.target.value.trim();
-              if (!name) e.target.value = group.name;
-              else if (name !== group.name) onRename(name);
-            }}
-            onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-          />
-        </label>
-        {props.onInbox && (
-          <button className="text-btn inbox-btn" onClick={props.onInbox}>
-            <MailIcon size={22} /> Posteingang{props.inboxCount ? ` (${props.inboxCount})` : ''}
-          </button>
-        )}
-        <button className="text-btn" onClick={() => setConfirm(true)} disabled={isLast} title={isLast ? 'Die letzte Gruppe kann nicht gelöscht werden.' : undefined}>
-          <TrashIcon /> Gruppe löschen
-        </button>
-        {isLast && <p className="hint group-last-hint">Die letzte Gruppe kann nicht gelöscht werden.</p>}
-        {confirm && (
-          <ConfirmRow
-            text={`„${group.name}“ mit ${kids.length === 1 ? '1 Kind' : `${kids.length} Kindern`} und allen Ergebnissen löschen?`}
-            confirmLabel="Löschen"
-            onConfirm={() => {
-              setConfirm(false);
-              onDelete();
-            }}
-            onCancel={() => setConfirm(false)}
-          />
-        )}
-      </div>
       )}
 
       <div className="tabs" role="tablist">

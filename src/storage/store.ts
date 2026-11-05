@@ -11,7 +11,7 @@
  * - inbox:      Posteingang: verschickte Herausforderungen für eine Gruppe oder ein Kind
  * - sendlog:    Protokoll: welches Kind wem was geschickt hat (für die Lehrkraft)
  */
-import { GRATIS } from '../edition';
+import { GRATIS, ZERLEGEN } from '../edition';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Answer, Challenge, ChallengeAnswers, Sender } from '../challenges/types';
 import type { Scene } from '../geometry';
@@ -227,8 +227,8 @@ export function checkBackup(raw: unknown, gratis: boolean): Backup {
   return b as Backup;
 }
 
-/** Eigene Datenbank je Ausgabe: Gratis- und Vollversion teilen sich keine Daten. */
-export const DB_NAME = GRATIS ? 'spiegeln-gratis' : 'spiegeln';
+/** Eigene Datenbank je Ausgabe: Spiegeln, Gratisversion und Zerlegen teilen sich keine Daten. */
+export const DB_NAME = ZERLEGEN ? 'zerlegen' : GRATIS ? 'spiegeln-gratis' : 'spiegeln';
 const DB_VERSION = 6;
 
 export function newId(): string {

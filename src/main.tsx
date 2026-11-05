@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { ZERLEGEN } from './edition';
+import ZerlegenApp from './zerlegen/ZerlegenApp';
 import './styles.css';
 import { requestPersistence } from './storage/persist';
 
@@ -9,6 +11,6 @@ void requestPersistence();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {ZERLEGEN ? <ZerlegenApp /> : <App />}
   </StrictMode>,
 );
